@@ -55,3 +55,42 @@ h1 {color: blueviolet;}
     box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
 
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2em;
+    justify-content: center;
+}
+
+.mobile-icons {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        display: none;
+    }
+    .mobile-icons {
+        display: block !important;
+    }
+}
+
+@media print {
+    h1 {
+        display: none;
+    }
+    main {
+        padding: 0;
+        margin: 0;
+    }
+    .floating-icon {
+        display: none;
+    }
+    p {
+        font-size: 1.5em;
+    }
+    .mobile-icons {
+        display: none !important;
+    }
+}
+

@@ -54,7 +54,7 @@ body, input, button {
 .forgot-password {
     text-align: center;
     font-size: 0.8em;
-    color: rgb(206, 70, 197);
+    color: rgba(206, 70, 197, 0.75);
 }
 
 .input{
@@ -70,9 +70,9 @@ body, input, button {
     border: 1px solid #ccc;
     border-radius: 10px;
     color: white;
-    background-color: rgb(206, 70, 197);
+    background-color: rgba(206, 70, 197, 0.75);
 }
 
 .signup-link {
-    color: rgb(206, 70, 197);
+    color: rgba(206, 70, 197, 0.75);
 }

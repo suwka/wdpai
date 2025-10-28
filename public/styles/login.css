@@ -22,9 +22,9 @@ body, input, button {
     flex-direction: column;
     justify-content: center;
     flex: 1;
-    gap: 2em;
+    gap: 3em;
     align-items: center;
-    margin-bottom: 5em;
+    margin-bottom: 1em;
 }
 
 .login-container form{
@@ -33,7 +33,7 @@ body, input, button {
     align-items: center;
     max-width: 400px;
     width: 80vw;
-    gap: 1em;
+    gap: 0.75em;
 }
 
 .login-container form > * {
@@ -48,7 +48,7 @@ body, input, button {
 
 .tittle {
     text-align: center;
-    font-size: 3.5rem;
+    font-size: 3rem;
 }
 
 .forgot-password {

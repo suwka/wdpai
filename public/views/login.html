@@ -3,18 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/styles/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="public/styles/login.css">
-    <title>Login</title>
+    <title>Purrfect Care</title>
 </head>
 <body>
-    <div class="overlay">
-        <form>
-            <h1>Login</h1>
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
-            <button type="submit">Login</button>
-        </form>
+    <div class="background"> 
+            <img src="public/img/backgroundcat.PNG" class="backgroundcat">
     </div>
+    <div class="items">
+            <div class="tittle">
+                Welcome to Purrfect Care
+            </div>
+                <div class="login-container">
+                    <form>
+                        <input type="email" class="input" placeholder="Email">
+                        <input type="password" class="input" placeholder="Password">
+                        <button type="submit" class="signin">sign in</button>
+                        <a href="#" class="forgot-password">forgot password?</a>
+                    </form>
+                </div>
+    </div>
+    <footer class="signup-prompt">
+        <p>don't have an account? <a href="#" class="signup-link">sign up</a></p>
+    </footer>
 </body>
 </html>

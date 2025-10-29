@@ -17,26 +17,37 @@ body {
     align-items: center;
 }
 
+.option-bar ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+}
+
+.option-bar {
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
+ }
+
+.small-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
 .tittle {
-    font-size: 2.5rem;
-    color: #000000;
+    font-size: 2rem;
     margin-left: 50px;
 }
-
-.options {
-    font-size: 2.5rem;
-    color: #000000;
-    margin-right: 50px;
-}
-
 
 .footer {
     height: 10vh;
     background-color: rgba(206,70,197,0.3);
     display: flex;
     align-items: center;
-    justify-content: center;
     margin-top: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .menu-bar ul {
@@ -46,5 +57,15 @@ body {
     margin: 0;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 50px;
+}
+
+.menu-bar ul li a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+    font-size: 1.2rem;
 }

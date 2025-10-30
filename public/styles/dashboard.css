@@ -6,15 +6,17 @@ body {
     flex-direction:  column;
     font-family: 'Abhaya Libre', serif;
     font-weight: 500;
+    height: 100vh;
 }
 
 
 .header {
     height: 10vh;
-    background-color: rgba(206,70,197,0.3);
+    background-color: rgba(240, 199, 237);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .option-bar ul {
@@ -42,12 +44,13 @@ body {
 
 .footer {
     height: 10vh;
-    background-color: rgba(206,70,197,0.3);
+    background-color: rgba(240, 199, 237);
     display: flex;
     align-items: center;
     margin-top: auto;
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
 .menu-bar ul {
@@ -58,7 +61,7 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 50px;
+    gap: 30px;
 }
 
 .menu-bar ul li a {
@@ -67,5 +70,14 @@ body {
     align-items: center;
     text-decoration: none;
     gap: 5px;
-    font-size: 1.2rem;
+    font-size: 1rem;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+html {
+    height: 100%;
 }

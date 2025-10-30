@@ -1,14 +1,49 @@
 <?php
-
 require_once 'AppController.php';
 
-class securityController extends AppController {
-    public function login() {
-        //pobieramy email z formularza i haslo
-        //sprawdzamy czy istnieje w db
-        //jezeli nie to zwracamy odp komunikaty
-        //jezleli istnieje to go przekierowujemy do dashbordu
-        return $this->render("login");
-    }
+class DashboardController extends AppController {
 
+    public function index() {
+        // Dane pobrane przez wykładowcę - MUSISZ je mieć
+        $cards = [
+            [
+                'id' => 1,
+                'title' => 'Ace of Spades',
+                'subtitle' => 'Legendary card',
+                'imageUrlPath' => 'https://deckofcardsapi.com/static/img/AS.png',
+                'href' => '/cards/ace-of-spades'
+            ],
+            [
+                'id' => 2,
+                'title' => 'Queen of Hearts',
+                'subtitle' => 'Classic romance',
+                'imageUrlPath' => 'https://deckofcardsapi.com/static/img/QH.png',
+                'href' => '/cards/queen-of-hearts'
+            ],
+            [
+                'id' => 3,
+                'title' => 'King of Clubs',
+                'subtitle' => 'Royal strength',
+                'imageUrlPath' => 'https://deckofcardsapi.com/static/img/KC.png',
+                'href' => '/cards/king-of-clubs'
+            ],
+            [
+                'id' => 4,
+                'title' => 'Jack of Diamonds',
+                'subtitle' => 'Sly and sharp',
+                'imageUrlPath' => 'https://deckofcardsapi.com/static/img/JD.png',
+                'href' => '/cards/jack-of-diamonds'
+            ],
+            [
+                'id' => 5,
+                'title' => 'Ten of Hearts',
+                'subtitle' => 'Lucky draw',
+                'imageUrlPath' => 'https://deckofcardsapi.com/static/img/0H.png',
+                'href' => '/cards/ten-of-hearts'
+            ],
+        ];
+        
+        // Zwracamy widok 'dashboard' i przekazujemy dane jako zmienną 'items'
+        return $this->render('dashboard', ['items' => $cards]);
+    }
 }

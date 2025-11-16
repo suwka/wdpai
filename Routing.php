@@ -1,51 +1,36 @@
 <?php
-// Wymagamy kontrolerów
-require_once 'src/controllers/SecurityController.php';
-require_once 'src/controllers/DashboardController.php';
 
 class Routing {
 
-    // Architektura routingu wykładowcy
+    // Tablica definicji naszych tras (ścieżek)
+    // Klucz = ścieżka w URL (np. /login)
+    // Wartość = nazwa pliku widoku (np. login.html)
     public static $routes = [
-        'login' => [
-            'controller' => "SecurityController",
-            'action' => 'login'
-        ],
-        'register'=> [
-            'controller' => "SecurityController",
-            'action' => 'register'
-        ],
-        'dashboard' => [
-            'controller' => "DashboardController",
-            'action' => 'index' // Zauważ, że DashboardController ma teraz akcję 'index'
-        ],
-        '' => [ // Dodajemy routing dla pustej ścieżki (strona główna)
-            'controller' => "DashboardController",
-            'action' => 'index'
-        ]
-        
+        'login' => 'login',        // Obsługuje /login
+        'register' => 'register',  // Obsługuje /register
+        'dashboard' => 'dashboard',// Obsługuje /dashboard
+        '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 
 
     public static function run(string $path) {
+        
         // Sprawdzamy, czy ścieżka istnieje w naszej tablicy $routes
         if (array_key_exists($path, self::$routes)) {
             
-            $routeInfo = self::$routes[$path];
+            // Pobieramy nazwę pliku, który mamy wczytać (np. 'login')
+            $templateName = self::$routes[$path];
 
-            // Nazwa klasy kontrolera (np. 'SecurityController')
-            $controllerName = $routeInfo['controller'];
-            
-            // Nazwa metody (akcji) do wywołania (np. 'login')
-            $action = $routeInfo['action'];
+            // Definiujemy pełną ścieżkę do pliku HTML
+            $templatePath = 'public/views/'. $templateName .'.html';
 
-            // Tworzymy nową instancję kontrolera i wywołujemy akcję
-            $controller = new $controllerName();
-            $controller->$action();
+            // Wczytujemy odpowiedni plik widoku
+            include $templatePath;
 
         } else {
-            // Jeśli ścieżka nie istnieje, wczytujemy 404
-            include 'public/views/404.html';
+            // Jeśli ścieżka nie jest zdefiniowana w $routes
+            http_response_code(404);
+            echo "nie znaleziono strony (404)";
         }
     }
 }

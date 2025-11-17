@@ -44,7 +44,7 @@ body {
 
 /* tytuł dashboardu */
 .tittle {
-    font-size: 2rem;
+    font-size: 3rem;
     margin-left: 50px;
 }
 
@@ -83,11 +83,8 @@ body {
 
 /* główna zawartość dashboardu */
 .main-content {
-    /* flex: 1;
-    overflow-y: auto; */
-    height: 100%;
-    display: grid;
-    grid-template-rows: 10% 45% 45%;
+    flex: 1;
+    overflow-y: auto;
     padding: 0 5%;
     box-sizing: border-box;
 }
@@ -98,7 +95,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 2rem;
+    font-size: 3rem;
+    padding: 20px 3rem;
 }
 
 .box_top a {
@@ -108,13 +106,50 @@ body {
     text-decoration: none;
     gap: 5px;
     font-size: 1rem;
-
 }
-/* 1/2 zawarosci strony */
-.box_middle {
 
+/* TUTAJ KOTY SA PRZEGLAD KUMALSKI */
+.box_middle {
     background-color: rgb(37, 148, 185);
 }
+
+.your-cats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 1.5rem;
+    margin-left: 3rem;
+}
+
+.cat-card{ 
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    width: 600px;
+}
+
+.cat-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 15px;
+}
+
+.cat-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    margin-left: 10px;
+}
+
+.cat-info .cat-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+    
 /* 2/2 zawartosci strony */
 .box_bottom {
     background-color: rgb(27, 78, 27);
@@ -123,17 +158,4 @@ body {
 /* zapewnienie pełnej wysokości strony */
 html {
     height: 100%;
-}
-
-
-.your-cats {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;        /* układ w rzędzie */
-    flex-wrap: nowrap;    /* nie zawijaj wierszy */
-    overflow-x: auto;     /* włącz scroll poziomy */
-    gap: 10px;            /* odstęp między kartami */
-    padding: 10px 0;      /* opcjonalne wcięcia */
-    max-width: 100%;      /* ograniczenie do szerokości kontenera */
-    box-sizing: border-box;
 }

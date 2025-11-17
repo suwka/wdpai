@@ -95,8 +95,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 3rem;
-    padding: 20px 3rem;
+    font-size: 2.5rem;
+    padding: 20px 2rem;
 }
 
 .box_top a {
@@ -113,12 +113,13 @@ body {
     background-color: rgb(37, 148, 185);
 }
 
+
 .your-cats {
     display: flex;
     flex-wrap: wrap;
-    justify-content: left;
+    justify-content: space-between;
     gap: 1.5rem;
-    margin-left: 3rem;
+    padding: 20px 2rem;
 }
 
 .cat-card{ 
@@ -127,7 +128,7 @@ body {
     background-color: white;
     display: flex;
     flex-direction: row;
-    width: 600px;
+    width: 525px;
 }
 
 .cat-image {
@@ -158,4 +159,41 @@ body {
 /* zapewnienie pełnej wysokości strony */
 html {
     height: 100%;
+}
+
+@media (max-width: 1300px) {
+    .cat-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .header {
+        display: none;
+    }
+    .main-content {
+        padding: 0;
+    }
+    .box_top > div, .box_top a i {
+        margin-top: 30px;
+    }
+    .box_top a {
+    font-size: 0; /* zmniejsza tekst do zera */
+    }
+
+    .box_top a i {
+    font-size: 40px; /* przywraca rozmiar ikony */
+    }
+    .your-cats {
+        gap: 1rem;
+    }
+    .cat-image {
+        width: 50px;
+        height: 50px;
+        margin: 10px;
+    }
+    .cat-info {
+        gap: 0;
+        font-size: 0.8rem;
+    }
 }

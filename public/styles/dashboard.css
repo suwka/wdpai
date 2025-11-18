@@ -91,7 +91,6 @@ body {
 
 /* tytul podstrony */
 .box_top {
-    background-color: yellow;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -110,16 +109,16 @@ body {
 
 /* TUTAJ KOTY SA PRZEGLAD KUMALSKI */
 .box_middle {
-    background-color: rgb(37, 148, 185);
+    margin-bottom: 20px;
 }
 
 
 .your-cats {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 1.5rem;
-    padding: 20px 2rem;
+    padding: 0px 2rem;
 }
 
 .cat-card{ 
@@ -150,10 +149,75 @@ body {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+ .section-tittle {
+    display: flex;
+    justify-content: left;
+    font-size: 2rem;
+    padding: 20px 2rem;
+}
     
 /* 2/2 zawartosci strony */
 .box_bottom {
-    background-color: rgb(27, 78, 27);
+    margin-bottom: 20px;
+}
+
+.activity-card {
+    display: flex;
+    width: 300px;
+    height: 80px;
+    background-color: rgb(238,238,238);
+    border-radius: 20px;
+}
+
+.activity-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background-color: #f0c7ed;
+    color: #d364cd;
+    border-radius: 20px;
+    font-size: 30px;
+    margin: 10px;
+}
+
+.activity-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.activity-text {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.activity-time {
+    font-size: 15px;
+    color: gray;
+}
+
+.all-activities {
+    display: flex;
+    flex-direction: row; 
+    gap: 5rem;
+    margin: 2rem;
+}
+
+.activity-tittle {
+    display: flex;
+    justify-content: left;
+    font-size: 2rem;
+    padding: 20px 0rem;
+}
+
+.cat-activity {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* zapewnienie pełnej wysokości strony */
@@ -164,6 +228,17 @@ html {
 @media (max-width: 1300px) {
     .cat-card {
         width: 100%;
+    }
+    .all-activities {
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+    }
+    .activity-card{
+        width: 100%;
+    }
+    .your-cats {
+        gap: 10px;
     }
 }
 
@@ -178,14 +253,11 @@ html {
         margin-top: 30px;
     }
     .box_top a {
-    font-size: 0; /* zmniejsza tekst do zera */
+    font-size: 0;
     }
 
     .box_top a i {
-    font-size: 40px; /* przywraca rozmiar ikony */
-    }
-    .your-cats {
-        gap: 1rem;
+    font-size: 40px;
     }
     .cat-image {
         width: 50px;
@@ -196,4 +268,5 @@ html {
         gap: 0;
         font-size: 0.8rem;
     }
+
 }

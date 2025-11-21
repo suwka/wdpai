@@ -1,0 +1,138 @@
+body {
+    min-height: 100vh;
+    margin: 0; 
+    background-color: rgb(238, 238, 238);
+    display: flex;
+    flex-direction:  column;
+    font-family: 'Abhaya Libre', serif;
+    font-weight: 500;
+    height: 10vh;
+}
+
+/* nagłówek górnego menu, tło i ułożenie elementów*/
+.header {
+    height: 100px;
+    background-color: rgba(240, 199, 237);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* user1, avatar, dzwonek i logout w nagłówku */
+.option-bar ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+    gap: 1.2rem;
+    font-size: 1.5rem;
+    align-items: center;
+}
+
+.option-bar {
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
+ }
+
+ /*zachowanie avataru w nagłówku*/
+.small-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+/* tytuł dashboardu */
+.tittle {
+    font-size: 3rem;
+    margin-left: 50px;
+}
+
+/*stopka dolnego menu, tło i zachowanie*/
+.footer {
+    height: 100px;
+    background-color: rgba(240, 199, 237);
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* dolne menu */
+.menu-bar ul {
+    list-style-type: none;
+    width: 100%;
+    padding: 0; 
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
+}
+
+.menu-bar ul li a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+    font-size: 1rem;
+}
+
+/* główna zawartość dashboardu */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 5%;
+    box-sizing: border-box;
+    background-color: blue;
+}
+
+/* tytul podstrony */
+.box_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 2.5rem;
+    padding: 20px 2rem;
+    margin-bottom: 0px;
+    background-color: red;
+}
+
+
+
+/* zapewnienie pełnej wysokości strony */
+html {
+    height: 100%;
+}
+
+@media (max-width: 1300px) {
+
+}
+
+@media (max-width: 700px) {
+    .header {
+        display: none;
+    }
+    .main-content {
+        padding: 0;
+    }
+    .box_top > div, .box_top a i {
+        margin-top: 30px;
+    }
+    .box_top a {
+    font-size: 0;
+    }
+
+    .box_top a i {
+    font-size: 40px;
+    }
+
+    .box_top {
+        position: sticky;
+        top: 0;
+        background-color: rgba(240, 199, 237);
+    }
+}

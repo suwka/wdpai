@@ -87,7 +87,6 @@ body {
     overflow-y: auto;
     padding: 0 5%;
     box-sizing: border-box;
-    background-color: blue;
 }
 
 /* tytul podstrony */
@@ -98,8 +97,166 @@ body {
     font-size: 2.5rem;
     padding: 20px 2rem;
     margin-bottom: 0px;
+}
+
+.box_top a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+    font-size: 1rem;
+}
+
+ .section-tittle {
+    display: flex;
+    justify-content: space-between;
+    font-size: 2rem;
+    padding: 20px 2rem;
+}
+
+.section-tittle a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+    font-size: 1rem;
+}
+
+/* GALERIA ZDJEC NIE?? */
+.image-box {
+    display: flex;
+    justify-content: center;
+    background-color: black;
+}
+
+.images {
+    width: 380px;
+    height: 455px;
     background-color: red;
 }
+
+.images-box-description {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+.images-buttons {
+    font-size: 20px;
+}
+
+.images-box-description > gallery {
+    
+}
+
+
+
+.cat-profile-container {
+    display: grid;
+    grid-template-columns: 55% 45%;
+}
+
+
+/* tutaj zdjecie kocura, imie, rasa, wiek */
+.cat-description {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.cat-description img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin-left: 2rem;
+}
+
+.cat-description {
+    display: flex;
+    align-items: center;
+}
+
+.cat-name {
+    font-size: 30px;
+    font-weight: bold;
+}
+.cat-settings {
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+}
+.cat-breed::after {
+    content: "•";
+    margin: 0 8px;
+}
+
+.cat-description-text {
+    margin-left: 2rem;
+}
+
+/* opis kocura */
+.cat-details-cards {
+    display: flex;
+    flex-direction: column;
+    /* margin: 10px 0px; */
+}
+
+.cat-detail-card {
+    border-radius: 20px;
+    margin: 5px 2rem;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: white;
+}
+
+.cat-detail-card > h1 {
+    font-size: 20px;
+    margin: 20px 20px 0px 20px;
+}
+
+.cat-detail-card > p {
+    font-size: 16px;
+    margin: 10px 20px 20px 20px;
+}
+
+
+
+/* przycisk na dole strony */
+.box_bottom {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-top: 20px; /* odstęp od reszty contentu */
+    /* bez position: fixed */
+}
+
+.view-activity-log {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 800px;
+    height: 50px;
+    background-color: rgb(196, 71, 181);
+    border-radius: 20px;
+}
+
+
+
+.cat-description > a {
+    margin-left: auto;
+    margin-right: 2rem;
+    font-size: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+}
+
+
 
 
 

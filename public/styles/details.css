@@ -19,6 +19,10 @@ body {
     width: 100%;
 }
 
+.tittle {
+    font-weight: bold;
+}
+
 /* user1, avatar, dzwonek i logout w nagłówku */
 .option-bar ul {
     list-style-type: none;
@@ -338,7 +342,7 @@ html {
     }
     .images {
         transform: scale(0.8); /* zmniejszenie do 70% */
-        margin-top: -20px;
+        margin-top: 0px;
     }
     .box_bottom {
         margin-top: 0px;

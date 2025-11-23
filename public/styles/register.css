@@ -17,6 +17,10 @@ body, input, button {
     font-weight: 500;
 }
 
+.tittle {
+    font-weight: bold;
+}
+
 .items {
     display: flex;
     flex-direction: column;

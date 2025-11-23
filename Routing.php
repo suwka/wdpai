@@ -9,7 +9,8 @@ class Routing {
         'login' => 'login',        // Obsługuje /login
         'register' => 'register',  // Obsługuje /register
         'dashboard' => 'dashboard',// Obsługuje /dashboard
-        'details' => 'details',    // Obsługuje /details
+        'details' => 'details',     // Obsługuje /details
+        'settings' => 'settings',    //settings
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 

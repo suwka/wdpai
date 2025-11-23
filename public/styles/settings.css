@@ -99,7 +99,12 @@ body {
     margin-bottom: 0px;
 }
 
-.box_top a {
+
+.tittle {
+    font-weight: bold;
+}
+
+.options {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -108,56 +113,6 @@ body {
     font-size: 1rem;
 }
 
-/* TUTAJ KOTY SA PRZEGLAD KUMALSKI */
-.box_middle {
-    margin-bottom: 20px;
-}
-
-
-/* .your-cats {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 1.5rem;
-    padding: 0px 2rem;
-} */
-
-.your-cats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-left: 2rem;
-    margin-right: 2rem;
-}
-
-.cat-card{ 
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    background-color: white;
-    display: flex;
-    flex-direction: row;
-    /* width: 525px; */
-}
-
-.cat-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 15px;
-}
-
-.cat-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.3rem;
-    margin-left: 10px;
-}
-
-.cat-info .cat-name {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
 
 .section-tittle {
     display: flex;
@@ -165,68 +120,96 @@ body {
     font-size: 2rem;
     padding: 20px 2rem;
 }
-    
-/* 2/2 TUTAJ SOM AKTYWNOSCI NIE?? */
+
 .box_bottom {
     margin-bottom: 20px;
 }
 
-.activity-card {
-    display: flex;
-    width: 300px;
-    height: 80px;
-    background-color: rgb(238,238,238);
-    border-radius: 20px;
+.all-users {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 20px 2rem;
+    gap: 10px;
 }
 
-.activity-icon {
+.single-user {
+    background-color: white;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+.user-avatar {
     width: 60px;
     height: 60px;
-    background-color: #f0c7ed;
-    color: #d364cd;
-    border-radius: 20px;
+    border-radius: 100%;
+    margin: 10px 0px 10px 10px;
+}
+
+.user-name {
     font-size: 30px;
-    margin: 10px;
 }
 
-.activity-info {
+.user-description {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-left: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0px 20px;
 }
 
-.activity-text {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.activity-time {
-    font-size: 15px;
-    color: gray;
-}
-
-.all-activities {
+.user-icons {
     display: flex;
-    flex-direction: row; 
-    gap: 5rem;
-    margin: 2rem;
-}
-
-.activity-tittle {
-    display: flex;
-    justify-content: left;
-    font-size: 2rem;
-    padding: 20px 0rem;
-}
-
-.cat-activity {
-    display: flex;
-    flex-direction: column;
     gap: 10px;
+}
+
+/* USTAWIENIA */
+
+.settings-options {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+}
+
+
+.setting-tittle {
+    padding: 10px 2rem;
+    font-size: 24px;
+}
+
+.settings-options label {
+    font-size: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-right: 2rem;
+    margin-left: 2rem;
+}
+
+.setting-checkbox {
+    background-color: black;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: grey;
+    cursor: pointer;
+    border-radius: 2px;
+    border: 2px solid #555;
+    background-color: white;
+    vertical-align: middle;
+}
+
+
+.box_under_bottom {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.logout-mobile {
+    display: none;
 }
 
 /* zapewnienie pełnej wysokości strony */
@@ -235,20 +218,27 @@ html {
 }
 
 @media (max-width: 1300px) {
-    .cat-card {
-        width: 100%;
-    }
-    .all-activities {
+    .all-users {
         display: flex;
         flex-direction: column;
-        gap: 0px;
-    }
-    .activity-card{
-        width: 100%;
-    }
-    .your-cats {
+        padding: 20px 2rem;
         gap: 10px;
+    }
+
+    .settings-options {
         grid-template-columns: repeat(2, 1fr);
+    }
+    .settings-empty {
+        display: none;
+    }
+    .logout-mobile {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 600px;
+        height: 40px;
+        background-color: rgba(206, 70, 197, 0.75);
+        border-radius: 20px;
     }
 }
 
@@ -269,50 +259,15 @@ html {
     .box_top a i {
     font-size: 40px;
     }
-    .cat-image {
-        width: 50px;
-        height: 50px;
-        margin: 10px;
-    }
-    .cat-info {
-        gap: 0;
-        font-size: 0.8rem;
-    }
+
     .box_top {
         position: sticky;
         top: 0;
         background-color: rgba(240, 199, 237);
     }
-    .your-cats{
+
+    .settings-options {
         display: flex;
         flex-direction: column;
-    }
-
-    .activity-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        display: flex;
-        justify-content: center;
-        padding: 0;
-    }
-    .activity-time, .activity-text {
-        font-size: 1rem;
-        gap: 0px;
-    }
-    .activity-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin-left: 10px;
-    }
-    .activity-card {
-        display: flex;
-        align-items: center;
-        height: 72px;
-    }
-
-    .cat-activity {
-        gap: 0px;
     }
 }

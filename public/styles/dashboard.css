@@ -113,7 +113,7 @@ body {
     justify-content: space-between;
     align-items: center;
     font-size: 2.5rem;
-    padding: 10px 0;
+    padding: 20px 0;
     margin-bottom: 0px;
 }
 
@@ -464,7 +464,7 @@ html {
     }
     .box_primary {
         padding: 20px 2rem;
-        background-color: transparent;
+        background-color: rgb(240, 199, 237);
     }
     .box_primary > div {
         margin-top: 30px;

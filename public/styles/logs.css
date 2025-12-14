@@ -179,18 +179,42 @@ th, td {
     margin: 0;
 }
 
-.search-panel {
-    background-color: red;
+
+.panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.search-input {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 14px;
+    color: #333;
+    width: 300px; /* Zmień tę liczbę na większą, jeśli chcesz jeszcze szerzej */
+}
+
+.fitlers-btn, .search-btn {
+    background-color: #d466d1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 5px;
 }
 
 
 th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; }
-th:nth-child(2) { width: 5%; }
+th:nth-child(2) { width: 6%; }
 td:nth-child(3) { width: 15%; }
 th:nth-child(4) { width: 15%; } 
 th:nth-child(5) { width: 25%; }
 th:nth-child(6) { width: 25%; } 
-th:nth-child(7) { width: 10%; } 
+th:nth-child(7) { width: 9%; } 
 
 @media (max-width: 1300px) {
     .all-users {
@@ -214,6 +238,42 @@ th:nth-child(7) { width: 10%; }
         height: 40px;
         background-color: rgba(206, 70, 197, 0.75);
         border-radius: 20px;
+    }
+/* 1. ID - Bez zmian */
+    th:nth-child(1), td:nth-child(1) { 
+        width: 5%; 
+        text-align: center; 
+    }
+
+    /* 2. Zdjęcie - ZMIANA: Zwiększamy do 10% (i dodajemy min-width dla bezpieczeństwa) */
+    th:nth-child(2), td:nth-child(2) { 
+        width: 10%; 
+        min-width: 70px; /* To kluczowe: kolumna nie będzie węższa niż obrazek */
+    }
+
+    /* 3. Name - Bez zmian */
+    th:nth-child(3), td:nth-child(3) { 
+        width: 15%; 
+    }
+
+    /* 4. User - Bez zmian */
+    th:nth-child(4), td:nth-child(4) { 
+        width: 15%; 
+    } 
+
+    /* 5. Action - Bez zmian */
+    th:nth-child(5), td:nth-child(5) { 
+        width: 15%; 
+    }
+
+    /* 6. Description - ZMIANA: Zabieramy 3% (z 25% na 22%), żeby oddać zdjęciu */
+    th:nth-child(6), td:nth-child(6) { 
+        width: 22%; 
+    } 
+
+    /* 7. Date - ZMIANA: Zabieramy 2% (z 20% na 18%) */
+    th:nth-child(7), td:nth-child(7) { 
+        width: 18%; 
     }
 }
 
@@ -262,7 +322,70 @@ th:nth-child(7) { width: 10%; }
         align-items: end;
     }
         .single-option i {
-        font-size: 30px;     /* przywraca normalny rozmiar ikony */
+        font-size: 30px; 
         margin-bottom: 10px;
     }
+    .panel {
+        /* Odwracamy kolejność: Search idzie na górę, Filtry na dół */
+        flex-direction: column-reverse; 
+        gap: 15px; /* Odstęp między rzędem search a filtrami */
+    }
+
+    .search-panel {
+        display: flex;
+        width: 100%;
+        gap: 10px; /* Odstęp input od przycisku */
+    }
+
+    .search-input {
+        width: auto; /* Resetujemy sztywną szerokość z desktopu */
+        flex-grow: 1; /* Input zajmuje całe wolne miejsce */
+    }
+
+    .search-btn {
+        width: auto; /* Przycisk zajmuje tylko tyle ile potrzebuje */
+        margin: 0;
+    }
+
+    .filter-panel {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+    }
+
+    /* --- 3. TABELA RESPONSYWNA --- */
+
+    /* Zmniejszamy czcionkę, żeby tabela weszła na ekran */
+    th, td {
+        font-size: 13px; 
+        padding: 5px 2px;
+        height: auto; /* Reset wysokości wierszy */
+    }
+
+    /* Ukrywamy kolumny: 2 (Zdjęcie) i 6 (Description) */
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(6), td:nth-child(6) {
+        display: none;
+    }
+
+    /* Reset szerokości z desktopu dla pozostałych kolumn */
+    th:nth-child(1), td:nth-child(1),
+    td:nth-child(3), th:nth-child(4), 
+    th:nth-child(5), th:nth-child(7) {
+        width: auto;
+    }
+
+    /* Ustawienie proporcji dla widocznych kolumn */
+    
+    /* ID - 5% (zwiększyłem do 8% żeby cyfra nie dotykała krawędzi) */
+    th:nth-child(1), td:nth-child(1) { 
+        width: 8%; 
+        text-align: center; 
+    }
+
+    /* Pozostałe 4 kolumny (Imie, User, Action, Data) dzielą resztę miejsca (ok. 23% każda) */
+    th:nth-child(3), td:nth-child(3) { width: 23%; } /* Name */
+    th:nth-child(4), td:nth-child(4) { width: 23%; } /* User */
+    th:nth-child(5), td:nth-child(5) { width: 23%; } /* Action */
+    th:nth-child(7), td:nth-child(7) { width: 23%; } /* Date */
 }

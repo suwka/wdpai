@@ -11,6 +11,7 @@ class Routing {
         'dashboard' => 'dashboard',// Obsługuje /dashboard
         'details' => 'details',     // Obsługuje /details
         'settings' => 'settings',    //settings
+        'logs' => 'logs',            //logi
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 

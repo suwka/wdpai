@@ -19,9 +19,6 @@ body {
     width: 100%;
 }
 
-.tittle {
-    font-weight: bold;
-}
 
 /* user1, avatar, dzwonek i logout w nagłówku */
 .option-bar ul {

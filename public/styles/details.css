@@ -115,6 +115,13 @@ body {
     padding: 20px 2rem;
 }
 
+.section-subtitle {
+    font-size: 1rem;
+    color: #999;
+    margin-bottom: 18px;
+    margin-left: 2rem;
+}
+
 .section-tittle a {
     display: flex;
     flex-direction: row;
@@ -131,11 +138,12 @@ body {
 }
 
 .images {
-    width: 395px;
-    height: 470px;
-    background-color: white;
+    width: 100%;
+    height: auto;
+    background-color: rgb(238, 238, 238);
     border: 1px solid #ccc;
     border-radius: 20px;
+    padding-bottom: 20px;
 }
 
 .images-box-description {
@@ -157,19 +165,18 @@ body {
 }
 
 .singlepicture {
-    height: 180px;
-    width: 180px;
-    border-radius: 20px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 15px; 
     border: 1px solid #ccc;
     overflow: hidden;
 }
 
 .all-images {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
-    margin: 10px;
+    margin: 10px 20px;
 }
 
 .singlepicture > .cat-image {
@@ -202,6 +209,8 @@ body {
 .cat-description {
     display: flex;
     align-items: center;
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 .cat-name {
@@ -229,23 +238,44 @@ body {
     /* margin: 10px 0px; */
 }
 
+
 .cat-detail-card {
     border-radius: 20px;
     margin: 5px 2rem;
     border: 1px solid #ccc;
     border-radius: 20px;
-    background-color: white;
+    background-color: rgb(238, 238, 238);
+    display: flex;
+    justify-content: space-between;
 }
 
-.cat-detail-card > h1 {
+
+.plusik {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.srodek {
+    display: flex;
+    align-items: center;
+}
+.prawa {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.lewa > h1 {
     font-size: 20px;
     margin: 20px 20px 0px 20px;
 }
 
-.cat-detail-card > p {
+.lewa > p {
     font-size: 16px;
     margin: 10px 20px 20px 20px;
 }
+
 
 
 
@@ -283,6 +313,23 @@ body {
 
 
 
+.primary-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+.left-container {
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.right-container {
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
 
 /* zapewnienie pełnej wysokości strony */
@@ -298,6 +345,10 @@ html {
     .image-box {
         margin-top: 20px;
         margin-bottom: 0px;
+    }
+    .primary-content {
+        display: flex;
+        flex-direction: column;
     }
 }
 
@@ -337,15 +388,31 @@ html {
         z-index: 10;
     }
     .images {
-        transform: scale(0.8); /* zmniejszenie do 70% */
-        margin-top: -20px;
+        width: 100%;       /* Pełna szerokość */
+        transform: none;   /* Usuwamy stare skalowanie (scale 0.8), bo grid sam się dopasuje */
+        margin-top: 0;
+        height: auto;
     }
+
+    .all-images {
+        grid-template-columns: repeat(2, 1fr); /* 2 kolumny zamiast 4 */
+        gap: 10px;
+    }
+
+    .singlepicture:nth-child(n+5) {
+        display: none;
+    }
+
     .box_bottom {
         margin-top: 0px;
     }
 
     .cat-description {
-        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between; /* Rozrzuca skrajne elementy na boki */
+        align-items: center;            /* Centruje w pionie */
+        margin: 20px 0;                 /* Odstęp góra/dół */
+        padding: 0 5px;                 /* Mały odstęp od krawędzi ekranu */
     }
 
     .cat-settings {
@@ -364,27 +431,30 @@ html {
         font-size: 15px;
     }
     .cat-description img {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        margin-left: 2rem;
+        margin-left: 0;   /* Resetujemy margines z desktopu */
+        width: 90px;      /* Możesz dostosować wielkość */
+        height: 90px;
     }
     .cat-description-text {
-        margin-left: 1rem;
-    }
+        flex: 1;             /* To sprawia, że tekst zajmuje całą przestrzeń między zdjęciem a przyciskiem */
+        text-align: center;  /* Wyśrodkowanie napisów w tej przestrzeni */
+        margin: 0 10px;      /* Marginesy, żeby tekst nie dotykał grafiki */
+    }   
 
-    .cat-detail-card > h1 {
-        font-size: 16px;
-        margin: 10px 10px 0px 10px;
-    }
-
-    .cat-detail-card > p {
-        font-size: 12px;
-        margin: 5px 10px 10px 10px;
+    .cat-detail-card {
+        width: 100%;       /* Rozciągnij na maxa */
+        margin: 10px 0;    /* WAŻNE: Zmień margines boczny na 0 (wcześniej było 2rem) */
+        box-sizing: border-box;
     }
     .image-box {
         margin-top: 0px;
         margin-bottom: 0px;
+        
+    }
+
+    .cat-description > a {
+        margin: 0;           /* Resetujemy marginesy z desktopu (margin-right: auto itp.) */
+        white-space: nowrap; /* Zapobiega łamaniu tekstu */
     }
 
 

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="public/styles/schedule.css">
-    <title>Logs</title>
+    <title>Schedule</title>
 </head>
 <body>
     <header class="header">
@@ -25,7 +25,7 @@
     
     <main class="main-content">
         <div class="box_top">
-            <div>Logs</div>
+            <div>Schedule</div>
             <div class="options">
                 <div class="single-option">
                     <i class="fa-solid fa-arrow-left"></i>
@@ -34,11 +34,77 @@
             </div>
         </div>
         <div class="section-box">
+            <div class="section-tittle">
+                    Calendar with activities
+                </div>
+                <div class="section-subtitle">You can manage activities here</div>
+            <div class="calendar-container">
+                    <div class="calendar-header">
+                        <span class="calendar-nav"><i class="fa-solid fa-chevron-left"></i></span>
+                        <span class="calendar-month">December 2025</span>
+                        <span class="calendar-nav"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
+                    </div>
+                    <div class="calendar-days">
+                        <div class="day other-month">24</div>
+                        <div class="day other-month">25</div>
+                        <div class="day other-month">26</div>
+                        <div class="day other-month">27</div>
+                        <div class="day other-month">28</div>
+                        <div class="day other-month">29</div>
+                        <div class="day other-month">30</div>
+                        <div class="day">1</div>
+                        <div class="day">2</div>
+                        <div class="day">3</div>
+                        <div class="day">4</div>
+                        <div class="day">5</div>
+                        <div class="day">6</div>
+                        <div class="day">7</div>
+                        <div class="day">8</div>
+                        <div class="day">9</div>
+                        <div class="day">10</div>
+                        <div class="day">11</div>
+                        <div class="day today">12</div>
+                        <div class="day">13</div>
+                        <div class="day">14</div>
+                        <div class="day has-event">15</div>
+                        <div class="day">16</div>
+                        <div class="day">17</div>
+                        <div class="day">18</div>
+                        <div class="day">19</div>
+                        <div class="day">20</div>
+                        <div class="day">21</div>
+                        <div class="day">22</div>
+                        <div class="day">23</div>
+                        <div class="day">24</div>
+                        <div class="day">25</div>
+                        <div class="day">26</div>
+                        <div class="day">27</div>
+                        <div class="day">28</div>
+                        <div class="day">29</div>
+                        <div class="day">30</div>
+                        <div class="day">31</div>
+                        <div class="day other-month">1</div>
+                        <div class="day other-month">2</div>
+                        <div class="day other-month">3</div>
+                        <div class="day other-month">4</div>
+                    </div>
+                </div>
+        </div>
+        <div class="section-box">
             <div class="box_middle">
                 <div class="section-tittle">
-                    Users
+                    Planned Activities
                 </div>
-                <div class="section-subtitle">You can manage all of actions here</div>
+                <div class="section-subtitle">You can manage all of activities here</div>
                 <div class="panel">
                     <div class="filter-panel">
                         <button class="fitlers-btn">Filters</button>
@@ -55,47 +121,21 @@
                             <th>#</th>
                             <th>Cat name</th>
                             <th>Cat name</th>
-                            <th>User</th>
                             <th>Action</th>
-                            <th>Description</th>
+                            <th>Details</th>
                             <th>Date</th>
+                            <th></th>
                         </tr>
                         <tr>
                             <td>1</td>
                             <td><img src="public/img/cat1.jpg" alt="cat-img"></td>
                             <td>Gilbert</td>
-                            <td>user1</td>
                             <td>Feeding</td>
-                            <td>Feeding by wet food</td>
-                            <td><time datetime="08:30:45 20-12-1914">08:30:45<br>20-12-1914</time></td>
+                            <td>Details</td>
+                            <td><time datetime="08:30:45 20-12-1914">08:30:45, 20-12-1914</time></td>
+                            <td><i class="fa-solid fa-ellipsis"></i></td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td><img src="public/img/cat1.jpg" alt="cat-img"></td>
-                            <td>Gilbert</td>
-                            <td>user1</td>
-                            <td>Feeding</td>
-                            <td>Feeding by wet food</td>
-                            <td><time datetime="08:30:45 20-12-1914">08:30:45<br>20-12-1914</time></td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td><img src="public/img/cat1.jpg" alt="cat-img"></td>
-                            <td>Gilbert</td>
-                            <td>user1</td>
-                            <td>Feeding</td>
-                            <td>Feeding by wet food</td>
-                            <td><time datetime="08:30:45 20-12-1914">08:30:45<br>20-12-1914</time></td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td><img src="public/img/cat1.jpg" alt="cat-img"></td>
-                            <td>Gilbert</td>
-                            <td>user1</td>
-                            <td>Feeding</td>
-                            <td>Feeding by wet food</td>
-                            <td><time datetime="08:30:45 20-12-1914">08:30:45<br>20-12-1914</time></td>
-                        </tr>
+
 
                     </table>
                 </div>

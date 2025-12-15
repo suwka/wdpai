@@ -211,9 +211,9 @@ th:nth-child(2) { width: 6%; white-space: nowrap }
 td:nth-child(3) { width: 15%; }
 th:nth-child(3) {visibility: hidden;}
 th:nth-child(4) { width: 15%; } 
-th:nth-child(5) { width: 25%; }
+th:nth-child(5) { width: 30%; }
 th:nth-child(6) { width: 25%; } 
-th:nth-child(7) { width: 9%; } 
+th:nth-child(7) { width: 4%; } 
 
 
 tr {

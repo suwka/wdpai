@@ -12,6 +12,7 @@ class Routing {
         'details' => 'details',     // Obsługuje /details
         'settings' => 'settings',    //settings
         'logs' => 'logs',            //logi
+        'schedule' => 'schedule',   //terminarz
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 

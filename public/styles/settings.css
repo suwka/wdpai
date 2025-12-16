@@ -131,6 +131,7 @@ body {
     font-size: 1rem;
     color: #999;
     margin-bottom: 18px;
+
 }
 
 .box_bottom {
@@ -212,17 +213,17 @@ input[type="checkbox"] {
     vertical-align: middle;
 }
 
-
 .box_under_bottom {
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    margin-top: 20px;
+    display: none;
+
 }
+
 
 .logout-mobile {
     display: none;
 }
+
+
 
 /* zapewnienie pełnej wysokości strony */
 html {
@@ -251,6 +252,12 @@ html {
         height: 40px;
         background-color: rgba(206, 70, 197, 0.75);
         border-radius: 20px;
+    }
+
+    .box_under_bottom {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
     }
 }
 
@@ -298,8 +305,9 @@ html {
         display: flex;
         align-items: end;
     }
-        .single-option i {
-        font-size: 30px;     /* przywraca normalny rozmiar ikony */
+    .single-option i {
+        font-size: 30px;   
         margin-bottom: 10px;
     }
+    
 }

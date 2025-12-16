@@ -388,14 +388,14 @@ html {
         z-index: 10;
     }
     .images {
-        width: 100%;       /* Pełna szerokość */
-        transform: none;   /* Usuwamy stare skalowanie (scale 0.8), bo grid sam się dopasuje */
+        width: 100%;       
+        transform: none;   
         margin-top: 0;
         height: auto;
     }
 
     .all-images {
-        grid-template-columns: repeat(2, 1fr); /* 2 kolumny zamiast 4 */
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
 
@@ -409,10 +409,10 @@ html {
 
     .cat-description {
         display: flex;
-        justify-content: space-between; /* Rozrzuca skrajne elementy na boki */
-        align-items: center;            /* Centruje w pionie */
-        margin: 20px 0;                 /* Odstęp góra/dół */
-        padding: 0 5px;                 /* Mały odstęp od krawędzi ekranu */
+        justify-content: space-between; 
+        align-items: center;            
+        margin: 20px 0;                 
+        padding: 0 5px;                
     }
 
     .cat-settings {
@@ -431,19 +431,19 @@ html {
         font-size: 15px;
     }
     .cat-description img {
-        margin-left: 0;   /* Resetujemy margines z desktopu */
-        width: 90px;      /* Możesz dostosować wielkość */
+        margin-left: 0;
+        width: 90px;
         height: 90px;
     }
     .cat-description-text {
-        flex: 1;             /* To sprawia, że tekst zajmuje całą przestrzeń między zdjęciem a przyciskiem */
-        text-align: center;  /* Wyśrodkowanie napisów w tej przestrzeni */
-        margin: 0 10px;      /* Marginesy, żeby tekst nie dotykał grafiki */
+        flex: 1;
+        text-align: center; 
+        margin: 0 10px;   
     }   
 
     .cat-detail-card {
-        width: 100%;       /* Rozciągnij na maxa */
-        margin: 10px 0;    /* WAŻNE: Zmień margines boczny na 0 (wcześniej było 2rem) */
+        width: 100%; 
+        margin: 10px 0;
         box-sizing: border-box;
     }
     .image-box {
@@ -453,8 +453,8 @@ html {
     }
 
     .cat-description > a {
-        margin: 0;           /* Resetujemy marginesy z desktopu (margin-right: auto itp.) */
-        white-space: nowrap; /* Zapobiega łamaniu tekstu */
+        margin: 0;  
+        white-space: nowrap; 
     }
 
 

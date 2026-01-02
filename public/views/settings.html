@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="public/styles/settings.css">
+    <link rel="stylesheet" type="text/css" href="public/styles/modal.css">
     <title>Settings</title>
 </head>
 <body>
@@ -35,8 +36,9 @@
         </div>
         <div class="section-box">
             <div class="box_middle">
-                <div class="section-tittle">
-                    Users
+                <div class="pc-section-header">
+                    <div class="section-tittle">Users</div>
+                    <button class="pc-action-btn" type="button" data-modal-open="add-user">Add user</button>
                 </div>
                 <div class="section-subtitle">You can manage users here</div>
                 <div class="all-users">
@@ -48,7 +50,7 @@
                             </div>
                             <div class="user-icons">
                                 <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#"><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
                     </div>
@@ -60,7 +62,7 @@
                             </div>
                             <div class="user-icons">
                                 <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#"><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
                     </div>
@@ -72,7 +74,7 @@
                             </div>
                             <div class="user-icons">
                                 <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#"><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
                     </div>
@@ -84,7 +86,7 @@
                             </div>
                             <div class="user-icons">
                                 <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#"><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
                     </div>
@@ -141,5 +143,20 @@
         </ul>
     </nav>
     </footer>
+
+    <div class="pc-modal-overlay" data-modal-overlay hidden>
+        <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">
+            <div class="pc-modal-header">
+                <div class="pc-modal-title" id="pc-modal-title" data-modal-title>Modal</div>
+                <button class="pc-modal-close" type="button" aria-label="Close" data-modal-close>&times;</button>
+            </div>
+            <div class="pc-modal-body" data-modal-body></div>
+            <div class="pc-modal-footer">
+                <button class="pc-btn pc-btn-secondary" type="button" data-modal-cancel>Cancel</button>
+                <button class="pc-btn pc-btn-primary" type="button" data-modal-ok>OK</button>
+            </div>
+        </div>
+    </div>
+    <script defer src="public/scripts/main.js"></script>
 </body>
 </html>

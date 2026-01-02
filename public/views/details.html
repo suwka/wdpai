@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="public/styles/details.css">
+    <link rel="stylesheet" type="text/css" href="public/styles/modal.css">
     <title>Dashboard</title>
 </head>
 <body>
@@ -41,7 +42,7 @@
                             <div class="cat-age">Age: 3 years</div>
                         </div>
                     </div>
-                    <a href="#"><i class="fa-solid fa-pen-to-square"></i>Edit</a>
+                    <a href="#" data-modal-open="edit-cat"><i class="fa-solid fa-pen-to-square"></i>Edit</a>
                 </div>
                 <div class="image-box">
                     <div class="images">
@@ -72,7 +73,9 @@
                     <div class="section-tittle">
                         Planned activities
                         <div class="plusik">
-                            <i class="fa-solid fa-circle-plus"></i>                    
+                            <button class="pc-icon-btn" type="button" data-modal-open="add-activity" title="Add activity">
+                                <i class="fa-solid fa-circle-plus"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="section-subtitle">You can manage planned activities</div>
@@ -157,5 +160,20 @@
             </ul>
         </nav>
     </footer>
+
+    <div class="pc-modal-overlay" data-modal-overlay hidden>
+        <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">
+            <div class="pc-modal-header">
+                <div class="pc-modal-title" id="pc-modal-title" data-modal-title>Modal</div>
+                <button class="pc-modal-close" type="button" aria-label="Close" data-modal-close>&times;</button>
+            </div>
+            <div class="pc-modal-body" data-modal-body></div>
+            <div class="pc-modal-footer">
+                <button class="pc-btn pc-btn-secondary" type="button" data-modal-cancel>Cancel</button>
+                <button class="pc-btn pc-btn-primary" type="button" data-modal-ok>OK</button>
+            </div>
+        </div>
+    </div>
+    <script defer src="public/scripts/main.js"></script>
 </body>
 </html>

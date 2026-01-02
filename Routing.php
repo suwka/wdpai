@@ -13,7 +13,11 @@ class Routing {
         'settings' => 'settings',    //settings
         'logs' => 'logs',            //logi
         'schedule' => 'schedule',   //terminarz
-        'cats' => 'cats',            //kocury
+        'cats' => 'cats',
+        'caregivers' => 'caregivers',            //kocury
+        'profile' => 'profile',                //profil
+        'reports' => 'reports',                //raporty
+        'help' => 'help',                      //pomoc
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 

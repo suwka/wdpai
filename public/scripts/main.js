@@ -1,6 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const overlay = document.querySelector('[data-modal-overlay]');
-  if (!overlay) return;
+  let overlay = document.querySelector('[data-modal-overlay]');
+  if (!overlay) {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div class="pc-modal-overlay" data-modal-overlay hidden>
+          <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">
+            <div class="pc-modal-header">
+              <div class="pc-modal-title" id="pc-modal-title" data-modal-title>Modal</div>
+              <button class="pc-modal-close" type="button" aria-label="Close" data-modal-close>&times;</button>
+            </div>
+            <div class="pc-modal-body" data-modal-body></div>
+            <div class="pc-modal-footer">
+              <button class="pc-btn pc-btn-secondary" type="button" data-modal-cancel>Cancel</button>
+              <button class="pc-btn pc-btn-primary" type="button" data-modal-ok>OK</button>
+            </div>
+          </div>
+        </div>
+      `
+    );
+    overlay = document.querySelector('[data-modal-overlay]');
+  }
 
   const titleEl = overlay.querySelector('[data-modal-title]');
   const bodyEl = overlay.querySelector('[data-modal-body]');
@@ -356,6 +376,184 @@ document.addEventListener('DOMContentLoaded', () => {
         title: 'Edit user',
         bodyHtml: addUserFormHtml(prefill),
         okText: 'Save',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'profile-edit') {
+      const nameEl = document.querySelector('[data-profile-name]');
+      const emailEl = document.querySelector('[data-profile-email]');
+      openModal({
+        title: 'Edit profile',
+        bodyHtml: `
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+              <label>Name</label>
+              <input class="pc-input" type="text" value="${safeText(nameEl?.textContent?.trim())}" />
+            </div>
+            <div class="pc-field">
+              <label>Email</label>
+              <input class="pc-input" type="email" value="${safeText(emailEl?.textContent?.trim())}" />
+            </div>
+          </form>
+        `,
+        okText: 'Save',
+        cancelText: 'Cancel',
+        onOkCb: () => {
+          const inputs = overlay.querySelectorAll('input');
+          const nextName = inputs[0]?.value?.trim() || '—';
+          const nextEmail = inputs[1]?.value?.trim() || '—';
+          if (nameEl) nameEl.textContent = nextName;
+          if (emailEl) emailEl.textContent = nextEmail;
+        },
+      });
+      return;
+    }
+
+    if (kind === 'profile-password') {
+      openModal({
+        title: 'Change password',
+        bodyHtml: `
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+              <label>Old password</label>
+              <input class="pc-input" type="password" placeholder="••••••••" />
+            </div>
+            <div class="pc-field">
+              <label>New password</label>
+              <input class="pc-input" type="password" placeholder="••••••••" />
+            </div>
+          </form>
+          <div class="pc-info" style="margin-top: 10px;">
+            <div class="pc-info-key">Note</div>
+            <div class="pc-info-val">UI only (no backend yet)</div>
+          </div>
+        `,
+        okText: 'OK',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'caregivers-assign') {
+      openModal({
+        title: 'Assign caregiver',
+        bodyHtml: `
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+              <label>Cat</label>
+              <select class="pc-select">
+                <option>Gilbert</option>
+                <option>Żaneta</option>
+                <option>Albert</option>
+              </select>
+            </div>
+            <div class="pc-field">
+              <label>Caregiver</label>
+              <select class="pc-select">
+                <option>user1</option>
+                <option>user2</option>
+                <option>user3</option>
+              </select>
+            </div>
+          </form>
+        `,
+        okText: 'OK',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'caregivers-manage') {
+      openModal({
+        title: 'Manage caregivers',
+        bodyHtml: `
+          <div class="pc-info">
+            <div class="pc-info-row">
+              <div class="pc-info-key">Cat</div>
+              <div class="pc-info-val">Selected row</div>
+            </div>
+          </div>
+          <div style="height: 10px;"></div>
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+              <label>Current caregivers</label>
+              <input class="pc-input" type="text" value="user2, user3" />
+            </div>
+            <div class="pc-field">
+              <label>Add caregiver</label>
+              <select class="pc-select">
+                <option>— choose —</option>
+                <option>user1</option>
+                <option>user2</option>
+                <option>user3</option>
+              </select>
+            </div>
+          </form>
+        `,
+        okText: 'Save',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'reports-generate') {
+      openModal({
+        title: 'Generate report',
+        bodyHtml: `
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-grid-2">
+              <div class="pc-field">
+                <label>From</label>
+                <input class="pc-input" type="date" />
+              </div>
+              <div class="pc-field">
+                <label>To</label>
+                <input class="pc-input" type="date" />
+              </div>
+            </div>
+            <div class="pc-field">
+              <label>Type</label>
+              <select class="pc-select">
+                <option>Weekly</option>
+                <option>Monthly</option>
+                <option>Activities</option>
+                <option>Logs</option>
+              </select>
+            </div>
+          </form>
+        `,
+        okText: 'OK',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'help-contact') {
+      openModal({
+        title: 'Contact',
+        bodyHtml: `
+          <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+              <label>Topic</label>
+              <select class="pc-select">
+                <option>Problem</option>
+                <option>Question</option>
+                <option>Feature request</option>
+              </select>
+            </div>
+            <div class="pc-field">
+              <label>Message</label>
+              <textarea class="pc-textarea" placeholder="Write here..."></textarea>
+            </div>
+          </form>
+          <div class="pc-info" style="margin-top: 10px;">
+            <div class="pc-info-key">Note</div>
+            <div class="pc-info-val">UI only (no backend yet)</div>
+          </div>
+        `,
+        okText: 'OK',
         cancelText: 'Cancel',
       });
     }

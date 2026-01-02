@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/public/styles/profile.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/modal.css">
+    <title>Profile</title>
+</head>
+<body>
+    <header class="header">
+        <div class="tittle">
+            Purrfect Care
+        </div>
+        <nav class="option-bar">
+            <ul>
+                <div>user1</div>
+                <img src="/public/img/avatar.jpg" class="small-avatar">
+                <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
+                <li><a href="/login"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="box_top">
+            <div>Profile</div>
+            <div class="options">
+                <a href="/dashboard" class="single-option">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back
+                </a>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box_middle">
+                <div class="pc-section-header">
+                    <div class="section-tittle">My profile</div>
+                    <button class="pc-action-btn" type="button" data-modal-open="profile-edit">Edit</button>
+                </div>
+                <div class="section-subtitle">Basic account information</div>
+
+                <div class="profile-grid">
+                    <div class="profile-row">
+                        <div class="profile-key">Name</div>
+                        <div class="profile-val" data-profile-name>user1</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Email</div>
+                        <div class="profile-val" data-profile-email>user1@example.com</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Role</div>
+                        <div class="profile-val">user</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box_middle">
+                <div class="pc-section-header">
+                    <div class="section-tittle">Security</div>
+                    <button class="pc-action-btn" type="button" data-modal-open="profile-password">Change password</button>
+                </div>
+                <div class="section-subtitle">UI only for now</div>
+
+                <div class="hint">
+                    Password change will be connected to backend later.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <nav class="menu-bar">
+            <ul>
+                <li><a href="/dashboard"><i class="fa-solid fa-house"></i>Home</a></li>
+                <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
+                <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
+                <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
+                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+            </ul>
+        </nav>
+    </footer>
+
+    <script defer src="/public/scripts/main.js"></script>
+</body>
+</html>

@@ -1,14 +1,11 @@
 # CatCare Manager
 
-Aplikacja do zarzadzania kotami  
-Domyslnie kotami ale mozna dodawac tez inne zwierzeta jako wyjatek hehe  
+aplikacja do zarzadzania kotami- domyslnie kotami ale mozna dodawac tez inne zwierzeta jako wyjatek hehe
 
-Celem aplikacji jest planowanie zycia kota oraz koordynacja opiekunow  
-Od prostych czynnosci jak zabawa z kotem  
-Az po bardziej wymagajace aktywnosci jak wizyty u weterynarza czy podawanie lekow  
+aelem aplikacji jest planowanie zycia kota oraz koordynacja opiekunow  od prostych czynnosci jak zabawa z kotem  
+az po bardziej wymagajace aktywnosci jak wizyty u weterynarza czy podawanie lekow  
 
-Aplikacja zapobiega sytuacjom w ktorych kot dostaje sniadanie 3 razy dziennie  
-Bo kazdy opiekun widzi co juz zostalo zrobione  
+alikacja zapobiega sytuacjom w ktorych kot dostaje sniadanie 3 razy dziennie bo kazdy opiekun widzi co juz zostalo zrobione  
 
 ---
 

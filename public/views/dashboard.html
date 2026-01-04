@@ -15,10 +15,10 @@
         </div>
         <nav class="option-bar">
             <ul>
-                <div>user1</div>
-                <img src="/public/img/avatar.jpg" class="small-avatar">
+                <div data-user-username>user1</div>
+                <img src="/public/img/avatar.jpg" class="small-avatar" data-user-avatar>
                 <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
-                <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -28,12 +28,12 @@
             <div>Dashboard</div>
         </div>
         <div class="section-welcome">
-            <div class="welcome-tittle">Welcome back, user1</div>
+            <div class="welcome-tittle" data-welcome>Welcome back, user1</div>
         </div>
         <div class="section-box">
         <div class="section-tittle">
             <div class="tittle-of-section-tittle">Schedule</div>
-            <div class="cats-action">More</div>
+            <a href="/schedule" class="cats-action" style="text-decoration: none">More</a>
         </div>
         <div class="section-subtitle">You can manage your activities here</div>
         <div class="box_top">
@@ -204,78 +204,20 @@
         <div class="box_middle">
             <div class="section-tittle">
                 <div class="tittle-of-section-tittle">Your cats</div>
-                <div class="cats-action">More</div>
+                <a href="/cats" class="cats-action" style="text-decoration: none">More</a>
             </div>
             <div class="section-subtitle">Manage your cats by clicking more</div>
-            <div class="items-card">
-                <div class="card">
-                    <img src="/public/img/cat1.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">Gilbert</div>
-                        <div class="card-activity-info">Next feeding 5:00 PM</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/cat2.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">Żaneta</div>
-                        <div class="card-activity-info">Next feeding 5:00 PM</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/cat3.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">Albert</div>
-                        <div class="card-activity-info">Next feeding 5:00 PM</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/cat3.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">Albert</div>
-                        <div class="card-activity-info">Next feeding 5:00 PM</div>
-                    </div>
-                </div>
-            </div>
+            <div class="items-card" data-dashboard-cats></div>
         </div>
         </div>
-        <div class="section-box">
+        <div class="section-box" data-admin-only hidden>
         <div class="box_middle">
             <div class="section-tittle">
                 <div class="tittle-of-section-tittle">Users</div>
-                <div class="cats-action">More</div>
+                    <a href="/settings" class="cats-action" style="text-decoration: none">More</a>
             </div>
             <div class="section-subtitle">Manage your users by clicking more</div>
-            <div class="items-card">
-                <div class="card">
-                    <img src="/public/img/avatar1.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">user1</div>
-                        <div class="card-activity-info">Last seen: 14.09.25 - 21:37</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/avatar2.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">user2</div>
-                        <div class="card-activity-info">Last seen: 14.09.25 - 21:37</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/avatar3.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">user3</div>
-                        <div class="card-activity-info">Last seen: 14.09.25 - 21:37</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="/public/img/avatar4.jpg" class="card-image">
-                    <div class="card-info">
-                        <div class="cat-user-name">user4</div>
-                        <div class="card-activity-info">Last seen: 14.09.25 - 21:37</div>
-                    </div>
-                </div>
-            </div>            
+            <div class="items-card" data-dashboard-users></div>
         </div>
         </div>
         <div class="box_bottom">
@@ -288,13 +230,14 @@
     <footer class="footer">
         <nav class="menu-bar" >
         <ul>
-            <li><a href="#"><i class="fa-solid fa-house"></i>Home</a></li>
-            <li><a href="#"><i class="fa-solid fa-cat"></i>Cats</a></li>
-            <li><a href="#"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
-            <li><a href="#"><i class="fa-solid fa-bars"></i>Logs</a></li>
-            <li><a href="#"><i class="fa-solid fa-gear"></i>Settings</a></li>
+            <li><a href="/dashboard"><i class="fa-solid fa-house"></i>Home</a></li>
+            <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
+            <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
+            <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
+            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
         </ul>
     </nav>
     </footer>
+    <script defer src="/public/scripts/main.js"></script>
 </body>
 </html>

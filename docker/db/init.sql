@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS cat_photos CASCADE;
 DROP TABLE IF EXISTS cat_caregivers CASCADE;
 DROP TABLE IF EXISTS activities CASCADE;
 DROP TABLE IF EXISTS logs CASCADE;
+DROP TABLE IF EXISTS support_tickets CASCADE;
 DROP TABLE IF EXISTS cats CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -94,6 +95,19 @@ CREATE TABLE logs (
 CREATE INDEX idx_logs_cat_id ON logs(cat_id);
 CREATE INDEX idx_logs_created_at ON logs(created_at);
 CREATE INDEX idx_logs_cat_created_at ON logs(cat_id, created_at);
+
+-- SUPPORT / HELP TICKETS
+CREATE TABLE support_tickets (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID REFERENCES users(id) ON DELETE SET NULL,
+  topic      TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_support_tickets_created_at ON support_tickets(created_at);
+CREATE INDEX idx_support_tickets_status ON support_tickets(status);
 
 -- Seed (minimal data for testing)
 INSERT INTO users (username, email, first_name, last_name, password_hash, role)

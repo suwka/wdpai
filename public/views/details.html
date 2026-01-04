@@ -16,10 +16,10 @@
         </div>
         <nav class="option-bar">
             <ul>
-                <div>user1</div>
-                <img src="/public/img/avatar.jpg" class="small-avatar">
+                <div data-user-username>user1</div>
+                <img src="/public/img/avatar.jpg" class="small-avatar" data-user-avatar>
                 <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
-                <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -27,7 +27,7 @@
     <main class="main-content">
         <div class="box_top">
             <div>Cat profile</div>
-            <a href="#"><i class="fa-solid fa-arrow-left"></i>Back</a>
+            <a href="/dashboard"><i class="fa-solid fa-arrow-left"></i>Back</a>
         </div>
         <div class="primary-content">
             <div class="left-container">
@@ -41,6 +41,7 @@
                             <div class="cat-breed">Moggie cat</div>
                             <div class="cat-age">Age: 3 years</div>
                         </div>
+                        <div class="cat-desc" data-cat-description></div>
                     </div>
                     <a href="#" data-modal-open="edit-cat"><i class="fa-solid fa-pen-to-square"></i>Edit</a>
                 </div>
@@ -49,9 +50,9 @@
                         <div class="images-box-description">
                             <div class="gallery">Gallery</div>
                             <div class="images-buttons">
-                                <a href="#"><i class="fa-solid fa-angle-down"></i></a>
-                                <a href="#"><i class="fa-solid fa-square-plus"></i></a>
-                                <a href="#" data-gallery-upload><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-gallery-toggle><i class="fa-solid fa-angle-down"></i></a>
+                                <a href="#" data-gallery-add><i class="fa-solid fa-square-plus"></i></a>
+                                <a href="#" data-gallery-manage><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
 
@@ -157,11 +158,11 @@
     <footer class="footer">
         <nav class="menu-bar">
             <ul>
-                <li><a href="#"><i class="fa-solid fa-house"></i>Home</a></li>
-                <li><a href="#"><i class="fa-solid fa-cat"></i>Cats</a></li>
-                <li><a href="#"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
-                <li><a href="#"><i class="fa-solid fa-bars"></i>Logs</a></li>
-                <li><a href="#"><i class="fa-solid fa-gear"></i>Settings</a></li>
+                <li><a href="/dashboard"><i class="fa-solid fa-house"></i>Home</a></li>
+                <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
+                <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
+                <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
+                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
             </ul>
         </nav>
     </footer>

@@ -16,10 +16,10 @@
         </div>
         <nav class="option-bar">
             <ul>
-                <div>user1</div>
-                <img src="/public/img/avatar.jpg" class="small-avatar">
+                <div data-user-username>user1</div>
+                <img src="/public/img/avatar.jpg" class="small-avatar" data-user-avatar>
                 <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
-                <li><a href="/login"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -45,8 +45,12 @@
 
                 <div class="profile-grid">
                     <div class="profile-row">
-                        <div class="profile-key">Name</div>
-                        <div class="profile-val" data-profile-name>user1</div>
+                        <div class="profile-key">Username</div>
+                        <div class="profile-val" data-profile-username>user1</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Full name</div>
+                        <div class="profile-val" data-profile-fullname>—</div>
                     </div>
                     <div class="profile-row">
                         <div class="profile-key">Email</div>
@@ -54,7 +58,7 @@
                     </div>
                     <div class="profile-row">
                         <div class="profile-key">Role</div>
-                        <div class="profile-val">user</div>
+                        <div class="profile-val" data-profile-role>user</div>
                     </div>
                 </div>
             </div>

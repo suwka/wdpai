@@ -183,8 +183,12 @@ class UploadController extends AppController
 
         $publicPath = '/public/uploads/cats/' . $catId . '/' . $fileName;
 
-        $stmt = $pdo->prepare('INSERT INTO cat_photos (cat_id, path, uploaded_by) VALUES (:cat, :path, :uid)');
-        $stmt->execute([':cat' => $catId, ':path' => $publicPath, ':uid' => $userId]);
+        $stmt = $pdo->prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 FROM cat_photos WHERE cat_id = :cat');
+        $stmt->execute([':cat' => $catId]);
+        $nextSort = (int)$stmt->fetchColumn();
+
+        $stmt = $pdo->prepare('INSERT INTO cat_photos (cat_id, path, uploaded_by, sort_order) VALUES (:cat, :path, :uid, :s)');
+        $stmt->execute([':cat' => $catId, ':path' => $publicPath, ':uid' => $userId, ':s' => $nextSort]);
 
         $this->redirect('/details?cat_id=' . urlencode($catId) . '&ok=photo');
     }

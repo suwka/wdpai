@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="public/styles/details.css">
-    <link rel="stylesheet" type="text/css" href="public/styles/modal.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/details.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/modal.css">
     <title>Dashboard</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
         <nav class="option-bar">
             <ul>
                 <div>user1</div>
-                <img src="public/img/avatar.jpg" class="small-avatar">
+                <img src="/public/img/avatar.jpg" class="small-avatar">
                 <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
                 <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             </ul>
@@ -33,7 +33,7 @@
             <div class="left-container">
                 <div class="cat-description">
                     <div class="cat-description-image">
-                        <img src="public/img/cat1.jpg" class="cat-image">
+                        <img src="/public/img/cat1.jpg" class="cat-image">
                     </div>
                     <div class="cat-description-text">
                         <div class="cat-name">Gilbert</div>
@@ -51,19 +51,24 @@
                             <div class="images-buttons">
                                 <a href="#"><i class="fa-solid fa-angle-down"></i></a>
                                 <a href="#"><i class="fa-solid fa-square-plus"></i></a>
-                                <a href="#"><i class="fa-solid fa-pen"></i></a>
+                                <a href="#" data-gallery-upload><i class="fa-solid fa-pen"></i></a>
                             </div>
                         </div>
+
+                        <form id="cat_gallery_upload_form" method="POST" action="/upload-cat-photo" enctype="multipart/form-data" hidden>
+                            <input type="hidden" name="cat_id" value="" id="cat_id_gallery">
+                            <input id="cat_photo" name="photo" type="file" accept="image/png,image/jpeg,image/webp">
+                        </form>
                         <div class="all-images">
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
                             
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
-                            <div class="singlepicture"><img src="public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
+                            <div class="singlepicture"><img src="/public/img/cat1.jpg" class="cat-image"></div>
                         </div>
                     </div>
                 </div>
@@ -174,6 +179,6 @@
             </div>
         </div>
     </div>
-    <script defer src="public/scripts/main.js"></script>
+    <script defer src="/public/scripts/main.js"></script>
 </body>
 </html>

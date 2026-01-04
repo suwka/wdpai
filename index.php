@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Wymagamy naszego (nowego) pliku z logiką wyświetlania
 require_once 'Routing.php';
 

@@ -18,28 +18,67 @@ class Routing {
         'profile' => 'profile',                //profil
         'reports' => 'reports',                //raporty
         'help' => 'help',                      //pomoc
+        'upload-user-avatar' => 'upload-user-avatar',
+        'upload-cat-avatar' => 'upload-cat-avatar',
+        'upload-cat-photo' => 'upload-cat-photo',
+        'cat-create' => 'cat-create',
+        'cat-update' => 'cat-update',
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 
 
     public static function run(string $path) {
-        
-        // Sprawdzamy, czy ścieżka istnieje w naszej tablicy $routes
-        if (array_key_exists($path, self::$routes)) {
-            
-            // Pobieramy nazwę pliku, który mamy wczytać (np. 'login')
-            $templateName = self::$routes[$path];
-
-            // Definiujemy pełną ścieżkę do pliku HTML
-            $templatePath = 'public/views/'. $templateName .'.html';
-
-            // Wczytujemy odpowiedni plik widoku
-            include $templatePath;
-
-        } else {
-            // Jeśli ścieżka nie jest zdefiniowana w $routes
+        if (!array_key_exists($path, self::$routes)) {
             http_response_code(404);
             echo "nie znaleziono strony (404)";
+            return;
         }
+
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+        // Controller-based handling for POST endpoints.
+        if ($method === 'POST') {
+            if ($path === 'login' || $path === 'register') {
+                require_once __DIR__ . '/src/controllers/SecurityController.php';
+                $controller = new SecurityController();
+                if ($path === 'login') {
+                    $controller->login();
+                    return;
+                }
+                $controller->register();
+                return;
+            }
+
+            if ($path === 'upload-user-avatar' || $path === 'upload-cat-avatar' || $path === 'upload-cat-photo') {
+                require_once __DIR__ . '/src/controllers/UploadController.php';
+                $controller = new UploadController();
+                if ($path === 'upload-user-avatar') {
+                    $controller->userAvatar();
+                    return;
+                }
+                if ($path === 'upload-cat-avatar') {
+                    $controller->catAvatar();
+                    return;
+                }
+                $controller->catPhoto();
+                return;
+            }
+
+            if ($path === 'cat-create' || $path === 'cat-update') {
+                require_once __DIR__ . '/src/controllers/CatsController.php';
+                $controller = new CatsController();
+                if ($path === 'cat-create') {
+                    $controller->create();
+                    return;
+                }
+                $controller->update();
+                return;
+            }
+        }
+
+        // Default: render static view (HTML).
+        $templateName = self::$routes[$path];
+        $templatePath = 'public/views/'. $templateName .'.html';
+        include $templatePath;
     }
 }

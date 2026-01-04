@@ -63,6 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function okHandler() {
+    const modalForm = overlay.querySelector('form[data-modal-form]');
+    if (modalForm) {
+      modalForm.requestSubmit();
+      return;
+    }
+
     if (typeof onOk === 'function') onOk();
     closeModal();
   }
@@ -77,36 +83,62 @@ document.addEventListener('DOMContentLoaded', () => {
     return (value ?? '').toString();
   }
 
+  function getCatIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('cat_id') || params.get('id') || '';
+  }
+
+  (function fillCatIdHiddenInputs() {
+    const catId = getCatIdFromUrl();
+    if (!catId) return;
+    const input1 = document.getElementById('cat_id');
+    if (input1) input1.value = catId;
+    const input2 = document.getElementById('cat_id_gallery');
+    if (input2) input2.value = catId;
+  })();
+
+  (function initGalleryUpload() {
+    const form = document.getElementById('cat_gallery_upload_form');
+    const fileInput = document.getElementById('cat_photo');
+    if (!form || !fileInput) return;
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-gallery-upload]');
+      if (!trigger) return;
+      e.preventDefault();
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (!fileInput.files || fileInput.files.length === 0) return;
+      form.requestSubmit();
+    });
+  })();
+
   function addCatFormHtml() {
     return `
-      <form class="pc-form" onsubmit="return false;">
+      <form class="pc-form" data-modal-form method="POST" action="/cat-create" enctype="multipart/form-data">
         <div class="pc-field">
           <label>Name</label>
-          <input class="pc-input" type="text" placeholder="e.g. Gilbert" />
+          <input class="pc-input" name="name" type="text" placeholder="e.g. Gilbert" required />
         </div>
         <div class="pc-grid-2">
           <div class="pc-field">
             <label>Age</label>
-            <input class="pc-input" type="number" min="0" placeholder="e.g. 3" />
+            <input class="pc-input" name="age" type="number" min="0" placeholder="e.g. 3" />
           </div>
           <div class="pc-field">
             <label>Breed</label>
-            <input class="pc-input" type="text" placeholder="e.g. Moggie" />
-          </div>
-        </div>
-        <div class="pc-grid-2">
-          <div class="pc-field">
-            <label>Owner</label>
-            <input class="pc-input" type="text" placeholder="e.g. user1" />
-          </div>
-          <div class="pc-field">
-            <label>Assigned users</label>
-            <input class="pc-input" type="text" placeholder="e.g. user2, user3" />
+            <input class="pc-input" name="breed" type="text" placeholder="e.g. Moggie" />
           </div>
         </div>
         <div class="pc-field">
           <label>Description</label>
-          <textarea class="pc-textarea" placeholder="Short note about the cat..."></textarea>
+          <textarea class="pc-textarea" name="description" placeholder="Short note about the cat..."></textarea>
+        </div>
+        <div class="pc-field">
+          <label>Profile photo</label>
+          <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
         </div>
       </form>
     `;
@@ -114,24 +146,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function editCatFormHtml(prefill) {
     return `
-      <form class="pc-form" onsubmit="return false;">
+      <form class="pc-form" data-modal-form method="POST" action="/cat-update" enctype="multipart/form-data">
+        <input type="hidden" name="cat_id" value="${safeText(prefill.id)}" />
         <div class="pc-field">
           <label>Name</label>
-          <input class="pc-input" type="text" value="${safeText(prefill.name)}" />
+          <input class="pc-input" name="name" type="text" value="${safeText(prefill.name)}" required />
         </div>
         <div class="pc-grid-2">
           <div class="pc-field">
             <label>Age</label>
-            <input class="pc-input" type="text" value="${safeText(prefill.age)}" />
+            <input class="pc-input" name="age" type="number" min="0" value="${safeText(prefill.age)}" />
           </div>
           <div class="pc-field">
-            <label>Owner</label>
-            <input class="pc-input" type="text" value="${safeText(prefill.owner)}" placeholder="e.g. user1" />
+            <label>Breed</label>
+            <input class="pc-input" name="breed" type="text" value="${safeText(prefill.breed)}" placeholder="e.g. Moggie" />
           </div>
         </div>
         <div class="pc-field">
-          <label>Assigned users</label>
-          <input class="pc-input" type="text" value="${safeText(prefill.assigned)}" placeholder="e.g. user2, user3" />
+          <label>Description</label>
+          <textarea class="pc-textarea" name="description" placeholder="Short note...">${safeText(prefill.description)}</textarea>
+        </div>
+        <div class="pc-field">
+          <label>Change profile photo</label>
+          <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
         </div>
       </form>
     `;
@@ -243,12 +280,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getCatPrefillFromDetailsPage() {
     const name = document.querySelector('.left-container .cat-name')?.textContent?.trim();
-    const age = document.querySelector('.left-container .cat-age')?.textContent?.trim();
+    const ageText = document.querySelector('.left-container .cat-age')?.textContent?.trim();
+    const breed = document.querySelector('.left-container .cat-breed')?.textContent?.trim();
+    const description = document.querySelector('.left-container .cat-description-text p')?.textContent?.trim();
+    const age = (ageText ?? '').match(/(\d+)/)?.[1] ?? '';
     return {
+      id: getCatIdFromUrl(),
       name: name ?? '',
       age: age ?? '',
-      owner: 'user1',
-      assigned: 'user1',
+      breed: breed ?? '',
+      description: description ?? '',
     };
   }
 
@@ -280,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
       openModal({
         title: 'Add cat',
         bodyHtml: addCatFormHtml(),
-        okText: 'OK',
+        okText: 'Save',
         cancelText: 'Cancel',
       });
       return;

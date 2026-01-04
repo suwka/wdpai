@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/styles/login.css">
+    <link rel="stylesheet" href="/public/styles/login.css">
     <title>Purrfect Care - Rejestracja</title>
 </head>
 <body>
     <div class="background"> 
-            <img src="public/img/backgroundcat.PNG" class="backgroundcat">
+            <img src="/public/img/backgroundcat.PNG" class="backgroundcat">
     </div>
     <div class="items">
             <div class="tittle">
@@ -17,11 +17,12 @@
             </div>
                 <div class="login-container">
                     <form method="POST">
+                        <input name="username" type="text" class="input" placeholder="Username">
                         <input name="email" type="email" class="input" placeholder="Email">
                         <input name="password1" type="password" class="input" placeholder="Password">
                         <input name="password2" type="password" class="input" placeholder="Password">
-                        <input name="firstname" type="firstname" class="input" placeholder="imie">
-                        <input name="lastname" type="lastname" class="input" placeholder="nazwisko">
+                        <input name="firstname" type="text" class="input" placeholder="imie">
+                        <input name="lastname" type="text" class="input" placeholder="nazwisko">
                         <button type="submit" class="signin">sign up</button>
                     </form>
                 </div>

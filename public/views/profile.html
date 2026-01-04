@@ -73,6 +73,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="section-box">
+            <div class="box_middle">
+                <div class="pc-section-header">
+                    <div class="section-tittle">Profile photo</div>
+                </div>
+                <div class="section-subtitle">Upload avatar (saved as path in DB)</div>
+
+                <form class="pc-form" method="POST" action="/upload-user-avatar" enctype="multipart/form-data">
+                    <div class="pc-field">
+                        <label for="user_avatar">Choose image</label>
+                        <input class="pc-input" id="user_avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" required>
+                    </div>
+                    <div class="pc-modal-footer" style="justify-content:flex-start; padding: 0;">
+                        <button class="pc-btn pc-btn-primary" type="submit">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <footer class="footer">

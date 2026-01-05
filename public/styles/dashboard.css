@@ -156,6 +156,7 @@ body {
 
 .card:hover {
     cursor: pointer;
+    transform: translateY(-5px);
 }
 
 .card{ 
@@ -166,6 +167,8 @@ body {
     flex-direction: row;
     min-width: calc((100% - 3rem - 6px) / 3);
     flex-shrink: 0;
+    transition: all 0.3s ease;
+    margin-top: 15px;
 }
 
 .card-image {
@@ -203,7 +206,6 @@ body {
 .section-subtitle {
     font-size: 1rem;
     color: #888;
-    margin-bottom: 15px;
 }
     
 /* 2/2 TUTAJ SOM AKTYWNOSCI NIE?? */
@@ -215,7 +217,17 @@ body {
     border-radius: 15px;
     border: 1px solid #ddd;
     width: 100%;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+
 }
+
+.activity-card:hover {
+    cursor: pointer;
+    transform: translateY(-5px);
+    
+}
+
 
 .activity-icon {
     display: flex;
@@ -263,7 +275,6 @@ body {
 .card-activity-info {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     width: 100%;
 
 }
@@ -433,7 +444,7 @@ body {
 .activity-column {
     display: flex;
     justify-content: center;
-    max-height: 240px;
+    max-height: 250px;
     height: auto;
     overflow-y: auto;
 }

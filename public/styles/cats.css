@@ -156,6 +156,13 @@ html {
     transition: transform 0.2s ease;
 }
 
+.cat-card:hover {
+    cursor: pointer;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* delikatny cien */
+    background-color: rgba(0, 0, 0, 0.062); /* opcjonalnie rozjasnienie tla */
+}
+
 .cat-image {
     width: 100%;
     height: 100%;

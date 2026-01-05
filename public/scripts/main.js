@@ -28,16 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = overlay.querySelector('[data-modal-cancel]');
   const closeBtn = overlay.querySelector('[data-modal-close]');
 
+  const footerEl = overlay.querySelector('.pc-modal-footer');
+  let footerExtraEl = overlay.querySelector('[data-modal-footer-extra]');
+  if (footerEl && !footerExtraEl) {
+    footerExtraEl = document.createElement('div');
+    footerExtraEl.setAttribute('data-modal-footer-extra', '');
+    footerExtraEl.className = 'pc-modal-footer-extra';
+    footerEl.prepend(footerExtraEl);
+  }
+
   let onOk = null;
   let lastActiveEl = null;
 
-  function openModal({ title, bodyHtml, okText = 'OK', cancelText = 'Cancel', onOkCb = null }) {
+  function openModal({ title, bodyHtml, okText = 'OK', cancelText = 'Cancel', onOkCb = null, footerExtraHtml = '' }) {
     lastActiveEl = document.activeElement;
     titleEl.textContent = title;
     bodyEl.innerHTML = bodyHtml;
     okBtn.textContent = okText;
     cancelBtn.textContent = cancelText;
     onOk = onOkCb;
+
+    if (footerExtraEl) {
+      const html = (footerExtraHtml ?? '').toString();
+      footerExtraEl.innerHTML = html;
+      footerExtraEl.hidden = html.trim() === '';
+    }
 
     overlay.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -51,6 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
     bodyEl.innerHTML = '';
     onOk = null;
+    if (footerExtraEl) {
+      footerExtraEl.innerHTML = '';
+      footerExtraEl.hidden = true;
+    }
     if (lastActiveEl && typeof lastActiveEl.focus === 'function') lastActiveEl.focus();
   }
 
@@ -584,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function activityFormHtml() {
     return `
-      <form class="pc-form" data-modal-form method="POST" action="/activity-create">
+      <form class="pc-form" data-modal-form id="pc-modal-form" method="POST" action="/activity-create">
         <input type="hidden" name="cat_id" value="${safeText(getCatIdFromUrl())}" />
         <div class="pc-field">
           <label>What (CO)</label>
@@ -604,6 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <input class="pc-input" name="time" type="time" required />
           </div>
         </div>
+        <div class="pc-field">
+          <label>Description (optional)</label>
+          <textarea class="pc-textarea" name="done_description" placeholder="What has been done..."></textarea>
+        </div>
       </form>
     `;
   }
@@ -617,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function activityEditFormHtml(prefill) {
     return `
-      <form class="pc-form" data-modal-form method="POST" action="/activity-update">
+      <form class="pc-form" data-modal-form id="pc-modal-form" method="POST" action="/activity-update">
         <input type="hidden" name="activity_id" value="${safeText(prefill.activityId)}" />
         <input type="hidden" name="cat_id" value="${safeText(prefill.catId)}" />
         <div class="pc-field">
@@ -637,6 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <label>Time</label>
             <input class="pc-input" name="time" type="time" value="${safeText(prefill.time)}" required />
           </div>
+        </div>
+        <div class="pc-field">
+          <label>Description (optional)</label>
+          <textarea class="pc-textarea" name="done_description" placeholder="What has been done...">${safeText(prefill.doneDescription || '')}</textarea>
         </div>
       </form>
     `;
@@ -846,27 +873,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Cats page: action buttons
-    const catsMoreInfo = e.target.closest('.icon-btn[title="More Info"]');
-    if (catsMoreInfo && catsMoreInfo.closest('.cat-card')) {
+    // Cats page: card navigation + action buttons
+    const catsDescBtn = e.target.closest('.icon-btn[data-cat-action="desc"]');
+    if (catsDescBtn && catsDescBtn.closest('.cat-card')) {
       e.preventDefault();
-      const card = catsMoreInfo.closest('.cat-card');
-      const catId = card?.getAttribute('data-cat-id') || '';
-      go('/details' + (catId ? `?cat_id=${encodeURIComponent(catId)}` : ''));
+      const card = catsDescBtn.closest('.cat-card');
+      const name = card.querySelector('.cat-name')?.textContent?.trim() ?? '';
+      const description = card.querySelector('.cat-description')?.textContent?.trim() ?? '';
+
+      openModal({
+        title: name ? `Opis: ${safeText(name)}` : 'Opis kota',
+        bodyHtml: `
+          <div class="pc-info">
+            <div class="pc-info-row">
+              <div class="pc-info-key">Opis</div>
+              <div class="pc-info-val">${safeText(description || 'Brak opisu.')}</div>
+            </div>
+          </div>
+        `,
+        okText: 'OK',
+        cancelText: 'Zamknij',
+      });
       return;
     }
 
-    const catsHealth = e.target.closest('.icon-btn[title="Health Logs"]');
-    if (catsHealth && catsHealth.closest('.cat-card')) {
+    const catsCaregiversBtn = e.target.closest('.icon-btn[data-cat-action="caregivers"]');
+    if (catsCaregiversBtn && catsCaregiversBtn.closest('.cat-card')) {
       e.preventDefault();
-      go('/logs');
+      go('/caregivers');
       return;
     }
 
-    const catsEdit = e.target.closest('.icon-btn[title="Edit Profile"]');
-    if (catsEdit && catsEdit.closest('.cat-card')) {
+    const catsEditBtn = e.target.closest('.icon-btn[data-cat-action="edit"]');
+    if (catsEditBtn && catsEditBtn.closest('.cat-card')) {
       e.preventDefault();
-      const card = catsEdit.closest('.cat-card');
+      const card = catsEditBtn.closest('.cat-card');
       const name = card.querySelector('.cat-name')?.textContent?.trim() ?? '';
       const meta = card.querySelector('.cat-meta')?.textContent?.trim() ?? '';
       const description = card.querySelector('.cat-description')?.textContent?.trim() ?? '';
@@ -875,7 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const breed = (meta.split('•')[0] ?? '').replace(/\s*cat\s*$/i, '').trim();
 
       openModal({
-        title: 'Edit cat',
+        title: 'Edytuj kota',
         bodyHtml: editCatFormHtml({
           id: card.getAttribute('data-cat-id') || '',
           name,
@@ -883,9 +924,18 @@ document.addEventListener('DOMContentLoaded', () => {
           breed,
           description,
         }),
-        okText: 'Save',
-        cancelText: 'Cancel',
+        okText: 'Zapisz',
+        cancelText: 'Anuluj',
       });
+      return;
+    }
+
+    const catsCard = e.target.closest('.cat-card');
+    if (catsCard) {
+      if (e.target.closest('.icon-btn')) return;
+      e.preventDefault();
+      const catId = catsCard.getAttribute('data-cat-id') || '';
+      go('/details' + (catId ? `?cat_id=${encodeURIComponent(catId)}` : ''));
       return;
     }
 
@@ -978,6 +1028,12 @@ document.addEventListener('DOMContentLoaded', () => {
         bodyHtml: activityFormHtml(),
         okText: 'Add',
         cancelText: 'Cancel',
+        footerExtraHtml: `
+          <label class="pc-modal-footer-check">
+            <input type="checkbox" form="pc-modal-form" name="mark_done" value="1" />
+            Done
+          </label>
+        `,
       });
       return;
     }
@@ -995,9 +1051,16 @@ document.addEventListener('DOMContentLoaded', () => {
           description: trigger.getAttribute('data-activity-description') || '',
           date: parts.date,
           time: parts.time,
+          doneDescription: trigger.getAttribute('data-activity-done-description') || '',
         }),
         okText: 'Save',
         cancelText: 'Cancel',
+        footerExtraHtml: `
+          <label class="pc-modal-footer-check">
+            <input type="checkbox" form="pc-modal-form" name="mark_done" value="1" />
+            Done
+          </label>
+        `,
       });
       return;
     }
@@ -1469,14 +1532,14 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
               <p class="cat-description">${safeText(desc)}</p>
               <div class="cat-actions">
-                <button class="icon-btn" title="More Info">
+                <button class="icon-btn" type="button" data-cat-action="desc" title="Opis">
                   <i class="fas fa-info-circle"></i>
                 </button>
-                <button class="icon-btn" title="Edit Profile">
-                  <i class="fas fa-pen"></i>
+                <button class="icon-btn" type="button" data-cat-action="caregivers" title="Opiekunowie">
+                  <i class="fas fa-users"></i>
                 </button>
-                <button class="icon-btn" title="Health Logs">
-                  <i class="fas fa-clipboard-list"></i>
+                <button class="icon-btn" type="button" data-cat-action="edit" title="Edytuj">
+                  <i class="fas fa-pen"></i>
                 </button>
               </div>
             </div>
@@ -1583,6 +1646,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data-activity-id="${safeText(a?.id)}"
                     data-activity-title="${safeText(title)}"
                     data-activity-description="${safeText(desc)}"
+                    data-activity-done-description="${safeText(a?.done_description || '')}"
                     data-activity-starts-at="${safeText(startsAt)}">
                     <i class="fa-solid fa-ellipsis"></i>
                   </button>
@@ -1610,17 +1674,15 @@ document.addEventListener('DOMContentLoaded', () => {
       cat_name: '',
       username: '',
       q: '',
-      // logs = executed-ish
-      past: true,
     };
 
     function formatWhenForLogs(startsAt) {
       const raw = (startsAt ?? '').toString().trim();
       const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2}:\d{2})/);
-      if (m) return `${m[4]}<br>${m[3]}-${m[2]}-${m[1]}`;
+      if (m) return `${m[4]} ${m[3]}-${m[2]}-${m[1]}`;
       const d = new Date(raw);
       if (!Number.isNaN(d.getTime())) {
-        return d.toLocaleTimeString() + '<br>' + d.toLocaleDateString();
+        return d.toLocaleTimeString() + ' ' + d.toLocaleDateString();
       }
       return safeText(raw || '—');
     }
@@ -1632,11 +1694,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildQuery() {
       const p = new URLSearchParams();
+      p.set('status', 'done');
       if (filters.q) p.set('q', filters.q);
       if (filters.cat_name) p.set('cat_name', filters.cat_name);
       if (filters.username) p.set('username', filters.username);
-      if (filters.past) p.set('past', '1');
-      // Treat logs as done-like: past activities excluding cancelled handled server-side by past=1
       return p.toString();
     }
 
@@ -1648,10 +1709,10 @@ document.addEventListener('DOMContentLoaded', () => {
       list.forEach((a, idx) => {
         const avatar = a?.cat_avatar_path || '/public/img/cat1.jpg';
         const catName = (a?.cat_name || '').toString().trim() || '—';
-        const userName = (a?.created_by_username || '').toString().trim() || '—';
+        const userName = (a?.done_by_username || a?.created_by_username || '').toString().trim() || '—';
         const title = (a?.title || '').toString().trim() || '—';
-        const desc = (a?.description || '').toString().trim();
-        const whenHtml = formatWhenForLogs(a?.starts_at);
+        const desc = (a?.done_description || '').toString().trim();
+        const whenHtml = formatWhenForLogs(a?.done_at);
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1661,7 +1722,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>${safeText(userName)}</td>
           <td>${safeText(title)}</td>
           <td>${safeText(desc)}</td>
-          <td><time datetime="${safeText(a?.starts_at)}">${whenHtml}</time></td>
+          <td><time datetime="${safeText(a?.done_at)}">${whenHtml}</time></td>
         `;
         table.appendChild(tr);
       });
@@ -1674,10 +1735,8 @@ document.addEventListener('DOMContentLoaded', () => {
           return r.json();
         })
         .then((data) => {
-          // client-side: keep only past + not cancelled (done-like)
           const items = Array.isArray(data?.items) ? data.items : [];
-          const filtered = items.filter((x) => (x?.status || '') !== 'cancelled');
-          render(filtered);
+          render(items);
         })
         .catch(() => {
           clearRows();
@@ -1697,12 +1756,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (/only\s+gilbert/i.test(pick)) filters.cat_name = 'Gilbert';
       if (/only\s+user1/i.test(pick)) filters.username = 'user1';
 
-      // On logs, checkbox meaning: done-like only (past). planned-only would be nonsensical -> ignore.
-      filters.past = true;
-      if (onlyPlanned && !onlyDone) {
-        // keep past anyway; no-op
-        filters.past = true;
-      }
+      // /logs zawsze pokazuje wykonane (done)
     }
 
     // Wire up search
@@ -1803,6 +1857,7 @@ document.addEventListener('DOMContentLoaded', () => {
               data-activity-cat-id="${safeText(catId)}"
               data-activity-title="${safeText(title)}"
               data-activity-description="${safeText(desc)}"
+              data-activity-done-description="${safeText(a?.done_description || '')}"
               data-activity-starts-at="${safeText(a?.starts_at)}">
               <i class="fa-solid fa-ellipsis"></i>
             </button>
@@ -1871,5 +1926,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     load();
   })();
+
+  //brak przekierowania dalej
+  document.addEventListener('submit', (e) => {
+      if (!e.target.matches('form[data-modal-form]')) return
+
+      e.preventDefault()
+      const form = e.target
+
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form)
+      }).then(r => {
+        if (r.ok) window.location.reload()
+      })
+    })
+
+
 });
   

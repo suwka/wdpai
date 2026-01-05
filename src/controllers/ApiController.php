@@ -74,11 +74,11 @@ class ApiController extends AppController
 
     private function activitiesAccessSql(string $userId, array &$params): string
     {
+        $params[':uid'] = $userId;
+
         if ($this->isAdmin()) {
             return '1=1';
         }
-
-        $params[':uid'] = $userId;
         return '(c.owner_id = :uid OR cc.user_id IS NOT NULL)';
     }
 
@@ -120,25 +120,39 @@ class ApiController extends AppController
             $params[':cat_name'] = $catName;
         }
         if ($username !== '') {
-            $where[] = 'u.username = :username';
+            $where[] = 'COALESCE(du.username, u.username) = :username';
             $params[':username'] = $username;
         }
         if ($q !== '') {
-            $where[] = '(a.title ILIKE :q OR COALESCE(a.description, \'\') ILIKE :q OR c.name ILIKE :q OR COALESCE(u.username, \'\') ILIKE :q)';
+            $where[] = '(
+              a.title ILIKE :q
+              OR COALESCE(a.description, \'\') ILIKE :q
+              OR COALESCE(a.done_description, \'\') ILIKE :q
+              OR c.name ILIKE :q
+              OR COALESCE(u.username, \'\') ILIKE :q
+              OR COALESCE(du.username, \'\') ILIKE :q
+            )';
             $params[':q'] = '%' . $q . '%';
         }
 
         $whereSql = implode(' AND ', $where);
 
+        $orderBy = 'a.starts_at DESC';
+        if ($status === 'done') {
+            $orderBy = 'a.done_at DESC NULLS LAST';
+        }
+
         $stmt = $pdo->prepare(
             'SELECT a.id, a.cat_id, c.name AS cat_name, c.avatar_path AS cat_avatar_path, '
-            . 'u.username AS created_by_username, a.title, a.description, a.starts_at, a.status '
+            . 'u.username AS created_by_username, a.title, a.description, a.starts_at, a.status, '
+            . 'a.done_at, a.done_description, du.username AS done_by_username '
             . 'FROM activities a '
             . 'JOIN cats c ON c.id = a.cat_id '
             . 'LEFT JOIN users u ON u.id = a.created_by '
+            . 'LEFT JOIN users du ON du.id = a.done_by '
             . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
             . 'WHERE ' . $whereSql . ' '
-            . 'ORDER BY a.starts_at DESC '
+            . 'ORDER BY ' . $orderBy . ' '
             . 'LIMIT 200'
         );
 
@@ -166,7 +180,7 @@ class ApiController extends AppController
         $stmt = $pdo->prepare(
             'SELECT to_char(date_trunc(\'day\', a.starts_at), \'YYYY-MM-DD\') AS day, '
             . 'SUM(CASE WHEN a.status = \'planned\' AND a.starts_at >= NOW() THEN 1 ELSE 0 END) AS planned_future_count, '
-            . 'SUM(CASE WHEN a.starts_at < NOW() AND a.status <> \'cancelled\' THEN 1 ELSE 0 END) AS done_like_count '
+            . 'SUM(CASE WHEN a.status = \'done\' THEN 1 ELSE 0 END) AS done_like_count '
             . 'FROM activities a '
             . 'JOIN cats c ON c.id = a.cat_id '
             . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '

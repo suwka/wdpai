@@ -59,6 +59,20 @@
     border-top: 1px solid #e0e0e0;
 }
 
+.pc-modal-footer-extra {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pc-modal-footer-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
 .pc-btn {
     border: none;
     border-radius: 8px;

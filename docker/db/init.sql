@@ -73,6 +73,9 @@ CREATE TABLE activities (
   description TEXT,
   starts_at   TIMESTAMP NOT NULL,
   status      TEXT NOT NULL DEFAULT 'planned' CHECK (status IN ('planned', 'done', 'cancelled')),
+  done_at     TIMESTAMP,
+  done_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+  done_description TEXT,
   created_by  UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
@@ -81,6 +84,7 @@ CREATE TABLE activities (
 CREATE INDEX idx_activities_cat_id ON activities(cat_id);
 CREATE INDEX idx_activities_starts_at ON activities(starts_at);
 CREATE INDEX idx_activities_cat_starts_at ON activities(cat_id, starts_at);
+CREATE INDEX idx_activities_done_at ON activities(done_at);
 
 -- LOGS
 CREATE TABLE logs (

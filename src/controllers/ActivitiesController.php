@@ -50,6 +50,8 @@ class ActivitiesController extends AppController
         $catId = trim($_POST['cat_id'] ?? '');
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $markDone = (string)($_POST['mark_done'] ?? '') === '1';
+        $doneDescription = trim($_POST['done_description'] ?? '');
         $date = trim($_POST['date'] ?? '');
         $time = trim($_POST['time'] ?? '');
 
@@ -77,9 +79,12 @@ class ActivitiesController extends AppController
 
         $startsAt = $dt->format('Y-m-d H:i:s');
 
+        $status = $markDone ? 'done' : 'planned';
+        $doneAt = $markDone ? (new DateTime())->format('Y-m-d H:i:s') : null;
+
         $stmt = $pdo->prepare(
-            'INSERT INTO activities (cat_id, title, description, starts_at, status, created_by) '
-            . 'VALUES (:cat_id, :title, :description, :starts_at, :status, :created_by)'
+            'INSERT INTO activities (cat_id, title, description, starts_at, status, done_at, done_by, done_description, created_by) '
+            . 'VALUES (:cat_id, :title, :description, :starts_at, :status, :done_at, :done_by, :done_description, :created_by)'
         );
 
         $stmt->execute([
@@ -87,7 +92,10 @@ class ActivitiesController extends AppController
             ':title' => $title,
             ':description' => ($description === '' ? null : $description),
             ':starts_at' => $startsAt,
-            ':status' => 'planned',
+            ':status' => $status,
+            ':done_at' => $doneAt,
+            ':done_by' => $markDone ? $userId : null,
+            ':done_description' => ($markDone && $doneDescription !== '') ? $doneDescription : null,
             ':created_by' => $userId,
         ]);
 
@@ -102,6 +110,8 @@ class ActivitiesController extends AppController
         $catId = trim($_POST['cat_id'] ?? '');
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $markDone = (string)($_POST['mark_done'] ?? '') === '1';
+        $doneDescription = trim($_POST['done_description'] ?? '');
         $date = trim($_POST['date'] ?? '');
         $time = trim($_POST['time'] ?? '');
 
@@ -138,19 +148,36 @@ class ActivitiesController extends AppController
 
         $startsAt = $dt->format('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare(
-            'UPDATE activities '
-            . 'SET title = :title, description = :description, starts_at = :starts_at '
-            . 'WHERE id = :id AND cat_id = :cid'
-        );
-
-        $stmt->execute([
-            ':title' => $title,
-            ':description' => ($description === '' ? null : $description),
-            ':starts_at' => $startsAt,
-            ':id' => $activityId,
-            ':cid' => $catId,
-        ]);
+        if ($markDone) {
+            $stmt = $pdo->prepare(
+                'UPDATE activities '
+                . 'SET title = :title, description = :description, starts_at = :starts_at, status = :status, done_at = NOW(), done_by = :done_by, done_description = :done_description, updated_at = NOW() '
+                . 'WHERE id = :id AND cat_id = :cid'
+            );
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => ($description === '' ? null : $description),
+                ':starts_at' => $startsAt,
+                ':status' => 'done',
+                ':done_by' => $userId,
+                ':done_description' => ($doneDescription === '' ? null : $doneDescription),
+                ':id' => $activityId,
+                ':cid' => $catId,
+            ]);
+        } else {
+            $stmt = $pdo->prepare(
+                'UPDATE activities '
+                . 'SET title = :title, description = :description, starts_at = :starts_at, updated_at = NOW() '
+                . 'WHERE id = :id AND cat_id = :cid'
+            );
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => ($description === '' ? null : $description),
+                ':starts_at' => $startsAt,
+                ':id' => $activityId,
+                ':cid' => $catId,
+            ]);
+        }
 
         $this->redirect('/details?cat_id=' . urlencode($catId) . '&ok=activity_updated');
     }

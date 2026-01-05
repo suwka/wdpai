@@ -368,6 +368,10 @@ tr:first-child {
 }
 
 
+tr:not(first-child)hover {
+    background-color: rgb(238, 238, 238);
+}
+
 
 @media (max-width: 1300px) {
     .all-users {

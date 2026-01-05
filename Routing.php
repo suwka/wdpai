@@ -25,6 +25,11 @@ class Routing {
         'api-cats' => 'api-cats',
         'api-cat' => 'api-cat',
         'api-cat-photos' => 'api-cat-photos',
+        'api-dashboard-activities' => 'api-dashboard-activities',
+        'api-cat-activities' => 'api-cat-activities',
+        'api-activities' => 'api-activities',
+        'api-activities-calendar' => 'api-activities-calendar',
+        'api-activities-day' => 'api-activities-day',
         'cat-photo-delete' => 'cat-photo-delete',
         'cat-photos-reorder' => 'cat-photos-reorder',
         'upload-user-avatar' => 'upload-user-avatar',
@@ -32,6 +37,9 @@ class Routing {
         'upload-cat-photo' => 'upload-cat-photo',
         'cat-create' => 'cat-create',
         'cat-update' => 'cat-update',
+        'cat-delete' => 'cat-delete',
+        'activity-create' => 'activity-create',
+        'activity-update' => 'activity-update',
         'support-create' => 'support-create',
         'support-list' => 'support-list',
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
@@ -67,9 +75,10 @@ class Routing {
         // Auth guard for HTML pages.
         if ($method === 'GET') {
             $publicPages = ['', 'login', 'register'];
-            $adminPages = ['settings', 'caregivers', 'reports'];
+            $adminPages = ['caregivers', 'reports'];
             $isHtmlPage = !in_array($path, [
-                'api-me', 'api-cats', 'api-cat', 'api-cat-photos',
+                'api-me', 'api-profile', 'api-users', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
+                'api-activities', 'api-activities-calendar', 'api-activities-day',
                 'support-list'
             ], true);
 
@@ -92,7 +101,7 @@ class Routing {
                 return;
             }
 
-            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos') {
+            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day') {
                 require_once __DIR__ . '/src/controllers/ApiController.php';
                 $controller = new ApiController();
                 if ($path === 'api-me') {
@@ -113,6 +122,26 @@ class Routing {
                 }
                 if ($path === 'api-cat') {
                     $controller->cat();
+                    return;
+                }
+                if ($path === 'api-dashboard-activities') {
+                    $controller->dashboardActivities();
+                    return;
+                }
+                if ($path === 'api-cat-activities') {
+                    $controller->catActivities();
+                    return;
+                }
+                if ($path === 'api-activities') {
+                    $controller->activities();
+                    return;
+                }
+                if ($path === 'api-activities-calendar') {
+                    $controller->activitiesCalendar();
+                    return;
+                }
+                if ($path === 'api-activities-day') {
+                    $controller->activitiesDay();
                     return;
                 }
                 $controller->catPhotos();
@@ -155,13 +184,31 @@ class Routing {
                 return;
             }
 
-            if ($path === 'cat-create' || $path === 'cat-update') {
+            if ($path === 'cat-create' || $path === 'cat-update' || $path === 'cat-delete') {
                 require_once __DIR__ . '/src/controllers/CatsController.php';
                 $controller = new CatsController();
                 if ($path === 'cat-create') {
                     $controller->create();
                     return;
                 }
+                if ($path === 'cat-update') {
+                    $controller->update();
+                    return;
+                }
+                $controller->delete();
+                return;
+            }
+
+            if ($path === 'activity-create') {
+                require_once __DIR__ . '/src/controllers/ActivitiesController.php';
+                $controller = new ActivitiesController();
+                $controller->create();
+                return;
+            }
+
+            if ($path === 'activity-update') {
+                require_once __DIR__ . '/src/controllers/ActivitiesController.php';
+                $controller = new ActivitiesController();
                 $controller->update();
                 return;
             }

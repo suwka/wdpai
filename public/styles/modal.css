@@ -173,3 +173,52 @@
     text-align: right;
     max-width: 70%;
 }
+
+/* Activity list inside day modal */
+.pc-activity-day-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.pc-activity-day-row {
+    display: flex;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.pc-activity-day-row:last-child {
+    border-bottom: none;
+}
+
+.pc-activity-day-time {
+    color: #999;
+    min-width: 48px;
+    text-align: left;
+}
+
+.pc-activity-day-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.pc-activity-day-title {
+    text-align: left;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pc-activity-day-sub {
+    margin-top: 2px;
+    color: #999;
+    font-size: 14px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

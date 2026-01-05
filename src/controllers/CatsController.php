@@ -5,6 +5,11 @@ require_once __DIR__ . '/../Database.php';
 
 class CatsController extends AppController
 {
+    private function isAdmin(): bool
+    {
+        return ($_SESSION['role'] ?? null) === 'admin';
+    }
+
     private function requireLogin(): string
     {
         $userId = $_SESSION['user_id'] ?? null;
@@ -162,5 +167,37 @@ class CatsController extends AppController
         }
 
         $this->redirect('/details?cat_id=' . urlencode($catId) . '&ok=updated');
+    }
+
+    public function delete(): void
+    {
+        $userId = $this->requireLogin();
+
+        $catId = $_POST['cat_id'] ?? '';
+        if (!$catId) {
+            $this->redirect('/settings?err=no_cat');
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
+        $stmt->execute([':id' => $catId]);
+        $ownerId = $stmt->fetchColumn();
+
+        if (!$ownerId) {
+            $this->redirect('/settings?err=not_found');
+        }
+
+        if ($ownerId !== $userId && !$this->isAdmin()) {
+            http_response_code(403);
+            echo 'Forbidden';
+            exit;
+        }
+
+        $stmt = $pdo->prepare('DELETE FROM cats WHERE id = :id');
+        $stmt->execute([':id' => $catId]);
+
+        $this->redirect('/settings?ok=cat_deleted');
     }
 }

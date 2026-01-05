@@ -33,6 +33,16 @@ body {
     margin-right: 50px;
 }
 
+.option-bar ul li a,
+.option-bar ul li a:visited {
+    color: #551a8b;
+    text-decoration: none;
+}
+
+.option-bar ul li a i {
+    color: inherit;
+}
+
 .small-avatar {
     width: 50px;
     height: 50px;
@@ -72,6 +82,11 @@ body {
     text-decoration: none;
     gap: 5px;
     font-size: 1rem;
+    color: #551a8b;
+}
+
+.menu-bar ul li a:visited {
+    color: #551a8b;
 }
 
 .main-content {
@@ -139,7 +154,7 @@ body {
 
 .assignment-row {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1.6fr 140px;
+    grid-template-columns: 1fr 2fr;
     gap: 12px;
     align-items: center;
     padding: 12px 14px;

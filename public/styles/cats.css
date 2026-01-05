@@ -33,6 +33,16 @@ body {
     margin-right: 50px;
 }
 
+.option-bar ul li a,
+.option-bar ul li a:visited {
+    color: #551a8b;
+    text-decoration: none;
+}
+
+.option-bar ul li a i {
+    color: inherit;
+}
+
 .small-avatar {
     width: 50px;
     height: 50px;
@@ -72,6 +82,11 @@ body {
     text-decoration: none;
     gap: 5px;
     font-size: 1rem;
+    color: #551a8b;
+}
+
+.menu-bar ul li a:visited {
+    color: #551a8b;
 }
 
 .main-content {

@@ -34,9 +34,180 @@ class ApiController extends AppController
     {
         if ($this->isAdmin()) return true;
 
-        $stmt = $pdo->prepare('SELECT 1 FROM cats WHERE id = :id AND owner_id = :uid');
-        $stmt->execute([':id' => $catId, ':uid' => $userId]);
+        $stmt = $pdo->prepare(
+            'SELECT 1 '
+            . 'FROM cats c '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE c.id = :cid AND (c.owner_id = :uid OR cc.user_id IS NOT NULL)'
+        );
+        $stmt->execute([':cid' => $catId, ':uid' => $userId]);
         return (bool)$stmt->fetchColumn();
+    }
+
+    public function catActivities(): void
+    {
+        $userId = $this->requireLogin();
+        $catId = $_GET['cat_id'] ?? '';
+        if (!$catId) {
+            $this->json(['error' => 'missing_cat_id'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        if (!$this->canAccessCat($pdo, $userId, $catId)) {
+            $this->json(['error' => 'forbidden'], 403);
+        }
+
+        $stmt = $pdo->prepare(
+            "SELECT id, cat_id, title, description, starts_at, status "
+            . "FROM activities "
+            . "WHERE cat_id = :cid AND status = 'planned' AND starts_at >= NOW() "
+            . "ORDER BY starts_at ASC "
+            . "LIMIT 200"
+        );
+        $stmt->execute([':cid' => $catId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->json(['items' => $rows]);
+    }
+
+    private function activitiesAccessSql(string $userId, array &$params): string
+    {
+        if ($this->isAdmin()) {
+            return '1=1';
+        }
+
+        $params[':uid'] = $userId;
+        return '(c.owner_id = :uid OR cc.user_id IS NOT NULL)';
+    }
+
+    public function activities(): void
+    {
+        $userId = $this->requireLogin();
+
+        $status = trim((string)($_GET['status'] ?? ''));
+        $q = trim((string)($_GET['q'] ?? ''));
+        $catName = trim((string)($_GET['cat_name'] ?? ''));
+        $username = trim((string)($_GET['username'] ?? ''));
+        $futureOnly = (string)($_GET['future'] ?? '') === '1';
+        $pastOnly = (string)($_GET['past'] ?? '') === '1';
+
+        $allowedStatuses = ['planned', 'done', 'cancelled'];
+        if ($status !== '' && !in_array($status, $allowedStatuses, true)) {
+            $this->json(['error' => 'invalid_status'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $params = [];
+        $where = [];
+        $where[] = $this->activitiesAccessSql($userId, $params);
+
+        if ($status !== '') {
+            $where[] = 'a.status = :status';
+            $params[':status'] = $status;
+        }
+        if ($futureOnly) {
+            $where[] = 'a.starts_at >= NOW()';
+        }
+        if ($pastOnly) {
+            $where[] = 'a.starts_at <= NOW()';
+        }
+        if ($catName !== '') {
+            $where[] = 'c.name = :cat_name';
+            $params[':cat_name'] = $catName;
+        }
+        if ($username !== '') {
+            $where[] = 'u.username = :username';
+            $params[':username'] = $username;
+        }
+        if ($q !== '') {
+            $where[] = '(a.title ILIKE :q OR COALESCE(a.description, \'\') ILIKE :q OR c.name ILIKE :q OR COALESCE(u.username, \'\') ILIKE :q)';
+            $params[':q'] = '%' . $q . '%';
+        }
+
+        $whereSql = implode(' AND ', $where);
+
+        $stmt = $pdo->prepare(
+            'SELECT a.id, a.cat_id, c.name AS cat_name, c.avatar_path AS cat_avatar_path, '
+            . 'u.username AS created_by_username, a.title, a.description, a.starts_at, a.status '
+            . 'FROM activities a '
+            . 'JOIN cats c ON c.id = a.cat_id '
+            . 'LEFT JOIN users u ON u.id = a.created_by '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE ' . $whereSql . ' '
+            . 'ORDER BY a.starts_at DESC '
+            . 'LIMIT 200'
+        );
+
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->json(['items' => $rows]);
+    }
+
+    public function activitiesCalendar(): void
+    {
+        $userId = $this->requireLogin();
+
+        $from = trim((string)($_GET['from'] ?? ''));
+        $to = trim((string)($_GET['to'] ?? ''));
+        if ($from === '' || $to === '') {
+            $this->json(['error' => 'missing_range'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $params = [':from' => $from, ':to' => $to];
+        $accessSql = $this->activitiesAccessSql($userId, $params);
+
+        $stmt = $pdo->prepare(
+            'SELECT to_char(date_trunc(\'day\', a.starts_at), \'YYYY-MM-DD\') AS day, '
+            . 'SUM(CASE WHEN a.status = \'planned\' AND a.starts_at >= NOW() THEN 1 ELSE 0 END) AS planned_future_count, '
+            . 'SUM(CASE WHEN a.starts_at < NOW() AND a.status <> \'cancelled\' THEN 1 ELSE 0 END) AS done_like_count '
+            . 'FROM activities a '
+            . 'JOIN cats c ON c.id = a.cat_id '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE ' . $accessSql . ' AND a.starts_at >= :from::date AND a.starts_at < :to::date '
+            . 'GROUP BY 1 '
+            . 'ORDER BY 1 ASC'
+        );
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->json(['items' => $rows]);
+    }
+
+    public function activitiesDay(): void
+    {
+        $userId = $this->requireLogin();
+
+        $date = trim((string)($_GET['date'] ?? ''));
+        if ($date === '') {
+            $this->json(['error' => 'missing_date'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $params = [':day' => $date];
+        $accessSql = $this->activitiesAccessSql($userId, $params);
+
+        $stmt = $pdo->prepare(
+            'SELECT a.id, a.cat_id, c.name AS cat_name, a.title, a.description, a.starts_at, a.status '
+            . 'FROM activities a '
+            . 'JOIN cats c ON c.id = a.cat_id '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE ' . $accessSql . ' '
+            . 'AND a.starts_at >= :day::date AND a.starts_at < (:day::date + INTERVAL \'1 day\') '
+            . 'AND a.status <> \'cancelled\' '
+            . 'ORDER BY a.starts_at ASC '
+            . 'LIMIT 500'
+        );
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->json(['items' => $rows]);
     }
 
     public function me(): void
@@ -145,6 +316,65 @@ class ApiController extends AppController
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $this->json(['items' => $rows]);
+    }
+
+    public function dashboardActivities(): void
+    {
+        $userId = $this->requireLogin();
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        // Recent = last activities that already started
+        // Planned = next planned activities
+        if ($this->isAdmin()) {
+            $recentStmt = $pdo->query(
+                "SELECT a.id, a.cat_id, c.name AS cat_name, a.title, a.starts_at, a.status\n" .
+                "FROM activities a\n" .
+                "JOIN cats c ON c.id = a.cat_id\n" .
+                "WHERE a.starts_at <= NOW()\n" .
+                "ORDER BY a.starts_at DESC\n" .
+                "LIMIT 6"
+            );
+            $plannedStmt = $pdo->query(
+                "SELECT a.id, a.cat_id, c.name AS cat_name, a.title, a.starts_at, a.status\n" .
+                "FROM activities a\n" .
+                "JOIN cats c ON c.id = a.cat_id\n" .
+                "WHERE a.status = 'planned' AND a.starts_at >= NOW()\n" .
+                "ORDER BY a.starts_at ASC\n" .
+                "LIMIT 6"
+            );
+
+            $recent = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+            $planned = $plannedStmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->json(['recent' => $recent, 'planned' => $planned]);
+        }
+
+        $recentStmt = $pdo->prepare(
+            "SELECT DISTINCT a.id, a.cat_id, c.name AS cat_name, a.title, a.starts_at, a.status\n" .
+            "FROM activities a\n" .
+            "JOIN cats c ON c.id = a.cat_id\n" .
+            "LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid\n" .
+            "WHERE (c.owner_id = :uid OR cc.user_id IS NOT NULL) AND a.starts_at <= NOW()\n" .
+            "ORDER BY a.starts_at DESC\n" .
+            "LIMIT 6"
+        );
+        $recentStmt->execute([':uid' => $userId]);
+        $recent = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $plannedStmt = $pdo->prepare(
+            "SELECT DISTINCT a.id, a.cat_id, c.name AS cat_name, a.title, a.starts_at, a.status\n" .
+            "FROM activities a\n" .
+            "JOIN cats c ON c.id = a.cat_id\n" .
+            "LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid\n" .
+            "WHERE (c.owner_id = :uid OR cc.user_id IS NOT NULL) AND a.status = 'planned' AND a.starts_at >= NOW()\n" .
+            "ORDER BY a.starts_at ASC\n" .
+            "LIMIT 6"
+        );
+        $plannedStmt->execute([':uid' => $userId]);
+        $planned = $plannedStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->json(['recent' => $recent, 'planned' => $planned]);
     }
 
     public function deleteCatPhoto(): void

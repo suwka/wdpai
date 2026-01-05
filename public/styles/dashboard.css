@@ -35,6 +35,16 @@ body {
     margin-right: 50px;
  }
 
+.option-bar ul li a,
+.option-bar ul li a:visited {
+    color: #551a8b;
+    text-decoration: none;
+}
+
+.option-bar ul li a i {
+    color: inherit;
+}
+
  /*zachowanie avataru w nagłówku*/
 .small-avatar {
     width: 50px;
@@ -79,6 +89,11 @@ body {
     text-decoration: none;
     gap: 5px;
     font-size: 1rem;
+    color: #551a8b;
+}
+
+.menu-bar ul li a:visited {
+    color: #551a8b;
 }
 
 /* główna zawartość dashboardu */
@@ -137,6 +152,10 @@ body {
     overflow-x: auto;
     white-space: nowrap;
     
+}
+
+.card:hover {
+    cursor: pointer;
 }
 
 .card{ 
@@ -389,6 +408,26 @@ body {
     height: 5px;
     background-color: #d364cd;
     border-radius: 50%;
+}
+
+.calendar-days > .day.has-planned:not(.has-done)::after {
+    background-color: #ccc;
+}
+
+.calendar-days > .day.has-planned.has-done::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 5px;
+    height: 5px;
+    background-color: #ccc;
+    border-radius: 50%;
+    transform: translateX(-4px);
+}
+
+.calendar-days > .day.has-planned.has-done::after {
+    background-color: #d364cd;
+    transform: translateX(4px);
 }
 
 .activity-column {

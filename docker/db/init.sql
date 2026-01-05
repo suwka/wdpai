@@ -112,6 +112,6 @@ CREATE INDEX idx_support_tickets_status ON support_tickets(status);
 -- Seed (minimal data for testing)
 INSERT INTO users (username, email, first_name, last_name, password_hash, role)
 VALUES
-  ('admin', 'admin@example.com', 'Admin', 'User', '$2y$10$eE9R6yGvJHh8mL7m7QhUOe8ZpW3qvS9y8m4sF6m5bJ2VJm0yqgq6K', 'admin'),
+  ('admin', 'admin@example.com', 'Admin', 'User', '$2y$10$WS4hSSfm9a4QnujppOxyWeRyUW7LYhvdmr94x1Pz4MHdyOFL3phi2', 'admin'),
   ('user1', 'user1@example.com', 'Jan', 'Kowalski', '$2y$10$eE9R6yGvJHh8mL7m7QhUOe8ZpW3qvS9y8m4sF6m5bJ2VJm0yqgq6K', 'user')
 ON CONFLICT DO NOTHING;

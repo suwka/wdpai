@@ -192,6 +192,139 @@ document.addEventListener('DOMContentLoaded', () => {
       return { monthIdx, year: parseInt(m[2], 10) };
     }
 
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function fmtDate(d) {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    function addDays(d, delta) {
+      const x = new Date(d);
+      x.setDate(x.getDate() + delta);
+      return x;
+    }
+
+    function getCalendarMode() {
+      const p = window.location.pathname;
+      if (p === '/dashboard') return { planned: true, done: true };
+      if (p === '/schedule') return { planned: true, done: false };
+      // no calendar markers elsewhere
+      return { planned: false, done: false };
+    }
+
+    function ensureDayClickHandler(container) {
+      if (container.getAttribute('data-activity-day-click') === '1') return;
+      container.setAttribute('data-activity-day-click', '1');
+
+      const daysEl = container.querySelector('.calendar-days');
+      if (!daysEl) return;
+
+      daysEl.addEventListener('click', (e) => {
+        const dayEl = e.target.closest('.day');
+        if (!dayEl || !daysEl.contains(dayEl)) return;
+
+        if (!dayEl.classList.contains('has-planned') && !dayEl.classList.contains('has-done')) return;
+        const date = dayEl.getAttribute('data-date') || '';
+        if (!date) return;
+
+        fetch('/api-activities-day?date=' + encodeURIComponent(date), { headers: { 'Accept': 'application/json' } })
+          .then((r) => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then((data) => {
+            const items = Array.isArray(data?.items) ? data.items : [];
+            const bodyHtml = items.length === 0
+              ? '<div class="pc-info"><div class="pc-info-row"><div class="pc-info-key">Info</div><div class="pc-info-val">No activities</div></div></div>'
+              : `
+                <div class="pc-activity-day-list">
+                  ${items.map((a) => {
+                    const startsAt = (a?.starts_at || '').toString();
+                    const m = startsAt.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+                    const time = m ? m[2] : '—';
+                    const cat = (a?.cat_name || '').toString().trim();
+                    const title = (a?.title || '').toString().trim();
+                    const desc = (a?.description || '').toString().trim();
+                    const main = [title, desc].filter(Boolean).join(' — ') || '—';
+                    return `
+                      <div class="pc-activity-day-row">
+                        <div class="pc-activity-day-time">${safeText(time)}</div>
+                        <div class="pc-activity-day-main">
+                          <div class="pc-activity-day-title">${safeText(main)}</div>
+                          ${cat ? `<div class="pc-activity-day-sub">${safeText(cat)}</div>` : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+
+            openModal({
+              title: `Activities (${date})`,
+              bodyHtml,
+              okText: 'OK',
+              cancelText: 'Close',
+            });
+          })
+          .catch(() => {
+            openModal({
+              title: `Activities (${date})`,
+              bodyHtml: '<div class="pc-info"><div class="pc-info-row"><div class="pc-info-key">Error</div><div class="pc-info-val">Cannot load activities</div></div></div>',
+              okText: 'OK',
+              cancelText: 'Close',
+            });
+          });
+      });
+    }
+
+    function decorateCalendar(container, fromDate, toDateExclusive) {
+      const mode = getCalendarMode();
+      if (!mode.planned && !mode.done) return;
+
+      const from = fmtDate(fromDate);
+      const to = fmtDate(toDateExclusive);
+
+      fetch('/api-activities-calendar?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to), { headers: { 'Accept': 'application/json' } })
+        .then((r) => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then((data) => {
+          const items = Array.isArray(data?.items) ? data.items : [];
+          const map = new Map();
+          items.forEach((row) => {
+            const day = (row?.day || '').toString();
+            if (!day) return;
+            map.set(day, {
+              planned: Number(row?.planned_future_count || 0),
+              done: Number(row?.done_like_count || 0),
+            });
+          });
+
+          const days = Array.from(container.querySelectorAll('.calendar-days > .day'));
+          days.forEach((el) => {
+            el.classList.remove('has-event', 'has-planned', 'has-done');
+            const date = el.getAttribute('data-date') || '';
+            if (!date) return;
+            const counts = map.get(date);
+            if (!counts) return;
+
+            const hasPlanned = mode.planned && counts.planned > 0;
+            const hasDone = mode.done && counts.done > 0;
+            if (!hasPlanned && !hasDone) return;
+
+            el.classList.add('has-event');
+            if (hasPlanned) el.classList.add('has-planned');
+            if (hasDone) el.classList.add('has-done');
+          });
+        })
+        .catch(() => {
+          // ignore
+        });
+    }
+
     function renderMonth(container, year, monthIdx) {
       const label = container.querySelector('.calendar-month');
       const daysEl = container.querySelector('.calendar-days');
@@ -201,43 +334,30 @@ document.addEventListener('DOMContentLoaded', () => {
       daysEl.innerHTML = '';
 
       const firstOfMonth = new Date(year, monthIdx, 1);
-      const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
       const startOffset = toMondayIndex(firstOfMonth.getDay());
-
-      const prevMonthDays = new Date(year, monthIdx, 0).getDate();
+      const startDate = new Date(year, monthIdx, 1 - startOffset);
       const today = new Date();
-      const isThisMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
 
-      for (let i = 0; i < startOffset; i++) {
-        const dayNum = prevMonthDays - (startOffset - 1 - i);
-        const d = document.createElement('div');
-        d.className = 'day other-month';
-        d.textContent = String(dayNum);
-        daysEl.appendChild(d);
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
+      // Always render a 6-week grid (42 cells)
+      for (let i = 0; i < 42; i++) {
+        const cur = addDays(startDate, i);
         const d = document.createElement('div');
         d.className = 'day';
-        d.textContent = String(day);
-        if (isThisMonth && day === today.getDate()) d.classList.add('today');
+        if (cur.getMonth() !== monthIdx) d.classList.add('other-month');
+        if (cur.getFullYear() === today.getFullYear() && cur.getMonth() === today.getMonth() && cur.getDate() === today.getDate()) {
+          d.classList.add('today');
+        }
+        d.textContent = String(cur.getDate());
+        d.setAttribute('data-date', fmtDate(cur));
         daysEl.appendChild(d);
       }
 
-      const total = startOffset + daysInMonth;
-      const trailing = (7 - (total % 7)) % 7;
-      for (let i = 1; i <= trailing; i++) {
-        const d = document.createElement('div');
-        d.className = 'day other-month';
-        d.textContent = String(i);
-        daysEl.appendChild(d);
-      }
+      ensureDayClickHandler(container);
+      decorateCalendar(container, startDate, addDays(startDate, 42));
     }
 
     containers.forEach((container) => {
-      const label = container.querySelector('.calendar-month');
-      const parsed = parseMonthLabel(label?.textContent ?? '');
-      const base = parsed ? new Date(parsed.year, parsed.monthIdx, 1) : new Date();
+      const base = new Date();
 
       // normalize to first of month
       let curYear = base.getFullYear();
@@ -349,6 +469,60 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   })();
 
+  (function initDashboardActivities() {
+    const recentHost = document.querySelector('[data-dashboard-activities-recent]');
+    const plannedHost = document.querySelector('[data-dashboard-activities-planned]');
+    if (!recentHost && !plannedHost) return;
+
+    function formatWhen(startsAt) {
+      const raw = (startsAt ?? '').toString();
+      if (!raw) return '—';
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return raw;
+      return d.toLocaleString();
+    }
+
+    function render(items, host) {
+      if (!host) return;
+      const list = Array.isArray(items) ? items : [];
+      if (list.length === 0) {
+        host.innerHTML = '';
+        return;
+      }
+
+      host.innerHTML = list.map((a) => {
+        const title = (a?.title || '').toString().trim();
+        const catName = (a?.cat_name || '').toString().trim();
+        const text = [title, catName].filter(Boolean).join(' • ') || '—';
+        return `
+          <div class="activity-card">
+            <div class="activity-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="activity-info">
+              <div class="activity-text">${safeText(text)}</div>
+              <div class="activity-time">${safeText(formatWhen(a?.starts_at))}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    fetch('/api-dashboard-activities', { headers: { 'Accept': 'application/json' } })
+      .then((r) => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then((data) => {
+        render(data?.recent, recentHost);
+        render(data?.planned, plannedHost);
+      })
+      .catch(() => {
+        if (recentHost) recentHost.innerHTML = '';
+        if (plannedHost) plannedHost.innerHTML = '';
+      });
+  })();
+
   function addCatFormHtml() {
     return `
       <form class="pc-form" data-modal-form method="POST" action="/cat-create" enctype="multipart/form-data">
@@ -410,23 +584,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function activityFormHtml() {
     return `
-      <form class="pc-form" onsubmit="return false;">
+      <form class="pc-form" data-modal-form method="POST" action="/activity-create">
+        <input type="hidden" name="cat_id" value="${safeText(getCatIdFromUrl())}" />
         <div class="pc-field">
           <label>What (CO)</label>
-          <input class="pc-input" type="text" placeholder="e.g. Feeding" />
+          <input class="pc-input" name="title" type="text" placeholder="e.g. Feeding" required />
         </div>
         <div class="pc-field">
           <label>Description</label>
-          <textarea class="pc-textarea" placeholder="Short description..."></textarea>
+          <textarea class="pc-textarea" name="description" placeholder="Short description..."></textarea>
         </div>
         <div class="pc-grid-2">
           <div class="pc-field">
             <label>Date</label>
-            <input class="pc-input" type="date" />
+            <input class="pc-input" name="date" type="date" required />
           </div>
           <div class="pc-field">
             <label>Time</label>
-            <input class="pc-input" type="time" />
+            <input class="pc-input" name="time" type="time" required />
+          </div>
+        </div>
+      </form>
+    `;
+  }
+
+  function parseStartsAtParts(startsAt) {
+    const raw = (startsAt ?? '').toString().trim();
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+    if (m) return { date: m[1], time: m[2] };
+    return { date: '', time: '' };
+  }
+
+  function activityEditFormHtml(prefill) {
+    return `
+      <form class="pc-form" data-modal-form method="POST" action="/activity-update">
+        <input type="hidden" name="activity_id" value="${safeText(prefill.activityId)}" />
+        <input type="hidden" name="cat_id" value="${safeText(prefill.catId)}" />
+        <div class="pc-field">
+          <label>What (CO)</label>
+          <input class="pc-input" name="title" type="text" value="${safeText(prefill.title)}" required />
+        </div>
+        <div class="pc-field">
+          <label>Description</label>
+          <textarea class="pc-textarea" name="description" placeholder="Short description...">${safeText(prefill.description)}</textarea>
+        </div>
+        <div class="pc-grid-2">
+          <div class="pc-field">
+            <label>Date</label>
+            <input class="pc-input" name="date" type="date" value="${safeText(prefill.date)}" required />
+          </div>
+          <div class="pc-field">
+            <label>Time</label>
+            <input class="pc-input" name="time" type="time" value="${safeText(prefill.time)}" required />
           </div>
         </div>
       </form>
@@ -535,6 +744,89 @@ document.addEventListener('DOMContentLoaded', () => {
       email: '',
     };
   }
+
+  (function initSettingsCats() {
+    if (window.location.pathname !== '/settings') return;
+    const host = document.querySelector('[data-settings-cats]');
+    if (!host) return;
+
+    fetch('/api-cats', { headers: { 'Accept': 'application/json' } })
+      .then((r) => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then((data) => {
+        const items = Array.isArray(data?.items) ? data.items : [];
+        if (items.length === 0) {
+          host.innerHTML = '';
+          return;
+        }
+
+        host.innerHTML = items.map((c) => {
+          const name = (c?.name ?? '').toString().trim() || '—';
+          const breed = (c?.breed ?? '').toString().trim();
+          const age = (c?.age ?? '').toString().trim();
+          const meta = [breed ? `${breed} cat` : '', age ? `${age} year` : ''].filter(Boolean).join(' • ');
+          const avatar = (c?.avatar_path ?? '').toString().trim() || '/public/img/avatar.jpg';
+
+          return `
+            <div class="single-user">
+              <img src="${safeText(avatar)}" class="user-avatar">
+              <div class="user-description">
+                <div>
+                  <div class="user-name">${safeText(name)}</div>
+                  ${meta ? `<div class="pc-cat-meta">${safeText(meta)}</div>` : ''}
+                </div>
+                <div class="user-icons">
+                  <form class="pc-inline-form" method="POST" action="/cat-delete" data-cat-delete data-cat-name="${safeText(c?.name)}">
+                    <input type="hidden" name="cat_id" value="${safeText(c?.id)}" />
+                    <button class="pc-icon-link" type="submit" aria-label="Delete">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </form>
+                  <a href="#" data-modal-open="edit-cat-settings"
+                    data-cat-id="${safeText(c?.id)}"
+                    data-cat-name="${safeText(c?.name)}"
+                    data-cat-age="${safeText(c?.age)}"
+                    data-cat-breed="${safeText(c?.breed)}"
+                    data-cat-description="${safeText(c?.description)}"
+                    aria-label="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(() => {
+        host.innerHTML = '';
+      });
+  })();
+
+  document.addEventListener('submit', (e) => {
+    const form = e.target?.closest?.('form[data-cat-delete]');
+    if (!form) return;
+
+    e.preventDefault();
+    const rawName = (form.getAttribute('data-cat-name') || '').trim();
+    const name = rawName || 'this cat';
+
+    openModal({
+      title: 'Confirm deletion',
+      bodyHtml: `
+        <div class="pc-info">
+          <div class="pc-info-row">
+            <div class="pc-info-key">Question</div>
+            <div class="pc-info-val">Are you sure you want to delete ${safeText(name)}?</div>
+          </div>
+        </div>
+      `,
+      okText: 'Delete',
+      cancelText: 'Cancel',
+      onOkCb: () => form.submit(),
+    });
+  });
 
   document.addEventListener('click', (e) => {
     // Dashboard cards navigation
@@ -664,11 +956,47 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (kind === 'edit-cat-settings') {
+      openModal({
+        title: 'Edit cat',
+        bodyHtml: editCatFormHtml({
+          id: trigger.getAttribute('data-cat-id') || '',
+          name: trigger.getAttribute('data-cat-name') || '',
+          age: trigger.getAttribute('data-cat-age') || '',
+          breed: trigger.getAttribute('data-cat-breed') || '',
+          description: trigger.getAttribute('data-cat-description') || '',
+        }),
+        okText: 'Save',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
     if (kind === 'add-activity') {
       openModal({
         title: 'Add activity',
         bodyHtml: activityFormHtml(),
         okText: 'Add',
+        cancelText: 'Cancel',
+      });
+      return;
+    }
+
+    if (kind === 'edit-activity') {
+      const startsAt = trigger.getAttribute('data-activity-starts-at') || '';
+      const parts = parseStartsAtParts(startsAt);
+      const catIdFromTrigger = trigger.getAttribute('data-activity-cat-id') || '';
+      openModal({
+        title: 'Edit activity',
+        bodyHtml: activityEditFormHtml({
+          activityId: trigger.getAttribute('data-activity-id') || '',
+          catId: catIdFromTrigger || getCatIdFromUrl(),
+          title: trigger.getAttribute('data-activity-title') || '',
+          description: trigger.getAttribute('data-activity-description') || '',
+          date: parts.date,
+          time: parts.time,
+        }),
+        okText: 'Save',
         cancelText: 'Cancel',
       });
       return;
@@ -1209,6 +1537,339 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(() => {
         // no-op
       });
+
+    (function initDetailsPlannedActivities() {
+      const host = document.querySelector('[data-cat-planned-activities]');
+      if (!host) return;
+
+      function formatWhen(rawStartsAt) {
+        const raw = (rawStartsAt ?? '').toString().trim();
+        const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/);
+        if (m) {
+          return `${m[4]}, ${m[3]}-${m[2]}-${m[1]}`;
+        }
+        const d = new Date(raw);
+        if (!Number.isNaN(d.getTime())) return d.toLocaleString();
+        return raw || '—';
+      }
+
+      fetch('/api-cat-activities?cat_id=' + encodeURIComponent(catId), { headers: { 'Accept': 'application/json' } })
+        .then((r) => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then((data) => {
+          const items = Array.isArray(data?.items) ? data.items : [];
+          if (items.length === 0) {
+            host.innerHTML = '';
+            return;
+          }
+
+          host.innerHTML = items.map((a) => {
+            const title = (a?.title || '').toString().trim() || '—';
+            const desc = (a?.description || '').toString().trim();
+            const startsAt = (a?.starts_at || '').toString();
+            return `
+              <div class="cat-detail-card">
+                <div class="lewa">
+                  <h1>${safeText(title)}</h1>
+                  <p>${safeText(desc)}</p>
+                </div>
+                <div class="srodek">
+                  ${safeText(formatWhen(startsAt))}
+                </div>
+                <div class="prawa">
+                  <button class="pc-icon-btn" type="button" title="Edit" data-modal-open="edit-activity"
+                    data-activity-id="${safeText(a?.id)}"
+                    data-activity-title="${safeText(title)}"
+                    data-activity-description="${safeText(desc)}"
+                    data-activity-starts-at="${safeText(startsAt)}">
+                    <i class="fa-solid fa-ellipsis"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(() => {
+          host.innerHTML = '';
+        });
+    })();
+  })();
+
+  (function initLogsPage() {
+    if (window.location.pathname !== '/logs') return;
+
+    const table = document.querySelector('table[data-logs-table]');
+    if (!table) return;
+
+    const input = document.querySelector('.search-panel .search-input');
+    const btn = document.querySelector('.search-panel .search-btn');
+
+    let filters = {
+      cat_name: '',
+      username: '',
+      q: '',
+      // logs = executed-ish
+      past: true,
+    };
+
+    function formatWhenForLogs(startsAt) {
+      const raw = (startsAt ?? '').toString().trim();
+      const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2}:\d{2})/);
+      if (m) return `${m[4]}<br>${m[3]}-${m[2]}-${m[1]}`;
+      const d = new Date(raw);
+      if (!Number.isNaN(d.getTime())) {
+        return d.toLocaleTimeString() + '<br>' + d.toLocaleDateString();
+      }
+      return safeText(raw || '—');
+    }
+
+    function clearRows() {
+      const rows = Array.from(table.querySelectorAll('tr'));
+      rows.slice(1).forEach((r) => r.remove());
+    }
+
+    function buildQuery() {
+      const p = new URLSearchParams();
+      if (filters.q) p.set('q', filters.q);
+      if (filters.cat_name) p.set('cat_name', filters.cat_name);
+      if (filters.username) p.set('username', filters.username);
+      if (filters.past) p.set('past', '1');
+      // Treat logs as done-like: past activities excluding cancelled handled server-side by past=1
+      return p.toString();
+    }
+
+    function render(items) {
+      clearRows();
+      const list = Array.isArray(items) ? items : [];
+      if (list.length === 0) return;
+
+      list.forEach((a, idx) => {
+        const avatar = a?.cat_avatar_path || '/public/img/cat1.jpg';
+        const catName = (a?.cat_name || '').toString().trim() || '—';
+        const userName = (a?.created_by_username || '').toString().trim() || '—';
+        const title = (a?.title || '').toString().trim() || '—';
+        const desc = (a?.description || '').toString().trim();
+        const whenHtml = formatWhenForLogs(a?.starts_at);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><img src="${safeText(avatar)}" alt="cat-img"></td>
+          <td>${safeText(catName)}</td>
+          <td>${safeText(userName)}</td>
+          <td>${safeText(title)}</td>
+          <td>${safeText(desc)}</td>
+          <td><time datetime="${safeText(a?.starts_at)}">${whenHtml}</time></td>
+        `;
+        table.appendChild(tr);
+      });
+    }
+
+    function load() {
+      fetch('/api-activities?' + buildQuery(), { headers: { 'Accept': 'application/json' } })
+        .then((r) => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then((data) => {
+          // client-side: keep only past + not cancelled (done-like)
+          const items = Array.isArray(data?.items) ? data.items : [];
+          const filtered = items.filter((x) => (x?.status || '') !== 'cancelled');
+          render(filtered);
+        })
+        .catch(() => {
+          clearRows();
+        });
+    }
+
+    function parseFilterModal(modalRoot) {
+      const select = modalRoot?.querySelector('select');
+      const onlyPlanned = modalRoot?.querySelectorAll('input[type="checkbox"]')?.[0]?.checked;
+      const onlyDone = modalRoot?.querySelectorAll('input[type="checkbox"]')?.[1]?.checked;
+      const pick = (select?.value || '').toString();
+
+      // Reset
+      filters.cat_name = '';
+      filters.username = '';
+
+      if (/only\s+gilbert/i.test(pick)) filters.cat_name = 'Gilbert';
+      if (/only\s+user1/i.test(pick)) filters.username = 'user1';
+
+      // On logs, checkbox meaning: done-like only (past). planned-only would be nonsensical -> ignore.
+      filters.past = true;
+      if (onlyPlanned && !onlyDone) {
+        // keep past anyway; no-op
+        filters.past = true;
+      }
+    }
+
+    // Wire up search
+    if (btn) {
+      btn.addEventListener('click', () => {
+        filters.q = (input?.value || '').toString().trim();
+        load();
+      });
+    }
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          filters.q = (input?.value || '').toString().trim();
+          load();
+        }
+      });
+    }
+
+    // Hook into modal OK: when logs-filters is open, read choices and reload
+    const originalOkHandler = okBtn.onclick;
+    // We can't rely on onclick (listeners use addEventListener), so we patch via capturing click on OK button
+    okBtn.addEventListener('click', () => {
+      if (overlay.hidden) return;
+      const title = titleEl?.textContent || '';
+      if (/logs\s+filters/i.test(title)) {
+        parseFilterModal(overlay);
+        // allow submit logic to run, then refresh
+        setTimeout(load, 0);
+      }
+    });
+
+    load();
+  })();
+
+  (function initSchedulePage() {
+    if (window.location.pathname !== '/schedule') return;
+
+    const table = document.querySelector('table[data-schedule-table]');
+    if (!table) return;
+
+    const input = document.querySelector('.search-panel .search-input');
+    const btn = document.querySelector('.search-panel .search-btn');
+
+    let filters = {
+      cat_name: '',
+      q: '',
+      future: true,
+    };
+
+    function clearRows() {
+      const rows = Array.from(table.querySelectorAll('tr'));
+      rows.slice(1).forEach((r) => r.remove());
+    }
+
+    function formatWhen(startsAt) {
+      const raw = (startsAt ?? '').toString().trim();
+      const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2}:\d{2})/);
+      if (m) return `${m[4]}, ${m[3]}-${m[2]}-${m[1]}`;
+      const d = new Date(raw);
+      if (!Number.isNaN(d.getTime())) return d.toLocaleString();
+      return raw || '—';
+    }
+
+    function buildQuery() {
+      const p = new URLSearchParams();
+      p.set('status', 'planned');
+      if (filters.future) p.set('future', '1');
+      if (filters.q) p.set('q', filters.q);
+      if (filters.cat_name) p.set('cat_name', filters.cat_name);
+      return p.toString();
+    }
+
+    function render(items) {
+      clearRows();
+      const list = Array.isArray(items) ? items : [];
+      if (list.length === 0) return;
+
+      list.forEach((a, idx) => {
+        const avatar = a?.cat_avatar_path || '/public/img/cat1.jpg';
+        const catName = (a?.cat_name || '').toString().trim() || '—';
+        const title = (a?.title || '').toString().trim() || '—';
+        const desc = (a?.description || '').toString().trim() || '';
+        const whenText = formatWhen(a?.starts_at);
+        const catId = (a?.cat_id || '').toString();
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><img src="${safeText(avatar)}" alt="cat-img"></td>
+          <td>${safeText(catName)}</td>
+          <td>${safeText(title)}</td>
+          <td>Details</td>
+          <td><time datetime="${safeText(a?.starts_at)}">${safeText(whenText)}</time></td>
+          <td>
+            <button class="pc-icon-btn" type="button" title="Edit" data-modal-open="edit-activity"
+              data-activity-id="${safeText(a?.id)}"
+              data-activity-cat-id="${safeText(catId)}"
+              data-activity-title="${safeText(title)}"
+              data-activity-description="${safeText(desc)}"
+              data-activity-starts-at="${safeText(a?.starts_at)}">
+              <i class="fa-solid fa-ellipsis"></i>
+            </button>
+          </td>
+        `;
+        table.appendChild(tr);
+      });
+    }
+
+    function load() {
+      fetch('/api-activities?' + buildQuery(), { headers: { 'Accept': 'application/json' } })
+        .then((r) => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then((data) => {
+          render(data?.items);
+        })
+        .catch(() => {
+          clearRows();
+        });
+    }
+
+    function parseFilterModal(modalRoot) {
+      const select = modalRoot?.querySelector('select');
+      const onlyPlanned = modalRoot?.querySelectorAll('input[type="checkbox"]')?.[0]?.checked;
+      const onlyDone = modalRoot?.querySelectorAll('input[type="checkbox"]')?.[1]?.checked;
+      const pick = (select?.value || '').toString();
+
+      // Reset
+      filters.cat_name = '';
+      if (/only\s+gilbert/i.test(pick)) filters.cat_name = 'Gilbert';
+
+      // Schedule should be planned future
+      filters.future = true;
+      if (onlyDone && !onlyPlanned) {
+        // If user picked "done" here, keep planned list anyway (UI is generic)
+        filters.future = true;
+      }
+    }
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        filters.q = (input?.value || '').toString().trim();
+        load();
+      });
+    }
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          filters.q = (input?.value || '').toString().trim();
+          load();
+        }
+      });
+    }
+
+    okBtn.addEventListener('click', () => {
+      if (overlay.hidden) return;
+      const title = titleEl?.textContent || '';
+      if (/schedule\s+filters/i.test(title)) {
+        parseFilterModal(overlay);
+        setTimeout(load, 0);
+      }
+    });
+
+    load();
   })();
 });
   

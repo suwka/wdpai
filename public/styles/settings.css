@@ -35,6 +35,16 @@ body {
     margin-right: 50px;
  }
 
+.option-bar ul li a,
+.option-bar ul li a:visited {
+    color: #551a8b;
+    text-decoration: none;
+}
+
+.option-bar ul li a i {
+    color: inherit;
+}
+
  /*zachowanie avataru w nagłówku*/
 .small-avatar {
     width: 50px;
@@ -79,6 +89,32 @@ body {
     text-decoration: none;
     gap: 5px;
     font-size: 1rem;
+    color: #551a8b;
+}
+
+.menu-bar ul li a:visited {
+    color: #551a8b;
+}
+
+.pc-inline-form {
+    display: inline;
+}
+
+.pc-icon-link {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #551a8b;
+}
+
+.pc-icon-link i {
+    color: inherit;
+}
+
+.pc-cat-meta {
+    font-size: 16px;
+    color: #999;
 }
 
 /* główna zawartość dashboardu */
@@ -163,6 +199,17 @@ body {
     font-size: 30px;
 }
 
+.pc-role-badge {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 16px;
+    color: #999;
+    border: 1px solid #ddd;
+    padding: 2px 10px;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
 .user-description {
     display: flex;
     flex-direction: row;
@@ -175,6 +222,23 @@ body {
 .user-icons {
     display: flex;
     gap: 10px;
+    color: #551a8b;
+    text-decoration: none;
+    
+}
+
+.user-icons a,
+.user-icons a:visited {
+    color: #551a8b;
+    text-decoration: none;
+}
+
+.user-icons a i {
+    color: inherit;
+}
+
+.user-icons a:hover {
+    text-decoration: none;
 }
 
 /* USTAWIENIA */

@@ -59,10 +59,31 @@
                 <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
                 <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
                 <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
             </ul>
         </nav>
     </footer>
+
+    <template id="tpl-caregivers-assign">
+        <form class="pc-form" onsubmit="return false;">
+            <div class="pc-field">
+                <label>Cat</label>
+                <select class="pc-select" data-caregivers-assign-cat>
+                    <option data-caregivers-assign-cat-first>—</option>
+                    <option>Żaneta</option>
+                    <option>Albert</option>
+                </select>
+            </div>
+            <div class="pc-field">
+                <label>Caregiver</label>
+                <select class="pc-select" data-caregivers-assign-user>
+                    <option data-caregivers-assign-user-first>—</option>
+                    <option>user2</option>
+                    <option>user3</option>
+                </select>
+            </div>
+        </form>
+    </template>
 
     <script defer src="/public/scripts/main.js"></script>
 </body>

@@ -45,10 +45,62 @@
                 <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
                 <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
                 <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
             </ul>
         </nav>
     </footer>
+
+    <template id="tpl-cat-form">
+        <form class="pc-form" data-modal-form enctype="multipart/form-data">
+            <input type="hidden" name="cat_id" value="" />
+            <div class="pc-field">
+                <label>Name</label>
+                <input class="pc-input" name="name" type="text" placeholder="e.g. Gilbert" required />
+            </div>
+            <div class="pc-grid-2">
+                <div class="pc-field">
+                    <label>Age</label>
+                    <input class="pc-input" name="age" type="number" min="0" placeholder="e.g. 3" />
+                </div>
+                <div class="pc-field">
+                    <label>Breed</label>
+                    <input class="pc-input" name="breed" type="text" placeholder="e.g. Moggie" />
+                </div>
+            </div>
+            <div class="pc-field">
+                <label>Description</label>
+                <textarea class="pc-textarea" name="description" placeholder="Short note..."></textarea>
+            </div>
+            <div class="pc-field">
+                <label>Photo</label>
+                <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+        </form>
+    </template>
+
+    <template id="tpl-cat-card">
+        <div class="cat-card" data-cat-id="">
+            <div class="cat-image-wrapper">
+                <img class="cat-image" src="" alt="cat">
+            </div>
+            <h3 class="cat-name"></h3>
+            <div class="cat-meta">
+                <span data-cat-meta-breed></span> <span>•</span> <span data-cat-meta-age></span> <span>•</span> <span data-cat-meta-notif>0 notifications</span>
+            </div>
+            <p class="cat-description"></p>
+            <div class="cat-actions">
+                <button class="icon-btn" type="button" data-cat-action="desc" title="Opis">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <button class="icon-btn" type="button" data-cat-action="caregivers" title="Opiekunowie">
+                    <i class="fas fa-users"></i>
+                </button>
+                <a class="icon-btn" href="/details" data-cat-action="edit-link" title="Edytuj" aria-label="Edytuj">
+                    <i class="fas fa-pen"></i>
+                </a>
+            </div>
+        </div>
+    </template>
 
     <div class="pc-modal-overlay" data-modal-overlay hidden>
         <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">

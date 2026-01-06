@@ -63,16 +63,6 @@
                     Planned Activities
                 </div>
                 <div class="section-subtitle">You can manage all of activities here</div>
-                <div class="panel">
-                    <div class="filter-panel">
-                        <button class="fitlers-btn" type="button" data-modal-open="schedule-filters">Filters</button>
-                        <button class="fitlers-btn" type="button" data-modal-open="schedule-options">Options</button>
-                    </div>
-                    <div class="search-panel">
-                        <input type="text" class="search-input" placeholder="Enter a phrase to search for...">
-                        <button class="search-btn">Search</button>
-                    </div>
-                </div>
                 <div class="logs-table">
                     <table data-schedule-table>
                         <tr>
@@ -97,10 +87,40 @@
             <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
             <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
             <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
         </ul>
     </nav>
     </footer>
+
+    <template id="tpl-schedule-row">
+        <tr>
+            <td data-schedule-idx></td>
+            <td><img data-schedule-avatar src="" alt="cat-img"></td>
+            <td data-schedule-cat-name></td>
+            <td data-schedule-title></td>
+            <td>Details</td>
+            <td><time data-schedule-starts-at datetime=""></time></td>
+            <td>
+                <a class="pc-icon-btn" title="Edit" data-schedule-edit-link href="#">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </a>
+            </td>
+        </tr>
+    </template>
+
+    <template id="tpl-activity-day-modal">
+        <div class="pc-activity-day-list" data-activity-day-list></div>
+    </template>
+
+    <template id="tpl-activity-day-row">
+        <div class="pc-activity-day-row">
+            <div class="pc-activity-day-time" data-activity-day-time></div>
+            <div class="pc-activity-day-main">
+                <div class="pc-activity-day-title" data-activity-day-title></div>
+                <div class="pc-activity-day-sub" data-activity-day-sub hidden></div>
+            </div>
+        </div>
+    </template>
 
     <div class="pc-modal-overlay" data-modal-overlay hidden>
         <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">

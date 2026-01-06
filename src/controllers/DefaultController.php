@@ -28,19 +28,7 @@ class DefaultController extends AppController {
         $this->render('settings');
     }
 
-    public function profile() {
-        $this->render('profile');
-    }
-
-    public function reports() {
-        $this->render('reports');
-    }
-
     public function caregivers() {
         $this->render('caregivers');
-    }
-
-    public function help() {
-        $this->render('help');
     }
 }

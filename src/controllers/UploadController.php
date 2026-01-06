@@ -85,7 +85,7 @@ class UploadController extends AppController
         );
 
         if (!$fileName) {
-            $this->redirect('/profile?err=avatar');
+            $this->redirect('/settings?err=avatar');
         }
 
         $publicPath = '/public/uploads/avatars/' . $fileName;
@@ -95,7 +95,7 @@ class UploadController extends AppController
         $stmt = $pdo->prepare('UPDATE users SET avatar_path = :p, updated_at = NOW() WHERE id = :id');
         $stmt->execute([':p' => $publicPath, ':id' => $userId]);
 
-        $this->redirect('/profile?ok=avatar');
+        $this->redirect('/settings?ok=avatar');
     }
 
     public function catAvatar(): void

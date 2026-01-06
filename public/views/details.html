@@ -100,10 +100,109 @@
                 <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
                 <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
                 <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+                <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
             </ul>
         </nav>
     </footer>
+
+    <template id="tpl-cat-form">
+        <form class="pc-form" data-modal-form enctype="multipart/form-data">
+            <input type="hidden" name="cat_id" value="" />
+            <div class="pc-field">
+                <label>Name</label>
+                <input class="pc-input" name="name" type="text" required />
+            </div>
+            <div class="pc-grid-2">
+                <div class="pc-field">
+                    <label>Age</label>
+                    <input class="pc-input" name="age" type="number" min="0" />
+                </div>
+                <div class="pc-field">
+                    <label>Breed</label>
+                    <input class="pc-input" name="breed" type="text" />
+                </div>
+            </div>
+            <div class="pc-field">
+                <label>Description</label>
+                <textarea class="pc-textarea" name="description" placeholder="Short note..."></textarea>
+            </div>
+            <div class="pc-field">
+                <label>Photo</label>
+                <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+        </form>
+    </template>
+
+    <template id="tpl-activity-form">
+        <form class="pc-form" data-modal-form id="pc-modal-form">
+            <input type="hidden" name="activity_id" value="" />
+            <input type="hidden" name="cat_id" value="" />
+            <div class="pc-field">
+                <label>What (CO)</label>
+                <input class="pc-input" name="title" type="text" placeholder="e.g. Feeding" required />
+            </div>
+            <div class="pc-field">
+                <label>Description</label>
+                <textarea class="pc-textarea" name="description" placeholder="Short description..."></textarea>
+            </div>
+            <div class="pc-grid-2">
+                <div class="pc-field">
+                    <label>Date</label>
+                    <input class="pc-input" name="date" type="date" required />
+                </div>
+                <div class="pc-field">
+                    <label>Time</label>
+                    <input class="pc-input" name="time" type="time" required />
+                </div>
+            </div>
+            <div class="pc-field">
+                <label>Description (optional)</label>
+                <textarea class="pc-textarea" name="done_description" placeholder="What has been done..."></textarea>
+            </div>
+        </form>
+    </template>
+
+    <template id="tpl-cat-gallery-item">
+        <div class="singlepicture" data-photo-id="">
+            <img class="cat-image" src="" alt="cat">
+        </div>
+    </template>
+
+    <template id="tpl-cat-planned-activity-card">
+        <div class="cat-detail-card">
+            <div class="lewa">
+                <h1 data-activity-title></h1>
+                <p data-activity-desc></p>
+            </div>
+            <div class="srodek" data-activity-when></div>
+            <div class="prawa">
+                <button class="pc-icon-btn" type="button" title="Edit" data-modal-open="edit-activity">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-gallery-manage-modal">
+        <div>
+            <div class="hint">UI: remove/reorder works locally. Upload is separate.</div>
+            <div data-gallery-list></div>
+        </div>
+    </template>
+
+    <template id="tpl-gallery-manage-row">
+        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin: 8px 0;" data-photo-id="" data-gallery-src="">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <img data-gallery-thumb src="" style="width:44px; height:44px; object-fit:cover; border-radius:8px;" alt="photo" />
+                <div data-gallery-label></div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="pc-btn pc-btn-secondary" type="button" data-gallery-up>Up</button>
+                <button class="pc-btn pc-btn-secondary" type="button" data-gallery-down>Down</button>
+                <button class="pc-btn pc-btn-secondary" type="button" data-gallery-remove>Remove</button>
+            </div>
+        </div>
+    </template>
 
     <div class="pc-modal-overlay" data-modal-overlay hidden>
         <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">

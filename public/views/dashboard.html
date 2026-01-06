@@ -109,10 +109,56 @@
             <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
             <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
             <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
         </ul>
     </nav>
     </footer>
+
+    <template id="tpl-dashboard-cat-card">
+        <div class="card" data-dashboard-card="cat" data-cat-id="">
+            <img class="card-image" src="" alt="cat">
+            <div class="card-info">
+                <div class="cat-user-name" data-dashboard-name></div>
+                <div class="card-activity-info" data-dashboard-meta></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-dashboard-user-card">
+        <div class="card" data-dashboard-card="user">
+            <img class="card-image" src="" alt="user">
+            <div class="card-info">
+                <div class="cat-user-name" data-dashboard-username></div>
+                <div class="card-activity-info" data-dashboard-sub></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-dashboard-activity-card">
+        <div class="activity-card">
+            <div class="activity-icon">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="activity-info">
+                <div class="activity-text" data-dashboard-activity-text></div>
+                <div class="activity-time" data-dashboard-activity-time></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-activity-day-modal">
+        <div class="pc-activity-day-list" data-activity-day-list></div>
+    </template>
+
+    <template id="tpl-activity-day-row">
+        <div class="pc-activity-day-row">
+            <div class="pc-activity-day-time" data-activity-day-time></div>
+            <div class="pc-activity-day-main">
+                <div class="pc-activity-day-title" data-activity-day-title></div>
+                <div class="pc-activity-day-sub" data-activity-day-sub hidden></div>
+            </div>
+        </div>
+    </template>
     <script defer src="/public/scripts/main.js"></script>
 </body>
 </html>

@@ -376,3 +376,35 @@ html {
     }
     
 }
+
+/* Profile (moved from /profile to /settings) */
+.profile-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background-color: rgb(238, 238, 238);
+    border: 1px solid #e0e0e0;
+}
+
+.profile-key {
+    color: #999;
+}
+
+.profile-val {
+    font-weight: 600;
+}
+
+.hint {
+    background-color: rgb(238, 238, 238);
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 12px 14px;
+}

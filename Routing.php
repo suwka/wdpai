@@ -16,9 +16,9 @@ class Routing {
         'schedule' => 'schedule',   //terminarz
         'cats' => 'cats',
         'caregivers' => 'caregivers',            //kocury
-        'profile' => 'profile',                //profil
-        'reports' => 'reports',                //raporty
-        'help' => 'help',                      //pomoc
+        'profile-update' => 'profile-update',
+        'profile-password-update' => 'profile-password-update',
+        'account-update' => 'account-update',
         'api-me' => 'api-me',
         'api-profile' => 'api-profile',
         'api-users' => 'api-users',
@@ -40,8 +40,6 @@ class Routing {
         'cat-delete' => 'cat-delete',
         'activity-create' => 'activity-create',
         'activity-update' => 'activity-update',
-        'support-create' => 'support-create',
-        'support-list' => 'support-list',
         '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
     ];
 
@@ -72,14 +70,20 @@ class Routing {
 
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+        // POST-only endpoints: never try to render them as HTML.
+        if ($method === 'GET' && ($path === 'profile-update' || $path === 'profile-password-update' || $path === 'account-update')) {
+            http_response_code(405);
+            echo 'Method not allowed';
+            return;
+        }
+
         // Auth guard for HTML pages.
         if ($method === 'GET') {
             $publicPages = ['', 'login', 'register'];
-            $adminPages = ['caregivers', 'reports'];
+            $adminPages = ['caregivers'];
             $isHtmlPage = !in_array($path, [
                 'api-me', 'api-profile', 'api-users', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
-                'api-activities', 'api-activities-calendar', 'api-activities-day',
-                'support-list'
+                'api-activities', 'api-activities-calendar', 'api-activities-day'
             ], true);
 
             if ($isHtmlPage && !in_array($path, $publicPages, true) && $path !== 'logout') {
@@ -148,12 +152,6 @@ class Routing {
                 return;
             }
 
-            if ($path === 'support-list') {
-                require_once __DIR__ . '/src/controllers/SupportController.php';
-                $controller = new SupportController();
-                $controller->list();
-                return;
-            }
         }
 
         // Controller-based handling for POST endpoints.
@@ -166,6 +164,21 @@ class Routing {
                     return;
                 }
                 $controller->register();
+                return;
+            }
+
+            if ($path === 'profile-update' || $path === 'profile-password-update' || $path === 'account-update') {
+                require_once __DIR__ . '/src/controllers/SecurityController.php';
+                $controller = new SecurityController();
+                if ($path === 'account-update') {
+                    $controller->updateAccount();
+                    return;
+                }
+                if ($path === 'profile-update') {
+                    $controller->updateProfile();
+                    return;
+                }
+                $controller->updatePassword();
                 return;
             }
 
@@ -210,13 +223,6 @@ class Routing {
                 require_once __DIR__ . '/src/controllers/ActivitiesController.php';
                 $controller = new ActivitiesController();
                 $controller->update();
-                return;
-            }
-
-            if ($path === 'support-create') {
-                require_once __DIR__ . '/src/controllers/SupportController.php';
-                $controller = new SupportController();
-                $controller->create();
                 return;
             }
 

@@ -16,7 +16,6 @@ alikacja zapobiega sytuacjom w ktorych kot dostaje sniadanie 3 razy dziennie bo 
 - kontrola karmienia i podawania lekow  
 - wielu opiekunow dla jednego kota  
 - logowanie wykonanych czynnosci  
-- raporty i podsumowania  
 - role uzytkownikow  
 
 ---
@@ -61,24 +60,10 @@ cat ↔ caregiver
 
 ---
 
-### Raporty
-
-**/reports**  
-Liczy podsumowania na podstawie logow i aktywnosci  
-np  
-- karmienie  
-- leki  
-- wykonane i pominiete zadania  
-
----
-
 ### Ustawienia i konto
 
-**/settings** admin  
-Zarzadzanie uzytkownikami i rolami  
-
-**/profile**  
-Zarzadzanie danymi konta  
+**/settings**  
+Zarzadzanie kontem oraz (dla admina) uzytkownikami i rolami  
 
 ---
 

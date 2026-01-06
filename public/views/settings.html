@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/public/styles/settings.css">
     <link rel="stylesheet" type="text/css" href="/public/styles/modal.css">
-    <title>Settings</title>
+    <title>Account</title>
 </head>
 <body>
     <header class="header">
@@ -26,7 +26,7 @@
     
     <main class="main-content">
         <div class="box_top">
-            <div>Settings</div>
+            <div>Account</div>
             <div class="options">
                 <a class="single-option" href="/dashboard">
                     <i class="fa-solid fa-arrow-left"></i>
@@ -97,6 +97,35 @@
         <div class="section-box">
             <div class="box_middle">
                 <div class="pc-section-header">
+                    <div class="section-tittle">Account</div>
+                    <button class="pc-action-btn" type="button" data-modal-open="account-edit">Edit</button>
+                </div>
+                <div class="section-subtitle">Name, password, profile photo</div>
+
+                <div class="profile-grid">
+                    <div class="profile-row">
+                        <div class="profile-key">Username</div>
+                        <div class="profile-val" data-profile-username>—</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Full name</div>
+                        <div class="profile-val" data-profile-fullname>—</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Email</div>
+                        <div class="profile-val" data-profile-email>—</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-key">Role</div>
+                        <div class="profile-val" data-profile-role>—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box_middle">
+                <div class="pc-section-header">
                     <div class="section-tittle">My cats</div>
                 </div>
                 <div class="section-subtitle">You can manage your cats here</div>
@@ -149,10 +178,95 @@
             <li><a href="/cats"><i class="fa-solid fa-cat"></i>Cats</a></li>
             <li><a href="/schedule"><i class="fa-solid fa-calendar"></i> Schedule</a></li>
             <li><a href="/logs"><i class="fa-solid fa-bars"></i>Logs</a></li>
-            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Settings</a></li>
+            <li><a href="/settings"><i class="fa-solid fa-gear"></i>Account</a></li>
         </ul>
     </nav>
     </footer>
+
+    <template id="tpl-settings-cat-row">
+        <div class="single-user">
+            <img src="/public/img/avatar.jpg" class="user-avatar" data-settings-cat-avatar>
+            <div class="user-description">
+                <div>
+                    <div class="user-name" data-settings-cat-name>—</div>
+                    <div class="pc-cat-meta" data-settings-cat-meta hidden></div>
+                </div>
+                <div class="user-icons">
+                    <form class="pc-inline-form" method="POST" data-cat-delete data-settings-cat-delete>
+                        <input type="hidden" name="cat_id" value="" data-settings-cat-id-field />
+                        <button class="pc-icon-link" type="submit" aria-label="Delete">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                    <a href="/details" aria-label="Edit" data-settings-cat-edit>
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-account-edit">
+        <form class="pc-form" data-modal-form method="POST" action="/account-update" enctype="multipart/form-data" id="pc-modal-form">
+            <div class="pc-field">
+                <label>Username (not changeable)</label>
+                <input class="pc-input" type="text" data-account-username readonly />
+            </div>
+
+            <div class="pc-grid-2">
+                <div class="pc-field">
+                    <label>First name</label>
+                    <input class="pc-input" name="first_name" type="text" />
+                </div>
+                <div class="pc-field">
+                    <label>Last name</label>
+                    <input class="pc-input" name="last_name" type="text" />
+                </div>
+            </div>
+
+            <div class="pc-field">
+                <label>Old password</label>
+                <input class="pc-input" name="old_password" type="password" placeholder="••••••••" />
+            </div>
+            <div class="pc-field">
+                <label>New password</label>
+                <input class="pc-input" name="new_password" type="password" placeholder="••••••••" />
+            </div>
+
+            <div class="pc-field">
+                <label>Profile photo</label>
+                <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+        </form>
+    </template>
+
+    <template id="tpl-cat-form">
+        <form class="pc-form" data-modal-form enctype="multipart/form-data">
+            <input type="hidden" name="cat_id" value="" />
+            <div class="pc-field">
+                <label>Name</label>
+                <input class="pc-input" name="name" type="text" required />
+            </div>
+            <div class="pc-grid-2">
+                <div class="pc-field">
+                    <label>Age</label>
+                    <input class="pc-input" name="age" type="number" min="0" />
+                </div>
+                <div class="pc-field">
+                    <label>Breed</label>
+                    <input class="pc-input" name="breed" type="text" />
+                </div>
+            </div>
+            <div class="pc-field">
+                <label>Description</label>
+                <textarea class="pc-textarea" name="description" placeholder="Short note..."></textarea>
+            </div>
+            <div class="pc-field">
+                <label>Photo</label>
+                <input class="pc-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+        </form>
+    </template>
 
     <div class="pc-modal-overlay" data-modal-overlay hidden>
         <div class="pc-modal" role="dialog" aria-modal="true" aria-labelledby="pc-modal-title">

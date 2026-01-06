@@ -343,7 +343,14 @@
         method: form.method,
         body: new FormData(form)
       }).then((r) => {
-        if (r.ok) window.location.reload();
+        // Keep server redirects (e.g. /settings?err=...) instead of losing the query string.
+        if (r.ok) {
+          if (r.redirected && r.url) {
+            window.location.href = r.url;
+            return;
+          }
+          window.location.reload();
+        }
       });
     });
   };

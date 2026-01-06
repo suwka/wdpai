@@ -45,6 +45,12 @@ body, input, button {
     box-sizing: border-box;
 }
 
+.pc-messages {
+    text-align: center;
+    font-size: 0.95em;
+    color: rgba(206, 70, 197, 0.75);
+}
+
 .signup-prompt {
     text-align: center;
     font-size: 0.8em;

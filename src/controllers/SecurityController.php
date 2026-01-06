@@ -15,27 +15,89 @@ class SecurityController extends AppController {
         $this->userRepository = new UserRepository();
     }
 
+    private function isValidEmail(string $email): bool
+    {
+        $email = trim($email);
+        if ($email === '' || strlen($email) > 254) return false;
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    private function isValidUsername(string $username): bool
+    {
+        $username = trim($username);
+        // Prevent weird input / "SQL injection" attempts by allowing a strict safe set.
+        // 3-30 chars: letters, digits, dot, underscore, dash.
+        if ($username === '' || strlen($username) < 3 || strlen($username) > 30) return false;
+        return (bool)preg_match('/^[a-zA-Z0-9._-]{3,30}$/', $username);
+    }
+
+    private function isValidPersonName(string $name): bool
+    {
+        $name = trim($name);
+        if ($name === '' || mb_strlen($name) > 50) return false;
+        // Letters + spaces + hyphen only.
+        return (bool)preg_match('/^[\p{L}][\p{L} \-]{0,49}$/u', $name);
+    }
+
+    private function passwordPolicyError(string $password, ?string $username = null, ?string $email = null): ?string
+    {
+        $password = (string)$password;
+        $len = strlen($password);
+        if ($len < 8 || $len > 64) {
+            return 'Hasło musi mieć 8–64 znaki.';
+        }
+        if (preg_match('/\s/', $password)) {
+            return 'Hasło nie może zawierać spacji.';
+        }
+        if (!preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
+            return 'Hasło jest za słabe: dodaj małą literę, dużą literę, cyfrę i znak specjalny.';
+        }
+
+        $normalized = strtolower(preg_replace('/[^a-z0-9]+/', '', $password));
+        if (str_contains($normalized, 'pantadeusz')) {
+            return 'Hasło jest zbyt łatwe (nie używaj prostych fraz).';
+        }
+
+        if ($username) {
+            $u = strtolower(preg_replace('/[^a-z0-9]+/', '', $username));
+            if ($u !== '' && str_contains($normalized, $u)) {
+                return 'Hasło nie może zawierać nazwy użytkownika.';
+            }
+        }
+        if ($email) {
+            $local = strtolower(preg_replace('/[^a-z0-9]+/', '', explode('@', $email)[0] ?? ''));
+            if ($local !== '' && str_contains($normalized, $local)) {
+                return 'Hasło nie może zawierać emaila.';
+            }
+        }
+
+        return null;
+    }
+
     public function login() {
         if (!$this->isPost()) {
             return $this->render('login');
         }
 
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $email = trim((string)($_POST['email'] ?? ''));
+        $password = (string)($_POST['password'] ?? '');
+
+        // Do not reveal whether email or password was wrong.
+        $genericLoginError = ['messages' => ['Błędny email lub hasło.']];
+
+        if ($email === '' || trim($password) === '') {
+            return $this->render('login', $genericLoginError);
+        }
 
         $user = $this->userRepository->getUserByEmail($email);
 
         if (!$user) {
-            return $this->render('login', ['messages' => ['User not found!']]);
-        }
-
-        if ($user->getEmail() !== $email) {
-            return $this->render('login', ['messages' => ['User with this email not exist!']]);
+            return $this->render('login', $genericLoginError);
         }
 
         // Weryfikacja hashu hasła
         if (!password_verify($password, $user->getPasswordHash())) {
-            return $this->render('login', ['messages' => ['Wrong password!']]);
+            return $this->render('login', $genericLoginError);
         }
 
         // Sesja (dla uploadów i uprawnień)
@@ -53,26 +115,43 @@ class SecurityController extends AppController {
         }
 
         $username = trim($_POST['username'] ?? '');
-        $email = $_POST['email'];
-        $password = $_POST['password1'];
-        $confirmedPassword = $_POST['password2'];
-        $firstname = $_POST['firstname'];
-        $lastname = $_POST['lastname'];
+        $email = trim((string)($_POST['email'] ?? ''));
+        $password = (string)($_POST['password1'] ?? '');
+        $confirmedPassword = (string)($_POST['password2'] ?? '');
+        $firstname = trim((string)($_POST['firstname'] ?? ''));
+        $lastname = trim((string)($_POST['lastname'] ?? ''));
 
-        if ($username === '') {
-            return $this->render('register', ['messages' => ['Username is required']]);
+        if (!$this->isValidUsername($username)) {
+            return $this->render('register', ['messages' => ['Niepoprawna nazwa użytkownika.']]);
         }
 
-        if ($password !== $confirmedPassword) {
-            return $this->render('register', ['messages' => ['Passwords do not match']]);
+        if (!$this->isValidEmail($email)) {
+            return $this->render('register', ['messages' => ['Niepoprawny email.']]);
+        }
+
+        if (!$this->isValidPersonName($firstname)) {
+            return $this->render('register', ['messages' => ['Niepoprawne imię.']]);
+        }
+        if (!$this->isValidPersonName($lastname)) {
+            return $this->render('register', ['messages' => ['Niepoprawne nazwisko.']]);
+        }
+
+        // Required checks requested: username exists / email exists / weak password
+        if ($this->userRepository->getUserByUsername($username)) {
+            return $this->render('register', ['messages' => ['Użytkownik o tym nicku już istnieje.']]);
         }
 
         if ($this->userRepository->getUserByEmail($email)) {
-            return $this->render('register', ['messages' => ['Email already exists']]);
+            return $this->render('register', ['messages' => ['Użytkownik o tym mailu już istnieje.']]);
         }
 
-        if ($this->userRepository->getUserByUsername($username)) {
-            return $this->render('register', ['messages' => ['Username already exists']]);
+        if ($password !== $confirmedPassword) {
+            return $this->render('register', ['messages' => ['Hasła nie są identyczne.']]);
+        }
+
+        $pwErr = $this->passwordPolicyError($password, $username, $email);
+        if ($pwErr) {
+            return $this->render('register', ['messages' => ['Za słabe hasło.']]);
         }
 
         // Haszujemy hasło

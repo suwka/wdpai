@@ -17,12 +17,20 @@
             </div>
                 <div class="login-container">
                     <form method="POST">
-                        <input name="username" type="text" class="input" placeholder="Username">
-                        <input name="email" type="email" class="input" placeholder="Email">
-                        <input name="password1" type="password" class="input" placeholder="Password">
-                        <input name="password2" type="password" class="input" placeholder="Password">
-                        <input name="firstname" type="text" class="input" placeholder="imie">
-                        <input name="lastname" type="text" class="input" placeholder="nazwisko">
+                        <?php if (!empty($messages) && is_array($messages)): ?>
+                            <div class="pc-messages" role="alert">
+                                <?php foreach ($messages as $m): ?>
+                                    <div><?php echo htmlspecialchars((string)$m, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <input name="username" type="text" class="input" placeholder="Username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]{3,30}" autocomplete="username">
+                        <input name="email" type="email" class="input" placeholder="Email" required maxlength="254" autocomplete="email">
+                        <input name="password1" type="password" class="input" placeholder="Password" required minlength="8" maxlength="64" autocomplete="new-password">
+                        <input name="password2" type="password" class="input" placeholder="Password" required minlength="8" maxlength="64" autocomplete="new-password">
+                        <input name="firstname" type="text" class="input" placeholder="imie" required maxlength="50" autocomplete="given-name">
+                        <input name="lastname" type="text" class="input" placeholder="nazwisko" required maxlength="50" autocomplete="family-name">
                         <button type="submit" class="signin">sign up</button>
                     </form>
                 </div>

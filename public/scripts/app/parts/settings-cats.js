@@ -19,10 +19,17 @@
         const breed = (c?.breed ?? '').toString().trim();
         const age = (c?.age ?? '').toString().trim();
         const meta = [breed ? `${breed} cat` : '', age ? `${age} year` : ''].filter(Boolean).join(' • ');
-        const avatar = (c?.avatar_path ?? '').toString().trim() || '/public/img/avatar.jpg';
+        const avatarFallback = '/public/img/cat1.jpg';
+        const avatar = (c?.avatar_path ?? '').toString().trim() || avatarFallback;
 
         const avatarEl = frag.querySelector('[data-settings-cat-avatar]');
-        if (avatarEl) avatarEl.setAttribute('src', ctx.safeText(avatar));
+        if (avatarEl) {
+          avatarEl.setAttribute('src', ctx.safeText(avatar));
+          avatarEl.onerror = () => {
+            avatarEl.onerror = null;
+            avatarEl.src = avatarFallback;
+          };
+        }
 
         const nameEl = frag.querySelector('[data-settings-cat-name]');
         if (nameEl) nameEl.textContent = ctx.safeText(name);
@@ -51,7 +58,7 @@
         host.appendChild(frag);
       }
 
-      ctx.apiGet(ctx.URLS.apiCats)
+      ctx.apiGet(ctx.URLS.apiCats + '?owned=1')
         .then((data) => {
           const items = Array.isArray(data?.items) ? data.items : [];
           clearHost();

@@ -18,7 +18,8 @@
           items.forEach((c) => {
             const ageLabel = (c?.age === null || c?.age === undefined || c?.age === '') ? '—' : `${ctx.safeText(c.age)} year old`;
             const breedLabel = (c?.breed || '').trim() ? ctx.safeText(c.breed) : 'unknown breed';
-            const avatar = c?.avatar_path || '/public/img/cat1.jpg';
+            const avatarFallback = '/public/img/cat1.jpg';
+            const avatar = (c?.avatar_path ?? '').toString().trim() || avatarFallback;
             const desc = c?.description || '';
 
             const frag = ctx.cloneTemplate('tpl-cat-card');
@@ -28,7 +29,13 @@
             const id = ctx.safeText(c?.id);
             card.setAttribute('data-cat-id', id);
             const img = card.querySelector('img');
-            if (img) img.setAttribute('src', ctx.safeText(avatar));
+            if (img) {
+              img.setAttribute('src', ctx.safeText(avatar));
+              img.onerror = () => {
+                img.onerror = null;
+                img.src = avatarFallback;
+              };
+            }
 
             const nameEl = card.querySelector('.cat-name');
             if (nameEl) nameEl.textContent = ctx.safeText(c?.name);
@@ -43,8 +50,19 @@
             if (descEl) descEl.textContent = ctx.safeText(desc);
 
             const editLink = card.querySelector('a.icon-btn[data-cat-action="edit-link"]');
+            const isOwner = Boolean(c?.is_owner);
             if (editLink) {
+              editLink.hidden = !isOwner;
               editLink.setAttribute('href', '/details' + (id ? `?cat_id=${encodeURIComponent(id)}&edit=1` : ''));
+            }
+
+            const caregiversBtn = card.querySelector('.icon-btn[data-cat-action="caregivers"]');
+            if (caregiversBtn) caregiversBtn.hidden = !isOwner;
+
+            // For caregivers: clicking the card should still open details, but without edit flows.
+            if (!isOwner) {
+              const editLikeHref = '/details' + (id ? `?cat_id=${encodeURIComponent(id)}` : '');
+              if (editLink) editLink.setAttribute('href', editLikeHref);
             }
 
             host.appendChild(card);

@@ -24,6 +24,25 @@ class UploadController extends AppController
         exit;
     }
 
+    private function isAdmin(): bool
+    {
+        return ($_SESSION['role'] ?? null) === 'admin';
+    }
+
+    private function canAccessCat(PDO $pdo, string $userId, string $catId): bool
+    {
+        if ($this->isAdmin()) return true;
+
+        $stmt = $pdo->prepare(
+            'SELECT 1 '
+            . 'FROM cats c '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE c.id = :cid AND (c.owner_id = :uid OR cc.user_id IS NOT NULL)'
+        );
+        $stmt->execute([':cid' => $catId, ':uid' => $userId]);
+        return (bool)$stmt->fetchColumn();
+    }
+
     private function detectImageExtension(string $tmpPath): ?string
     {
         if (class_exists('finfo')) {
@@ -149,11 +168,7 @@ class UploadController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
-        $stmt->execute([':id' => $catId]);
-        $ownerId = $stmt->fetchColumn();
-
-        if (!$ownerId || $ownerId !== $userId) {
+        if (!$this->canAccessCat($pdo, $userId, $catId)) {
             http_response_code(403);
             echo 'Forbidden';
             exit;

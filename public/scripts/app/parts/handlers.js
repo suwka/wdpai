@@ -10,6 +10,16 @@
         .then((data) => {
           const c = data?.item;
           if (!c) return;
+
+          if (!Boolean(c?.is_owner)) {
+            ctx.openModal({
+              title: 'Brak uprawnień',
+              bodyHtml: '<div class="hint">Nie możesz edytować tego kota.</div>',
+              okText: 'OK',
+              cancelText: 'Zamknij',
+            });
+            return;
+          }
           const node = buildCatFormNode({
             id,
             name: c?.name || '',
@@ -209,7 +219,9 @@
       const catsCaregiversBtn = e.target.closest('.icon-btn[data-cat-action="caregivers"]');
       if (catsCaregiversBtn && catsCaregiversBtn.closest('.cat-card')) {
         e.preventDefault();
-        ctx.go('/caregivers');
+        const card = catsCaregiversBtn.closest('.cat-card');
+        const catId = card?.getAttribute('data-cat-id') || '';
+        ctx.go('/caregivers' + (catId ? `?cat_id=${encodeURIComponent(catId)}` : ''));
         return;
       }
 

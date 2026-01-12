@@ -29,12 +29,19 @@
           const top = items.slice(0, 4);
           clearHost(host);
           top.forEach((c) => {
-            const avatar = c?.avatar_path || '/public/img/cat1.jpg';
+            const avatarFallback = '/public/img/cat1.jpg';
+            const avatar = (c?.avatar_path ?? '').toString().trim() || avatarFallback;
             const meta = `${(c?.breed || '—')} • ${(c?.age ?? '—')}y`;
             appendFromTemplate(host, 'tpl-dashboard-cat-card', (el) => {
               el.setAttribute('data-cat-id', ctx.safeText(c?.id));
               const img = el.querySelector('img');
-              if (img) img.setAttribute('src', ctx.safeText(avatar));
+              if (img) {
+                img.setAttribute('src', ctx.safeText(avatar));
+                img.onerror = () => {
+                  img.onerror = null;
+                  img.src = avatarFallback;
+                };
+              }
               const nameEl = el.querySelector('[data-dashboard-name]');
               if (nameEl) nameEl.textContent = ctx.safeText(c?.name);
               const metaEl = el.querySelector('[data-dashboard-meta]');
@@ -64,11 +71,18 @@
           const top = items.slice(0, 4);
           clearHost(host);
           top.forEach((u) => {
-            const avatar = u?.avatar_path || '/public/img/avatar.jpg';
+            const avatarFallback = '/public/img/avatar.jpg';
+            const avatar = (u?.avatar_path ?? '').toString().trim() || avatarFallback;
             const sub = u?.role ? `Role: ${ctx.safeText(u.role)}` : '';
             appendFromTemplate(host, 'tpl-dashboard-user-card', (el) => {
               const img = el.querySelector('img');
-              if (img) img.setAttribute('src', ctx.safeText(avatar));
+              if (img) {
+                img.setAttribute('src', ctx.safeText(avatar));
+                img.onerror = () => {
+                  img.onerror = null;
+                  img.src = avatarFallback;
+                };
+              }
               const usernameEl = el.querySelector('[data-dashboard-username]');
               if (usernameEl) usernameEl.textContent = ctx.safeText(u?.username);
               const subEl = el.querySelector('[data-dashboard-sub]');

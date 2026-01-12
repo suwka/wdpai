@@ -15,7 +15,7 @@ class Routing {
         'logs' => 'logs',            //logi
         'schedule' => 'schedule',   //terminarz
         'cats' => 'cats',
-        'caregivers' => 'caregivers',            //kocury
+        'caregivers' => 'caregivers',
         'profile-update' => 'profile-update',
         'profile-password-update' => 'profile-password-update',
         'account-update' => 'account-update',
@@ -30,6 +30,9 @@ class Routing {
         'api-activities' => 'api-activities',
         'api-activities-calendar' => 'api-activities-calendar',
         'api-activities-day' => 'api-activities-day',
+        'api-caregivers' => 'api-caregivers',
+        'caregiver-assign' => 'caregiver-assign',
+        'caregiver-unassign' => 'caregiver-unassign',
         'cat-photo-delete' => 'cat-photo-delete',
         'cat-photos-reorder' => 'cat-photos-reorder',
         'upload-user-avatar' => 'upload-user-avatar',
@@ -80,10 +83,10 @@ class Routing {
         // Auth guard for HTML pages.
         if ($method === 'GET') {
             $publicPages = ['', 'login', 'register'];
-            $adminPages = ['caregivers'];
+            $adminPages = [];
             $isHtmlPage = !in_array($path, [
                 'api-me', 'api-profile', 'api-users', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
-                'api-activities', 'api-activities-calendar', 'api-activities-day'
+                'api-activities', 'api-activities-calendar', 'api-activities-day', 'api-caregivers'
             ], true);
 
             if ($isHtmlPage && !in_array($path, $publicPages, true) && $path !== 'logout') {
@@ -105,7 +108,7 @@ class Routing {
                 return;
             }
 
-            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day') {
+            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day' || $path === 'api-caregivers') {
                 require_once __DIR__ . '/src/controllers/ApiController.php';
                 $controller = new ApiController();
                 if ($path === 'api-me') {
@@ -146,6 +149,10 @@ class Routing {
                 }
                 if ($path === 'api-activities-day') {
                     $controller->activitiesDay();
+                    return;
+                }
+                if ($path === 'api-caregivers') {
+                    $controller->caregivers();
                     return;
                 }
                 $controller->catPhotos();
@@ -234,6 +241,17 @@ class Routing {
                     return;
                 }
                 $controller->reorderCatPhotos();
+                return;
+            }
+
+            if ($path === 'caregiver-assign' || $path === 'caregiver-unassign') {
+                require_once __DIR__ . '/src/controllers/ApiController.php';
+                $controller = new ApiController();
+                if ($path === 'caregiver-assign') {
+                    $controller->assignCaregiver();
+                    return;
+                }
+                $controller->unassignCaregiver();
                 return;
             }
         }

@@ -19,7 +19,25 @@
 
           const avatarEls = document.querySelectorAll('[data-user-avatar]');
           avatarEls.forEach((img) => {
-            if (img && u.avatar_path) img.setAttribute('src', u.avatar_path);
+            if (!img) return;
+
+            const avatarFallback = '/public/img/avatar.jpg';
+            const avatar = (u?.avatar_path ?? '').toString().trim() || avatarFallback;
+            img.setAttribute('src', avatar);
+            img.onerror = () => {
+              img.onerror = null;
+              img.src = avatarFallback;
+            };
+
+            // Make avatar act as a link to settings (on every view)
+            img.style.cursor = 'pointer';
+            if (img.getAttribute('data-avatar-settings-bound') === '1') return;
+            img.setAttribute('data-avatar-settings-bound', '1');
+            img.addEventListener('click', (e) => {
+              e.preventDefault();
+              if (window.location.pathname === '/settings') return;
+              ctx.go('/settings');
+            });
           });
 
           const welcome = document.querySelector('[data-welcome]');
@@ -27,6 +45,19 @@
             const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
             welcome.textContent = `Welcome back, ${fullName || (u.username || '—')}`;
           }
+
+          const titles = document.querySelectorAll('.tittle');
+          titles.forEach((el) => {
+            if (!el) return;
+            el.style.cursor = 'pointer';
+            if (el.getAttribute('data-title-dashboard-bound') === '1') return;
+            el.setAttribute('data-title-dashboard-bound', '1');
+            el.addEventListener('click', (e) => {
+              e.preventDefault();
+              if (window.location.pathname === '/dashboard') return;
+              ctx.go('/dashboard');
+            });
+          });
 
           const pUsername = document.querySelector('[data-profile-username]');
           if (pUsername) pUsername.textContent = u.username || '—';

@@ -274,12 +274,29 @@ class ApiController extends AppController
         $pdo = $db->connect();
 
         if ($this->isAdmin() && (($_GET['all'] ?? '') === '1')) {
-            $stmt = $pdo->query('SELECT id, owner_id, name, breed, age, description, avatar_path FROM cats ORDER BY created_at DESC LIMIT 200');
+            $stmt = $pdo->query("SELECT id, owner_id, name, breed, age, description, avatar_path, 1 AS is_owner FROM cats ORDER BY created_at DESC LIMIT 200");
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $this->json(['items' => $rows]);
         }
 
-        $stmt = $pdo->prepare('SELECT id, owner_id, name, breed, age, description, avatar_path FROM cats WHERE owner_id = :uid ORDER BY created_at DESC');
+        $ownedOnly = (string)($_GET['owned'] ?? '') === '1';
+        if ($ownedOnly) {
+            $stmt = $pdo->prepare('SELECT id, owner_id, name, breed, age, description, avatar_path, 1 AS is_owner FROM cats WHERE owner_id = :uid ORDER BY created_at DESC');
+            $stmt->execute([':uid' => $userId]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->json(['items' => $rows]);
+        }
+
+        // Default scope: cats owned by me OR where I am assigned as caregiver
+        $stmt = $pdo->prepare(
+            'SELECT c.id, c.owner_id, c.name, c.breed, c.age, c.description, c.avatar_path, '
+            . '(CASE WHEN c.owner_id = :uid THEN 1 ELSE 0 END) AS is_owner '
+            . 'FROM cats c '
+            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
+            . 'WHERE (c.owner_id = :uid OR cc.user_id IS NOT NULL) '
+            . 'ORDER BY c.created_at DESC '
+            . 'LIMIT 500'
+        );
         $stmt->execute([':uid' => $userId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $this->json(['items' => $rows]);
@@ -300,8 +317,8 @@ class ApiController extends AppController
             $this->json(['error' => 'forbidden'], 403);
         }
 
-        $stmt = $pdo->prepare('SELECT id, owner_id, name, breed, age, description, avatar_path FROM cats WHERE id = :id');
-        $stmt->execute([':id' => $catId]);
+        $stmt = $pdo->prepare('SELECT id, owner_id, name, breed, age, description, avatar_path, (CASE WHEN owner_id = :uid THEN 1 ELSE 0 END) AS is_owner FROM cats WHERE id = :id');
+        $stmt->execute([':id' => $catId, ':uid' => $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             $this->json(['error' => 'not_found'], 404);
@@ -404,8 +421,14 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        if (!$this->canAccessCat($pdo, $userId, $catId)) {
-            $this->json(['error' => 'forbidden'], 403);
+        // Only owner (or admin) can delete photos
+        if (!$this->isAdmin()) {
+            $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
+            $stmt->execute([':id' => $catId]);
+            $ownerId = $stmt->fetchColumn();
+            if (!$ownerId || $ownerId !== $userId) {
+                $this->json(['error' => 'forbidden'], 403);
+            }
         }
 
         $stmt = $pdo->prepare('DELETE FROM cat_photos WHERE id = :pid AND cat_id = :cid');
@@ -434,8 +457,14 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        if (!$this->canAccessCat($pdo, $userId, $catId)) {
-            $this->json(['error' => 'forbidden'], 403);
+        // Only owner (or admin) can reorder photos
+        if (!$this->isAdmin()) {
+            $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
+            $stmt->execute([':id' => $catId]);
+            $ownerId = $stmt->fetchColumn();
+            if (!$ownerId || $ownerId !== $userId) {
+                $this->json(['error' => 'forbidden'], 403);
+            }
         }
 
         $pdo->beginTransaction();
@@ -452,6 +481,130 @@ class ApiController extends AppController
             $pdo->rollBack();
             $this->json(['error' => 'failed'], 500);
         }
+
+        $this->json(['ok' => true]);
+    }
+
+    public function caregivers(): void
+    {
+        $userId = $this->requireLogin();
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $catId = trim((string)($_GET['cat_id'] ?? ''));
+        if ($catId === '') {
+            $this->json(['error' => 'missing_cat_id'], 400);
+        }
+
+        $catStmt = $pdo->prepare('SELECT id, owner_id, name, avatar_path FROM cats WHERE id = :cid');
+        $catStmt->execute([':cid' => $catId]);
+        $cat = $catStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$cat) {
+            $this->json(['error' => 'not_found'], 404);
+        }
+
+        if (!$this->isAdmin() && ($cat['owner_id'] ?? null) !== $userId) {
+            $this->json(['error' => 'forbidden'], 403);
+        }
+
+        // Assigned caregivers for this cat
+        $assignedStmt = $pdo->prepare(
+            'SELECT u.id, u.username, u.first_name, u.last_name, u.avatar_path '
+            . 'FROM cat_caregivers cc '
+            . 'JOIN users u ON u.id = cc.user_id '
+            . 'WHERE cc.cat_id = :cid '
+            . 'ORDER BY u.username ASC'
+        );
+        $assignedStmt->execute([':cid' => $catId]);
+        $assigned = $assignedStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Available caregivers to assign: regular users excluding owner + already assigned
+        $availableStmt = $pdo->prepare(
+            'SELECT u.id, u.username, u.first_name, u.last_name, u.avatar_path '
+            . 'FROM users u '
+            . 'WHERE u.role = \'user\' '
+            . 'AND u.id <> :owner '
+            . 'AND u.id NOT IN (SELECT user_id FROM cat_caregivers WHERE cat_id = :cid) '
+            . 'ORDER BY u.username ASC '
+            . 'LIMIT 500'
+        );
+        $availableStmt->execute([':cid' => $catId, ':owner' => $cat['owner_id']]);
+        $available = $availableStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->json([
+            'cat' => $cat,
+            'assigned' => $assigned,
+            'available' => $available,
+        ]);
+    }
+
+    public function assignCaregiver(): void
+    {
+        $userId = $this->requireLogin();
+
+        $catId = (string)($_POST['cat_id'] ?? '');
+        $caregiverId = (string)($_POST['user_id'] ?? '');
+        if ($catId === '' || $caregiverId === '') {
+            $this->json(['error' => 'missing_params'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :cid');
+        $stmt->execute([':cid' => $catId]);
+        $ownerId = $stmt->fetchColumn();
+        if (!$ownerId) {
+            $this->json(['error' => 'not_found'], 404);
+        }
+
+        if (!$this->isAdmin() && $ownerId !== $userId) {
+            $this->json(['error' => 'forbidden'], 403);
+        }
+
+        if ($caregiverId === $ownerId) {
+            $this->json(['error' => 'invalid_caregiver'], 400);
+        }
+
+        $careStmt = $pdo->prepare('SELECT 1 FROM users WHERE id = :id AND role = \'user\'');
+        $careStmt->execute([':id' => $caregiverId]);
+        if (!(bool)$careStmt->fetchColumn()) {
+            $this->json(['error' => 'invalid_caregiver'], 400);
+        }
+
+        $ins = $pdo->prepare('INSERT INTO cat_caregivers (cat_id, user_id) VALUES (:cid, :uid) ON CONFLICT DO NOTHING');
+        $ins->execute([':cid' => $catId, ':uid' => $caregiverId]);
+
+        $this->json(['ok' => true]);
+    }
+
+    public function unassignCaregiver(): void
+    {
+        $userId = $this->requireLogin();
+
+        $catId = (string)($_POST['cat_id'] ?? '');
+        $caregiverId = (string)($_POST['user_id'] ?? '');
+        if ($catId === '' || $caregiverId === '') {
+            $this->json(['error' => 'missing_params'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :cid');
+        $stmt->execute([':cid' => $catId]);
+        $ownerId = $stmt->fetchColumn();
+        if (!$ownerId) {
+            $this->json(['error' => 'not_found'], 404);
+        }
+
+        if (!$this->isAdmin() && $ownerId !== $userId) {
+            $this->json(['error' => 'forbidden'], 403);
+        }
+
+        $del = $pdo->prepare('DELETE FROM cat_caregivers WHERE cat_id = :cid AND user_id = :uid');
+        $del->execute([':cid' => $catId, ':uid' => $caregiverId]);
 
         $this->json(['ok' => true]);
     }

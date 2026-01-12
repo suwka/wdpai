@@ -368,7 +368,18 @@ tr:first-child {
 }
 
 
-tr:not(first-child)hover {
+tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+tr:last-child {
+    border-bottom: none;
+}
+tr:first-child {
+    border-bottom: none;
+}
+
+tr:not(:first-child):hover {
     background-color: rgb(238, 238, 238);
 }
 

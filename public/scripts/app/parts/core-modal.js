@@ -57,6 +57,7 @@
       apiActivities: '/api-activities',
       apiActivitiesCalendar: '/api-activities-calendar',
       apiActivitiesDay: '/api-activities-day',
+      apiCaregivers: '/api-caregivers',
 
       catCreate: '/cat-create',
       catUpdate: '/cat-update',
@@ -67,6 +68,9 @@
 
       catPhotoDelete: '/cat-photo-delete',
       catPhotosReorder: '/cat-photos-reorder',
+
+      caregiverAssign: '/caregiver-assign',
+      caregiverUnassign: '/caregiver-unassign',
     };
 
     const FILTER_PRESETS = {

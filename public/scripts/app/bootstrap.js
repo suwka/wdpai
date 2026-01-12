@@ -16,6 +16,7 @@
     try { parts.dashboard?.(ctx); } catch (e) { console.warn('dashboard failed', e); }
     try { parts.settingsCats?.(ctx); } catch (e) { console.warn('settingsCats failed', e); }
     try { parts.catsPageData?.(ctx); } catch (e) { console.warn('catsPageData failed', e); }
+    try { parts.caregiversPage?.(ctx); } catch (e) { console.warn('caregiversPage failed', e); }
     try { parts.detailsPageData?.(ctx); } catch (e) { console.warn('detailsPageData failed', e); }
     try { parts.detailsGalleryControls?.(ctx); } catch (e) { console.warn('detailsGalleryControls failed', e); }
     try { parts.logsPage?.(ctx); } catch (e) { console.warn('logsPage failed', e); }

@@ -28,7 +28,7 @@
         <div class="box_top">
             <div>Caregivers</div>
             <div class="options">
-                <a href="/dashboard" class="single-option">
+                <a href="/cats" class="single-option">
                     <i class="fa-solid fa-arrow-left"></i>
                     Back
                 </a>
@@ -39,14 +39,20 @@
             <div class="box_middle">
                 <div class="pc-section-header">
                     <div class="section-tittle">Caregivers</div>
+                    <button class="pc-action-btn" type="button" data-caregiver-add>Add caregiver</button>
                 </div>
-                <div class="section-subtitle">Caregivers and assigned cats</div>
+                <div class="section-subtitle">Assigned caregivers for selected cat</div>
 
-                <div class="assignments" data-caregivers-table>
-                    <div class="assignment-row header-row">
-                        <div>Caregiver</div>
-                        <div>Assigned cats</div>
-                    </div>
+                <div class="logs-table">
+                    <table data-caregivers-table>
+                        <tr>
+                            <th>#</th>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
@@ -65,24 +71,28 @@
     </footer>
 
     <template id="tpl-caregivers-assign">
-        <form class="pc-form" onsubmit="return false;">
-            <div class="pc-field">
-                <label>Cat</label>
-                <select class="pc-select" data-caregivers-assign-cat>
-                    <option data-caregivers-assign-cat-first>—</option>
-                    <option>Żaneta</option>
-                    <option>Albert</option>
-                </select>
-            </div>
+        <form class="pc-form">
             <div class="pc-field">
                 <label>Caregiver</label>
                 <select class="pc-select" data-caregivers-assign-user>
-                    <option data-caregivers-assign-user-first>—</option>
-                    <option>user2</option>
-                    <option>user3</option>
+                    <option value="" data-caregivers-assign-user-first>—</option>
                 </select>
             </div>
         </form>
+    </template>
+
+    <template id="tpl-caregiver-row">
+        <tr>
+            <td data-caregivers-idx></td>
+            <td><img data-caregivers-avatar src="" alt="avatar"></td>
+            <td data-caregivers-fullname></td>
+            <td data-caregivers-username></td>
+            <td>
+                <button class="pc-icon-btn" type="button" title="Remove" data-caregivers-remove>
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>
     </template>
 
     <script defer src="/public/scripts/main.js"></script>

@@ -17,13 +17,28 @@
           const breedEl = document.querySelector('.left-container .cat-breed');
           const ageEl = document.querySelector('.left-container .cat-age');
           const descEl = document.querySelector('[data-cat-description]');
-          const imgEl = document.querySelector('.left-container .cat-description-image img');
+          const imgEl = document.querySelector('img[data-cat-avatar]') || document.querySelector('.left-container .cat-description-image img');
 
           if (nameEl) nameEl.textContent = c.name || '—';
           if (breedEl) breedEl.textContent = c.breed || '—';
           if (ageEl) ageEl.textContent = 'Age: ' + (c.age ?? '—') + ' years';
           if (descEl) descEl.textContent = c.description || '';
-          if (imgEl && c.avatar_path) imgEl.src = c.avatar_path;
+          if (imgEl) {
+            const avatarFallback = '/public/img/cat1.jpg';
+            const avatar = (c?.avatar_path ?? '').toString().trim() || avatarFallback;
+            imgEl.src = avatar;
+            imgEl.onerror = () => {
+              imgEl.onerror = null;
+              imgEl.src = avatarFallback;
+            };
+          }
+
+          const isOwner = Boolean(c?.is_owner);
+          const editLink = document.querySelector('[data-modal-open="edit-cat"]');
+          if (editLink) editLink.hidden = !isOwner;
+
+          const manageBtn = document.querySelector('[data-gallery-manage]');
+          if (manageBtn) manageBtn.hidden = !isOwner;
         })
         .catch(() => {
           // no-op

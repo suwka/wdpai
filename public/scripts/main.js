@@ -8,6 +8,7 @@
     '/public/scripts/app/parts/dashboard.js',
     '/public/scripts/app/parts/settings-cats.js',
     '/public/scripts/app/parts/cats-page-data.js',
+    '/public/scripts/app/parts/caregivers-page.js',
     '/public/scripts/app/parts/details-page-data.js',
     '/public/scripts/app/parts/details-gallery-controls.js',
     '/public/scripts/app/parts/logs-page.js',

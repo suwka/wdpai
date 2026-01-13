@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/public/styles/schedule.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/modal.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/admin.css">
+    <title>Panel administratora</title>
+</head>
+<body>
+<header class="header">
+    <div class="tittle">Purrfect Care</div>
+    <nav class="option-bar">
+        <ul>
+            <div data-user-username>—</div>
+            <img src="/public/img/avatar.jpg" class="small-avatar" data-user-avatar>
+            <li><a href="/logout" title="Wyloguj"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="main-content">
+    <div class="box_top">
+        <div>Panel administratora</div>
+        <div class="options">
+            <button class="pc-action-btn" type="button" data-admin-add-user>
+                <i class="fa-solid fa-user-plus"></i>
+                Dodaj użytkownika
+            </button>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="section-tittle">Statystyki</div>
+        <div class="section-subtitle">Widok ogólny</div>
+        <div class="admin-stats" data-admin-stats>
+            <div class="admin-stat">
+                <div class="admin-stat-label">Wszyscy użytkownicy</div>
+                <div class="admin-stat-value" data-admin-total>—</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat-label">Administratorzy</div>
+                <div class="admin-stat-value" data-admin-admins>—</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat-label">Zablokowani</div>
+                <div class="admin-stat-value" data-admin-blocked>—</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="section-tittle">Użytkownicy</div>
+        <div class="section-subtitle">Zarządzanie kontami</div>
+
+        <div class="logs-table">
+            <table data-admin-users-table>
+                <tr>
+                    <th>ID</th>
+                    <th>Użytkownik</th>
+                    <th>Imię</th>
+                    <th>Nazwisko</th>
+                    <th>Email</th>
+                    <th>Rola</th>
+                    <th>Ostatnie logowanie</th>
+                    <th>Rejestracja</th>
+                    <th>Akcje</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</main>
+
+<template id="tpl-admin-user-row">
+    <tr>
+        <td data-admin-id class="admin-mono"></td>
+        <td data-admin-username></td>
+        <td data-admin-first></td>
+        <td data-admin-last></td>
+        <td data-admin-email></td>
+        <td>
+            <span data-admin-role></span>
+            <span class="admin-badge admin-badge-blocked" data-admin-blocked-badge hidden>Zablokowany</span>
+        </td>
+        <td><time data-admin-last-login datetime=""></time></td>
+        <td><time data-admin-created datetime=""></time></td>
+        <td class="admin-actions">
+            <button class="pc-icon-btn" type="button" title="Edytuj" data-admin-action="edit"><i class="fa-solid fa-pen"></i></button>
+            <button class="pc-icon-btn" type="button" title="Zablokuj/odblokuj" data-admin-action="block"><i class="fa-solid fa-ban"></i></button>
+            <button class="pc-icon-btn" type="button" title="Usuń" data-admin-action="delete"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    </tr>
+</template>
+
+<template id="tpl-admin-user-edit">
+    <form class="pc-form" data-modal-form data-admin-user-edit>
+        <input type="hidden" name="user_id" value="" data-admin-edit-id>
+        <div class="pc-grid-2">
+            <div class="pc-field">
+                <label>Imię</label>
+                <input class="pc-input" name="first_name" type="text" value="" required>
+            </div>
+            <div class="pc-field">
+                <label>Nazwisko</label>
+                <input class="pc-input" name="last_name" type="text" value="" required>
+            </div>
+        </div>
+        <div class="pc-field">
+            <label>Nowe hasło (opcjonalnie)</label>
+            <input class="pc-input" name="new_password" type="password" value="" autocomplete="new-password" placeholder="Zostaw puste, aby nie zmieniać">
+        </div>
+        <div class="hint">Edytujesz tylko imię/nazwisko/hasło. Roli, maila i username nie zmieniamy tutaj.</div>
+    </form>
+</template>
+
+<template id="tpl-admin-user-create">
+    <form class="pc-form" data-modal-form data-admin-user-create>
+        <div class="pc-grid-2">
+            <div class="pc-field">
+                <label>Username</label>
+                <input class="pc-input" name="username" type="text" required>
+            </div>
+            <div class="pc-field">
+                <label>Email</label>
+                <input class="pc-input" name="email" type="email" required>
+            </div>
+        </div>
+        <div class="pc-grid-2">
+            <div class="pc-field">
+                <label>Imię</label>
+                <input class="pc-input" name="first_name" type="text" required>
+            </div>
+            <div class="pc-field">
+                <label>Nazwisko</label>
+                <input class="pc-input" name="last_name" type="text" required>
+            </div>
+        </div>
+        <div class="pc-grid-2">
+            <div class="pc-field">
+                <label>Rola</label>
+                <select class="pc-select" name="role">
+                    <option value="user" selected>user</option>
+                    <option value="admin">admin</option>
+                </select>
+            </div>
+            <div class="pc-field">
+                <label>Hasło</label>
+                <input class="pc-input" name="password" type="password" autocomplete="new-password" required>
+            </div>
+        </div>
+    </form>
+</template>
+
+<script defer src="/public/scripts/main.js"></script>
+</body>
+</html>

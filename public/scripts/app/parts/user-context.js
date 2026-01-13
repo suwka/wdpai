@@ -54,8 +54,9 @@
             el.setAttribute('data-title-dashboard-bound', '1');
             el.addEventListener('click', (e) => {
               e.preventDefault();
-              if (window.location.pathname === '/dashboard') return;
-              ctx.go('/dashboard');
+              const target = (u.role === 'admin') ? '/admin' : '/dashboard';
+              if (window.location.pathname === target) return;
+              ctx.go(target);
             });
           });
 
@@ -67,6 +68,16 @@
           if (pEmail) pEmail.textContent = u.email || '—';
           const pRole = document.querySelector('[data-profile-role]');
           if (pRole) pRole.textContent = u.role || '—';
+
+          const back = document.querySelector('[data-settings-back]');
+          if (back) {
+            back.setAttribute('href', (u.role === 'admin') ? '/admin' : '/dashboard');
+          }
+
+          const userOnlyEls = document.querySelectorAll('[data-user-only]');
+          userOnlyEls.forEach((el) => {
+            el.hidden = (u.role === 'admin');
+          });
         })
         .catch(() => {
           // ignore

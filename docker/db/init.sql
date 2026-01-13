@@ -19,12 +19,15 @@ CREATE TABLE users (
   last_name     TEXT NOT NULL,
   password_hash TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  is_blocked    BOOLEAN NOT NULL DEFAULT FALSE,
+  last_login_at TIMESTAMP,
   avatar_path   TEXT,
   created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_is_blocked ON users(is_blocked);
 
 -- CATS
 CREATE TABLE cats (
@@ -116,6 +119,7 @@ CREATE INDEX idx_support_tickets_status ON support_tickets(status);
 -- Seed (minimal data for testing)
 INSERT INTO users (username, email, first_name, last_name, password_hash, role)
 VALUES
-  ('admin', 'admin@example.com', 'Admin', 'User', '$2y$10$WS4hSSfm9a4QnujppOxyWeRyUW7LYhvdmr94x1Pz4MHdyOFL3phi2', 'admin'),
-  ('user1', 'user1@example.com', 'Jan', 'Kowalski', '$2y$10$eE9R6yGvJHh8mL7m7QhUOe8ZpW3qvS9y8m4sF6m5bJ2VJm0yqgq6K', 'user')
+  ('admin', 'admin@example.com', 'Admin', 'User', '$2y$10$XaWFVP4b0PJkor/MLZEWiuTyxaUKLK1xOgIxo7m5w0x8AB4CVFWmy', 'admin'),
+  ('user1', 'user1@example.com', 'Jan', 'Kowalski', '$2y$10$eE9R6yGvJHh8mL7m7QhUOe8ZpW3qvS9y8m4sF6m5bJ2VJm0yqgq6K', 'user'),
+  ('testowy', 'testowy@testowy', 'Test', 'User', '$2y$10$4SeBepX4FraV6HfGYmE0puY3m12cgyQ8Jmk2XcPsTfMham13hdMr2', 'user')
 ON CONFLICT DO NOTHING;

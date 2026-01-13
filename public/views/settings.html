@@ -10,6 +10,7 @@
     <title>Account</title>
 </head>
 <body>
+    <?php $isAdmin = (($_SESSION['role'] ?? '') === 'admin'); ?>
     <header class="header">
         <div class="tittle">
             Purrfect Care
@@ -18,7 +19,9 @@
             <ul>
                 <div data-user-username>user1</div>
                 <img src="/public/img/avatar.jpg" class="small-avatar" data-user-avatar>
-                <li><a href="#"><i class="fa-solid fa-bell"></i></a></li>
+                <?php if (!isset($isAdmin) || !$isAdmin): ?>
+                    <li data-user-only hidden><a href="#"><i class="fa-solid fa-bell"></i></a></li>
+                <?php endif; ?>
                 <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             </ul>
         </nav>
@@ -28,7 +31,7 @@
         <div class="box_top">
             <div>Account</div>
             <div class="options">
-                <a class="single-option" href="/dashboard">
+                <a class="single-option" href="/dashboard" data-settings-back>
                     <i class="fa-solid fa-arrow-left"></i>
                     Back
                 </a>
@@ -62,65 +65,6 @@
                 </div>
             </div>
         <?php endif; ?>
-        <div class="section-box" data-admin-only hidden>
-            <div class="box_middle">
-                <div class="pc-section-header">
-                    <div class="section-tittle">Users</div>
-                    <button class="pc-action-btn" type="button" data-modal-open="add-user">Add user</button>
-                </div>
-                <div class="section-subtitle">You can manage users here</div>
-                <div class="all-users">
-                    <div class="single-user">
-                        <img src="/public/img/avatar.jpg" class="user-avatar"> 
-                        <div class="user-description">
-                            <div class="user-name">
-                                user1
-                            </div>
-                            <div class="user-icons">
-                                <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="single-user">
-                        <img src="/public/img/avatar.jpg" class="user-avatar"> 
-                        <div class="user-description">
-                            <div class="user-name">
-                                user1
-                            </div>
-                            <div class="user-icons">
-                                <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="single-user">
-                        <img src="/public/img/avatar.jpg" class="user-avatar"> 
-                        <div class="user-description">
-                            <div class="user-name">
-                                user1
-                            </div>
-                            <div class="user-icons">
-                                <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="single-user">
-                        <img src="/public/img/avatar.jpg" class="user-avatar"> 
-                        <div class="user-description">
-                            <div class="user-name">
-                                user2
-                            </div>
-                            <div class="user-icons">
-                                <a href="#"><i class="fa-solid fa-trash-can"></i></a>
-                                <a href="#" data-modal-open="edit-user"><i class="fa-solid fa-pen"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="section-box">
             <div class="box_middle">
@@ -151,7 +95,8 @@
             </div>
         </div>
 
-        <div class="section-box">
+        <?php if (!$isAdmin): ?>
+        <div class="section-box" data-user-only hidden>
             <div class="box_middle">
                 <div class="pc-section-header">
                     <div class="section-tittle">My cats</div>
@@ -160,6 +105,7 @@
                 <div class="all-users" data-settings-cats></div>
             </div>
         </div>
+        <?php endif; ?>
         <div class="section-box">
             <div class="box_bottom">
                 <div class="section-tittle">
@@ -194,12 +140,15 @@
                 </div>
             </div>
         </div>
-        <div class="box_under_bottom">
+        <?php if (!$isAdmin): ?>
+        <div class="box_under_bottom" data-user-only hidden>
             <div class="logout-mobile">Log out</div>
         </div>
+        <?php endif; ?>
     </main>
 
-    <footer class="footer">
+    <?php if (!$isAdmin): ?>
+    <footer class="footer" data-user-only hidden>
         <nav class="menu-bar" >
         <ul>
             <li><a href="/dashboard"><i class="fa-solid fa-house"></i>Home</a></li>
@@ -210,6 +159,7 @@
         </ul>
     </nav>
     </footer>
+    <?php endif; ?>
 
     <template id="tpl-settings-cat-row">
         <div class="single-user">

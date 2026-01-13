@@ -8,6 +8,8 @@ class User {
     private string $firstName;
     private string $lastName;
     private string $role;
+    private bool $isBlocked;
+    private ?string $lastLoginAt;
     private ?string $avatarPath;
 
     public function __construct(
@@ -17,6 +19,8 @@ class User {
         string $firstName,
         string $lastName,
         string $role = 'user',
+        bool $isBlocked = false,
+        ?string $lastLoginAt = null,
         ?string $id = null,
         ?string $avatarPath = null
     ) {
@@ -27,6 +31,8 @@ class User {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->role = $role;
+        $this->isBlocked = $isBlocked;
+        $this->lastLoginAt = $lastLoginAt;
         $this->avatarPath = $avatarPath;
     }
 
@@ -37,6 +43,8 @@ class User {
     public function getFirstName(): string { return $this->firstName; }
     public function getLastName(): string { return $this->lastName; }
     public function getRole(): string { return $this->role; }
+    public function isBlocked(): bool { return $this->isBlocked; }
+    public function getLastLoginAt(): ?string { return $this->lastLoginAt; }
     public function getAvatarPath(): ?string { return $this->avatarPath; }
 
     public function getFullName(): string

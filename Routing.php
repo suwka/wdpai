@@ -10,6 +10,7 @@ class Routing {
         'register' => 'register',  // Obsługuje /register
         'logout' => 'logout',
         'dashboard' => 'dashboard',// Obsługuje /dashboard
+        'admin' => 'admin',
         'details' => 'details',     // Obsługuje /details
         'settings' => 'settings',    //settings
         'logs' => 'logs',            //logi
@@ -22,6 +23,7 @@ class Routing {
         'api-me' => 'api-me',
         'api-profile' => 'api-profile',
         'api-users' => 'api-users',
+        'api-admin-stats' => 'api-admin-stats',
         'api-cats' => 'api-cats',
         'api-cat' => 'api-cat',
         'api-cat-photos' => 'api-cat-photos',
@@ -31,6 +33,10 @@ class Routing {
         'api-activities-calendar' => 'api-activities-calendar',
         'api-activities-day' => 'api-activities-day',
         'api-caregivers' => 'api-caregivers',
+        'admin-user-update' => 'admin-user-update',
+        'admin-user-create' => 'admin-user-create',
+        'admin-user-block' => 'admin-user-block',
+        'admin-user-delete' => 'admin-user-delete',
         'caregiver-assign' => 'caregiver-assign',
         'caregiver-unassign' => 'caregiver-unassign',
         'cat-photo-delete' => 'cat-photo-delete',
@@ -83,15 +89,21 @@ class Routing {
         // Auth guard for HTML pages.
         if ($method === 'GET') {
             $publicPages = ['', 'login', 'register'];
-            $adminPages = [];
+            $adminPages = ['admin'];
             $isHtmlPage = !in_array($path, [
-                'api-me', 'api-profile', 'api-users', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
+                'api-me', 'api-profile', 'api-users', 'api-admin-stats', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
                 'api-activities', 'api-activities-calendar', 'api-activities-day', 'api-caregivers'
             ], true);
 
             if ($isHtmlPage && !in_array($path, $publicPages, true) && $path !== 'logout') {
                 if (!self::isLoggedIn()) {
                     self::redirect('/login');
+                }
+
+                // Admin allowed HTML pages: /admin and /settings (plus logout)
+                $adminAllowed = array_merge($adminPages, ['settings']);
+                if (self::isAdmin() && !in_array($path, $adminAllowed, true)) {
+                    self::redirect('/admin');
                 }
                 if (in_array($path, $adminPages, true) && !self::isAdmin()) {
                     self::redirect('/dashboard?err=forbidden');
@@ -108,7 +120,7 @@ class Routing {
                 return;
             }
 
-            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day' || $path === 'api-caregivers') {
+            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-admin-stats' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day' || $path === 'api-caregivers') {
                 require_once __DIR__ . '/src/controllers/ApiController.php';
                 $controller = new ApiController();
                 if ($path === 'api-me') {
@@ -121,6 +133,10 @@ class Routing {
                 }
                 if ($path === 'api-users') {
                     $controller->users();
+                    return;
+                }
+                if ($path === 'api-admin-stats') {
+                    $controller->adminStats();
                     return;
                 }
                 if ($path === 'api-cats') {
@@ -241,6 +257,25 @@ class Routing {
                     return;
                 }
                 $controller->reorderCatPhotos();
+                return;
+            }
+
+            if ($path === 'admin-user-update' || $path === 'admin-user-create' || $path === 'admin-user-block' || $path === 'admin-user-delete') {
+                require_once __DIR__ . '/src/controllers/ApiController.php';
+                $controller = new ApiController();
+                if ($path === 'admin-user-update') {
+                    $controller->adminUserUpdate();
+                    return;
+                }
+                if ($path === 'admin-user-create') {
+                    $controller->adminUserCreate();
+                    return;
+                }
+                if ($path === 'admin-user-block') {
+                    $controller->adminUserBlock();
+                    return;
+                }
+                $controller->adminUserDelete();
                 return;
             }
 

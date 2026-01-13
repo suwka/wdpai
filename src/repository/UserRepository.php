@@ -66,6 +66,8 @@ class UserRepository extends Repository {
             $row['first_name'],
             $row['last_name'],
             $row['role'] ?? 'user',
+            (bool)($row['is_blocked'] ?? false),
+            isset($row['last_login_at']) ? (string)$row['last_login_at'] : null,
             $row['id'] ?? null,
             $row['avatar_path'] ?? null
         );

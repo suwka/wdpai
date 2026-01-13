@@ -5,6 +5,7 @@ require_once __DIR__ . '/../Database.php';
 
 class ApiController extends AppController
 {
+    private const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
     private function requireLogin(): string
     {
         $userId = $_SESSION['user_id'] ?? null;
@@ -20,6 +21,51 @@ class ApiController extends AppController
     private function isAdmin(): bool
     {
         return ($_SESSION['role'] ?? null) === 'admin';
+    }
+
+    private function requireAdmin(): void
+    {
+        $this->requireLogin();
+        if (!$this->isAdmin()) {
+            $this->json(['error' => 'forbidden'], 403);
+        }
+    }
+
+    private function isValidEmail(string $email): bool
+    {
+        $email = trim($email);
+        if ($email === '' || strlen($email) > 254) return false;
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    private function isValidUsername(string $username): bool
+    {
+        $username = trim($username);
+        if ($username === '' || strlen($username) < 3 || strlen($username) > 30) return false;
+        return (bool)preg_match('/^[a-zA-Z0-9._-]{3,30}$/', $username);
+    }
+
+    private function isValidPersonName(string $name): bool
+    {
+        $name = trim($name);
+        if ($name === '' || mb_strlen($name) > 50) return false;
+        return (bool)preg_match('/^[\p{L}][\p{L} \-]{0,49}$/u', $name);
+    }
+
+    private function passwordPolicyError(string $password): ?string
+    {
+        $password = (string)$password;
+        $len = strlen($password);
+        if ($len < 8 || $len > 64) {
+            return 'Hasło musi mieć 8–64 znaki.';
+        }
+        if (preg_match('/\s/', $password)) {
+            return 'Hasło nie może zawierać spacji.';
+        }
+        if (!preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
+            return 'Hasło jest za słabe.';
+        }
+        return null;
     }
 
     private function json(array $payload, int $code = 200): void
@@ -253,17 +299,221 @@ class ApiController extends AppController
 
     public function users(): void
     {
-        $this->requireLogin();
-        if (!$this->isAdmin()) {
-            $this->json(['error' => 'forbidden'], 403);
+        $this->requireAdmin();
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $stmt = $pdo->query('SELECT id, username, email, first_name, last_name, role, is_blocked, last_login_at, avatar_path, created_at FROM users ORDER BY created_at DESC LIMIT 500');
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->json(['items' => $rows]);
+    }
+
+    public function adminStats(): void
+    {
+        $this->requireAdmin();
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $stmt = $pdo->query(
+            "SELECT COUNT(*)::int AS total_users, "
+            . "SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END)::int AS admin_users, "
+            . "SUM(CASE WHEN is_blocked THEN 1 ELSE 0 END)::int AS blocked_users "
+            . "FROM users"
+        );
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['total_users' => 0, 'admin_users' => 0, 'blocked_users' => 0];
+        $this->json(['item' => $row]);
+    }
+
+    public function adminUserUpdate(): void
+    {
+        $this->requireAdmin();
+
+        $adminId = (string)($_SESSION['user_id'] ?? '');
+        $userId = trim((string)($_POST['user_id'] ?? ''));
+        $firstName = trim((string)($_POST['first_name'] ?? ''));
+        $lastName = trim((string)($_POST['last_name'] ?? ''));
+        $newPassword = (string)($_POST['new_password'] ?? '');
+
+        if ($userId === '') {
+            $this->json(['error' => 'missing_user_id'], 400);
+        }
+        if ($userId === $adminId) {
+            $this->json(['error' => 'cannot_edit_self'], 400);
+        }
+        if ($firstName === '' || $lastName === '') {
+            $this->json(['error' => 'invalid_name'], 400);
         }
 
         $db = new Database();
         $pdo = $db->connect();
 
-        $stmt = $pdo->query('SELECT id, username, email, first_name, last_name, role, avatar_path, created_at FROM users ORDER BY created_at DESC LIMIT 200');
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $this->json(['items' => $rows]);
+        $pwdSql = '';
+        $params = [
+            ':id' => $userId,
+            ':fn' => $firstName,
+            ':ln' => $lastName,
+        ];
+
+        if (trim($newPassword) !== '') {
+            $pwErr = $this->passwordPolicyError($newPassword);
+            if ($pwErr) {
+                $this->json(['error' => 'weak_password', 'message' => $pwErr], 400);
+            }
+            $pwdSql = ', password_hash = :ph';
+            $params[':ph'] = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+
+        // Cannot edit default admin account here
+        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
+        $emailStmt->execute([':id' => $userId]);
+        $email = (string)($emailStmt->fetchColumn() ?? '');
+        if (strtolower($email) === self::DEFAULT_ADMIN_EMAIL) {
+            $this->json(['error' => 'protected_account'], 403);
+        }
+
+        $stmt = $pdo->prepare('UPDATE users SET first_name = :fn, last_name = :ln' . $pwdSql . ', updated_at = NOW() WHERE id = :id');
+        $stmt->execute($params);
+
+        $this->json(['ok' => true]);
+    }
+
+    public function adminUserBlock(): void
+    {
+        $this->requireAdmin();
+
+        $adminId = (string)($_SESSION['user_id'] ?? '');
+        $userId = trim((string)($_POST['user_id'] ?? ''));
+        $isBlocked = (string)($_POST['is_blocked'] ?? '') === '1';
+
+        if ($userId === '') {
+            $this->json(['error' => 'missing_user_id'], 400);
+        }
+        if ($userId === $adminId) {
+            $this->json(['error' => 'cannot_block_self'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
+        $emailStmt->execute([':id' => $userId]);
+        $email = (string)($emailStmt->fetchColumn() ?? '');
+        if (strtolower($email) === self::DEFAULT_ADMIN_EMAIL) {
+            $this->json(['error' => 'protected_account'], 403);
+        }
+
+        $stmt = $pdo->prepare('UPDATE users SET is_blocked = :b, updated_at = NOW() WHERE id = :id');
+        $stmt->execute([':b' => $isBlocked ? 1 : 0, ':id' => $userId]);
+
+        $this->json(['ok' => true]);
+    }
+
+    public function adminUserDelete(): void
+    {
+        $this->requireAdmin();
+
+        $adminId = (string)($_SESSION['user_id'] ?? '');
+        $userId = trim((string)($_POST['user_id'] ?? ''));
+
+        if ($userId === '') {
+            $this->json(['error' => 'missing_user_id'], 400);
+        }
+        if ($userId === $adminId) {
+            $this->json(['error' => 'cannot_delete_self'], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
+        $emailStmt->execute([':id' => $userId]);
+        $email = (string)($emailStmt->fetchColumn() ?? '');
+        if (strtolower($email) === self::DEFAULT_ADMIN_EMAIL) {
+            $this->json(['error' => 'protected_account'], 403);
+        }
+
+        // Safety: do not allow deleting last admin
+        $roleStmt = $pdo->prepare('SELECT role FROM users WHERE id = :id');
+        $roleStmt->execute([':id' => $userId]);
+        $role = (string)($roleStmt->fetchColumn() ?? '');
+        if ($role === 'admin') {
+            $cntStmt = $pdo->query("SELECT COUNT(*)::int FROM users WHERE role = 'admin'");
+            $adminCount = (int)$cntStmt->fetchColumn();
+            if ($adminCount <= 1) {
+                $this->json(['error' => 'cannot_delete_last_admin'], 400);
+            }
+        }
+
+        $stmt = $pdo->prepare('DELETE FROM users WHERE id = :id');
+        $stmt->execute([':id' => $userId]);
+
+        $this->json(['ok' => true]);
+    }
+
+    public function adminUserCreate(): void
+    {
+        $this->requireAdmin();
+
+        $username = trim((string)($_POST['username'] ?? ''));
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
+        $firstName = trim((string)($_POST['first_name'] ?? ''));
+        $lastName = trim((string)($_POST['last_name'] ?? ''));
+        $role = trim((string)($_POST['role'] ?? 'user'));
+        $password = (string)($_POST['password'] ?? '');
+
+        if (!$this->isValidUsername($username)) {
+            $this->json(['error' => 'invalid_username'], 400);
+        }
+        if (!$this->isValidEmail($email)) {
+            $this->json(['error' => 'invalid_email'], 400);
+        }
+        if (!$this->isValidPersonName($firstName) || !$this->isValidPersonName($lastName)) {
+            $this->json(['error' => 'invalid_name'], 400);
+        }
+
+        $allowedRoles = ['user', 'admin'];
+        if (!in_array($role, $allowedRoles, true)) {
+            $this->json(['error' => 'invalid_role'], 400);
+        }
+
+        $pwErr = $this->passwordPolicyError($password);
+        if ($pwErr) {
+            $this->json(['error' => 'weak_password', 'message' => $pwErr], 400);
+        }
+
+        $db = new Database();
+        $pdo = $db->connect();
+
+        // Prevent duplicates with friendly error
+        $existsStmt = $pdo->prepare('SELECT 1 FROM users WHERE email = :e OR username = :u');
+        $existsStmt->execute([':e' => $email, ':u' => $username]);
+        if ((bool)$existsStmt->fetchColumn()) {
+            $this->json(['error' => 'already_exists'], 409);
+        }
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO users (username, email, first_name, last_name, password_hash, role, is_blocked) '
+            . 'VALUES (:u, :e, :fn, :ln, :ph, :r, FALSE)'
+        );
+
+        try {
+            $stmt->execute([
+                ':u' => $username,
+                ':e' => $email,
+                ':fn' => $firstName,
+                ':ln' => $lastName,
+                ':ph' => $hash,
+                ':r' => $role,
+            ]);
+        } catch (Throwable $e) {
+            $this->json(['error' => 'failed'], 500);
+        }
+
+        $this->json(['ok' => true]);
     }
 
     public function cats(): void

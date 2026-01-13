@@ -1,0 +1,77 @@
+/* Minimal additions on top of schedule.css */
+
+.admin-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.admin-stat {
+    background: rgb(238, 238, 238);
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    padding: 14px 16px;
+    min-width: 220px;
+    flex: 1;
+}
+
+.admin-stat-label {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 8px;
+}
+
+.admin-stat-value {
+    font-size: 32px;
+    color: #551a8b;
+}
+
+.admin-actions {
+    white-space: nowrap;
+}
+
+.admin-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.admin-badge-blocked {
+    border-color: #d9534f;
+    color: #d9534f;
+}
+
+.admin-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+/* Make the admin table readable with many columns */
+.logs-table table[data-admin-users-table] {
+    table-layout: auto;
+}
+
+/* schedule.css ma globalne th/td:nth-child(...) – resetujemy dla tabeli admina */
+.logs-table table[data-admin-users-table] th,
+.logs-table table[data-admin-users-table] td {
+    width: auto;
+    visibility: visible;
+}
+
+.logs-table table[data-admin-users-table] th:nth-child(3) {
+    visibility: visible;
+}
+
+.logs-table table[data-admin-users-table] th,
+.logs-table table[data-admin-users-table] td {
+    font-size: 16px;
+}
+
+.logs-table table[data-admin-users-table] th {
+    white-space: nowrap;
+}

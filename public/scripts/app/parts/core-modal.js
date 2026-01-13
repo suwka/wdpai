@@ -49,6 +49,7 @@
     const URLS = {
       apiProfile: '/api-profile',
       apiUsers: '/api-users',
+      apiAdminStats: '/api-admin-stats',
       apiCats: '/api-cats',
       apiCat: '/api-cat',
       apiCatPhotos: '/api-cat-photos',
@@ -71,6 +72,11 @@
 
       caregiverAssign: '/caregiver-assign',
       caregiverUnassign: '/caregiver-unassign',
+
+      adminUserUpdate: '/admin-user-update',
+      adminUserCreate: '/admin-user-create',
+      adminUserBlock: '/admin-user-block',
+      adminUserDelete: '/admin-user-delete',
     };
 
     const FILTER_PRESETS = {

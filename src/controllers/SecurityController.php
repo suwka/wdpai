@@ -79,7 +79,7 @@ class SecurityController extends AppController {
             return $this->render('login');
         }
 
-        $email = trim((string)($_POST['email'] ?? ''));
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
         $password = (string)($_POST['password'] ?? '');
 
         // Do not reveal whether email or password was wrong.
@@ -100,13 +100,28 @@ class SecurityController extends AppController {
             return $this->render('login', $genericLoginError);
         }
 
+        if ($user->isBlocked()) {
+            return $this->render('login', ['messages' => ['Konto jest zablokowane.']]);
+        }
+
         // Sesja (dla uploadów i uprawnień)
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['role'] = $user->getRole();
         $_SESSION['username'] = $user->getUsername();
 
+        // Audit: last login
+        try {
+            $db = new Database();
+            $pdo = $db->connect();
+            $stmt = $pdo->prepare('UPDATE users SET last_login_at = NOW(), updated_at = NOW() WHERE id = :id');
+            $stmt->execute([':id' => $user->getId()]);
+        } catch (Throwable $e) {
+            // ignore audit failures
+        }
+
         $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}/dashboard");
+        $target = ($user->getRole() === 'admin') ? '/admin' : '/dashboard';
+        header("Location: {$url}{$target}");
     }
 
     public function register() {
@@ -115,7 +130,7 @@ class SecurityController extends AppController {
         }
 
         $username = trim($_POST['username'] ?? '');
-        $email = trim((string)($_POST['email'] ?? ''));
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
         $password = (string)($_POST['password1'] ?? '');
         $confirmedPassword = (string)($_POST['password2'] ?? '');
         $firstname = trim((string)($_POST['firstname'] ?? ''));

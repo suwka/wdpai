@@ -13,6 +13,7 @@
     '/public/scripts/app/parts/details-gallery-controls.js',
     '/public/scripts/app/parts/logs-page.js',
     '/public/scripts/app/parts/schedule-page.js',
+    '/public/scripts/app/parts/admin-page.js',
     '/public/scripts/app/parts/handlers.js',
     '/public/scripts/app/bootstrap.js',
   ];

@@ -21,6 +21,7 @@
     try { parts.detailsGalleryControls?.(ctx); } catch (e) { console.warn('detailsGalleryControls failed', e); }
     try { parts.logsPage?.(ctx); } catch (e) { console.warn('logsPage failed', e); }
     try { parts.schedulePage?.(ctx); } catch (e) { console.warn('schedulePage failed', e); }
+    try { parts.adminPage?.(ctx); } catch (e) { console.warn('adminPage failed', e); }
     try { parts.handlers?.(ctx); } catch (e) { console.warn('handlers failed', e); }
   };
 })();

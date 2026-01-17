@@ -1,4 +1,9 @@
-// Bootstraps all app modules (loaded by public/scripts/main.js)
+/*
+ * bootstrap.js
+ *
+ * Punkt startowy frontendu: tworzy kontekst aplikacji (AppCore) i uruchamia
+ * dostępne moduły stron/komponentów.
+ */
 (function () {
   window.AppBootstrap = function () {
     const ctx = window.AppCore?.createContext?.();
@@ -7,7 +12,6 @@
       return;
     }
 
-    // Run modules if present (order matters a bit: core context -> user context -> pages)
     const parts = window.AppParts || {};
 
     try { parts.userContext?.(ctx); } catch (e) { console.warn('userContext failed', e); }

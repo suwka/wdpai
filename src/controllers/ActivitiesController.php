@@ -1,48 +1,15 @@
 <?php
 
+/**
+ * ActivitiesController
+ *
+ * Kontroler HTML dla aktywności (terminarz) – tworzenie i aktualizacja wpisów.
+ */
+
 require_once __DIR__ . '/AppController.php';
-require_once __DIR__ . '/../Database.php';
 
 class ActivitiesController extends AppController
 {
-    private function requireLogin(): string
-    {
-        $userId = $_SESSION['user_id'] ?? null;
-        if (!$userId) {
-            $url = "http://$_SERVER[HTTP_HOST]";
-            header("Location: {$url}/login");
-            exit;
-        }
-
-        return $userId;
-    }
-
-    private function isAdmin(): bool
-    {
-        return ($_SESSION['role'] ?? null) === 'admin';
-    }
-
-    private function redirect(string $path): void
-    {
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}{$path}");
-        exit;
-    }
-
-    private function canAccessCat(PDO $pdo, string $userId, string $catId): bool
-    {
-        if ($this->isAdmin()) return true;
-
-        $stmt = $pdo->prepare(
-            'SELECT 1 '
-            . 'FROM cats c '
-            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
-            . 'WHERE c.id = :cid AND (c.owner_id = :uid OR cc.user_id IS NOT NULL)'
-        );
-        $stmt->execute([':cid' => $catId, ':uid' => $userId]);
-        return (bool)$stmt->fetchColumn();
-    }
-
     public function create(): void
     {
         $userId = $this->requireLogin();
@@ -68,13 +35,11 @@ class ActivitiesController extends AppController
             $this->redirect('/details?cat_id=' . urlencode($catId) . '&err=invalid_datetime');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         if (!$this->canAccessCat($pdo, $userId, $catId)) {
-            http_response_code(403);
-            echo 'Forbidden';
-            exit;
+            $this->response->text('Forbidden', 403);
+            return;
         }
 
         $startsAt = $dt->format('Y-m-d H:i:s');
@@ -130,8 +95,7 @@ class ActivitiesController extends AppController
             $this->redirect('/details?cat_id=' . urlencode($catId) . '&err=invalid_datetime');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         if (!$this->canAccessCat($pdo, $userId, $catId)) {
             http_response_code(403);
@@ -139,7 +103,6 @@ class ActivitiesController extends AppController
             exit;
         }
 
-        // Ensure activity belongs to this cat (and exists)
         $check = $pdo->prepare('SELECT 1 FROM activities WHERE id = :id AND cat_id = :cid');
         $check->execute([':id' => $activityId, ':cid' => $catId]);
         if (!(bool)$check->fetchColumn()) {

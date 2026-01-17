@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * User
+ *
+ * Model domenowy użytkownika (encja). Przechowuje dane i udostępnia gettery
+ * wykorzystywane przez kontrolery/repozytoria.
+ */
+
 class User {
     private string $id;
     private string $username;

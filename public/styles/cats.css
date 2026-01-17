@@ -1,3 +1,4 @@
+/* Styles: cats.css */
 body {
     min-height: 100vh;
     margin: 0; 
@@ -122,7 +123,6 @@ html {
 }
 
 
-/* pimary content */
 .section-tittle {
     display: flex;
     justify-content: left;
@@ -144,7 +144,6 @@ html {
 }
 
 
-/* karty */
 .cat-card {
     flex: 1 0 300px;
     margin: 0;
@@ -162,8 +161,8 @@ html {
 .cat-card:hover {
     cursor: pointer;
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* delikatny cien */
-    background-color: rgba(0, 0, 0, 0.062); /* opcjonalnie rozjasnienie tla */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); 
+    background-color: rgba(0, 0, 0, 0.062); 
 }
 
 .cat-image {
@@ -243,7 +242,7 @@ html {
 }
 
 @media (max-width: 1300px) {
-    /* bydom zmiany tu nie */
+    
 }
 
 @media (max-width: 700px) {

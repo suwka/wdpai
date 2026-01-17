@@ -1,3 +1,5 @@
+/* modul kontrolek galerii szczegolow */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -76,11 +78,8 @@
                 const form = new URLSearchParams();
                 form.set('cat_id', catId);
                 orderIds.forEach((id) => form.append('order[]', id));
-                fetch(ctx.URLS.catPhotosReorder, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                  body: form.toString(),
-                }).catch(() => {});
+                ctx.apiPostUrlEncoded(ctx.URLS.catPhotosReorder, form)
+                  .catch((e2) => console.warn('reorder failed', e2));
               }
             },
           });
@@ -114,11 +113,8 @@
                 const form = new URLSearchParams();
                 form.set('cat_id', catId);
                 form.set('photo_id', photoId);
-                fetch(ctx.URLS.catPhotoDelete, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                  body: form.toString(),
-                }).catch(() => {});
+                ctx.apiPostUrlEncoded(ctx.URLS.catPhotoDelete, form)
+                  .catch((e2) => console.warn('delete photo failed', e2));
               }
               return;
             }

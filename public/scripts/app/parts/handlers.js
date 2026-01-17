@@ -1,3 +1,5 @@
+/* Global UI event handlers module. */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -36,7 +38,6 @@
           });
         })
         .catch(() => {
-          // no-op
         });
     }
 
@@ -76,7 +77,6 @@
           });
         })
         .catch(() => {
-          // no-op
         });
     }
 
@@ -147,8 +147,6 @@
       return frag;
     }
 
-
-    // Confirm delete cat (settings)
     document.addEventListener('submit', (e) => {
       const form = e.target?.closest?.('form[data-cat-delete]');
       if (!form) return;
@@ -172,10 +170,7 @@
         onOkCb: () => form.submit(),
       });
     });
-
-    // Global click delegation
     document.addEventListener('click', (e) => {
-      // Dashboard cards navigation
       const dashboardCard = e.target.closest('.card[data-dashboard-card]');
       if (dashboardCard) {
         e.preventDefault();
@@ -192,7 +187,6 @@
         }
       }
 
-      // Cats page: action buttons
       const catsDescBtn = e.target.closest('.icon-btn[data-cat-action="desc"]');
       if (catsDescBtn && catsDescBtn.closest('.cat-card')) {
         e.preventDefault();
@@ -269,7 +263,6 @@
               }
             })
             .catch(() => {
-              // no-op
             });
 
           ctx.openModal({ title: 'Account', bodyNode: node, okText: 'Save', cancelText: 'Close' });
@@ -343,26 +336,14 @@
         return;
       }
     });
-
-    // Modal form submit -> POST -> reload
     document.addEventListener('submit', (e) => {
       if (!e.target.matches('form[data-modal-form]')) return;
 
       e.preventDefault();
       const form = e.target;
 
-      fetch(form.action, {
-        method: form.method,
-        body: new FormData(form)
-      }).then((r) => {
-        // Keep server redirects (e.g. /settings?err=...) instead of losing the query string.
-        if (r.ok) {
-          if (r.redirected && r.url) {
-            window.location.href = r.url;
-            return;
-          }
-          window.location.reload();
-        }
+      ctx.submitForm(form).catch((e2) => {
+        console.warn('form submit failed', e2);
       });
     });
   };

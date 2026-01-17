@@ -1,3 +1,5 @@
+/* Gallery upload helper module. */
+
 (function () {
   window.AppParts = window.AppParts || {};
 

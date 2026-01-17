@@ -1,189 +1,141 @@
 <?php
 
+/**
+ * SecurityController
+ *
+ * Kontroler bezpieczeństwa: logowanie, rejestracja, wylogowanie oraz aktualizacja profilu/hasła.
+ * Korzysta z repozytorium użytkowników i wspólnej walidacji (Validator).
+ */
+
 require_once __DIR__ . '/AppController.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../Database.php';
+require_once __DIR__ . '/../utils/Validator.php';
 
 class SecurityController extends AppController {
 
-    private $userRepository;
+    private UserRepository $userRepository;
 
-    public function __construct()
+    public function __construct(?UserRepository $userRepository = null)
     {
         parent::__construct();
-        $this->userRepository = new UserRepository();
-    }
-
-    private function isValidEmail(string $email): bool
-    {
-        $email = trim($email);
-        if ($email === '' || strlen($email) > 254) return false;
-        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-    }
-
-    private function isValidUsername(string $username): bool
-    {
-        $username = trim($username);
-        // Prevent weird input / "SQL injection" attempts by allowing a strict safe set.
-        // 3-30 chars: letters, digits, dot, underscore, dash.
-        if ($username === '' || strlen($username) < 3 || strlen($username) > 30) return false;
-        return (bool)preg_match('/^[a-zA-Z0-9._-]{3,30}$/', $username);
-    }
-
-    private function isValidPersonName(string $name): bool
-    {
-        $name = trim($name);
-        if ($name === '' || mb_strlen($name) > 50) return false;
-        // Letters + spaces + hyphen only.
-        return (bool)preg_match('/^[\p{L}][\p{L} \-]{0,49}$/u', $name);
-    }
-
-    private function passwordPolicyError(string $password, ?string $username = null, ?string $email = null): ?string
-    {
-        $password = (string)$password;
-        $len = strlen($password);
-        if ($len < 8 || $len > 64) {
-            return 'Hasło musi mieć 8–64 znaki.';
-        }
-        if (preg_match('/\s/', $password)) {
-            return 'Hasło nie może zawierać spacji.';
-        }
-        if (!preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
-            return 'Hasło jest za słabe: dodaj małą literę, dużą literę, cyfrę i znak specjalny.';
-        }
-
-        $normalized = strtolower(preg_replace('/[^a-z0-9]+/', '', $password));
-        if (str_contains($normalized, 'pantadeusz')) {
-            return 'Hasło jest zbyt łatwe (nie używaj prostych fraz).';
-        }
-
-        if ($username) {
-            $u = strtolower(preg_replace('/[^a-z0-9]+/', '', $username));
-            if ($u !== '' && str_contains($normalized, $u)) {
-                return 'Hasło nie może zawierać nazwy użytkownika.';
-            }
-        }
-        if ($email) {
-            $local = strtolower(preg_replace('/[^a-z0-9]+/', '', explode('@', $email)[0] ?? ''));
-            if ($local !== '' && str_contains($normalized, $local)) {
-                return 'Hasło nie może zawierać emaila.';
-            }
-        }
-
-        return null;
+        $this->userRepository = $userRepository ?? new UserRepository();
     }
 
     public function login() {
         if (!$this->isPost()) {
-            return $this->render('login');
+            $this->render('login');
+            return;
         }
 
-        $email = strtolower(trim((string)($_POST['email'] ?? '')));
-        $password = (string)($_POST['password'] ?? '');
+        $post = $this->request->post();
+        $email = strtolower(trim((string)($post['email'] ?? '')));
+        $password = (string)($post['password'] ?? '');
 
-        // Do not reveal whether email or password was wrong.
         $genericLoginError = ['messages' => ['Błędny email lub hasło.']];
 
         if ($email === '' || trim($password) === '') {
-            return $this->render('login', $genericLoginError);
+            $this->render('login', $genericLoginError);
+            return;
         }
 
         $user = $this->userRepository->getUserByEmail($email);
 
         if (!$user) {
-            return $this->render('login', $genericLoginError);
+            $this->render('login', $genericLoginError);
+            return;
         }
 
-        // Weryfikacja hashu hasła
         if (!password_verify($password, $user->getPasswordHash())) {
-            return $this->render('login', $genericLoginError);
+            $this->render('login', $genericLoginError);
+            return;
         }
 
         if ($user->isBlocked()) {
-            return $this->render('login', ['messages' => ['Konto jest zablokowane.']]);
+            $this->render('login', ['messages' => ['Konto jest zablokowane.']]);
+            return;
         }
 
-        // Sesja (dla uploadów i uprawnień)
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['role'] = $user->getRole();
         $_SESSION['username'] = $user->getUsername();
 
-        // Audit: last login
         try {
-            $db = new Database();
-            $pdo = $db->connect();
+            $pdo = $this->db();
             $stmt = $pdo->prepare('UPDATE users SET last_login_at = NOW(), updated_at = NOW() WHERE id = :id');
             $stmt->execute([':id' => $user->getId()]);
         } catch (Throwable $e) {
-            // ignore audit failures
         }
 
-        $url = "http://$_SERVER[HTTP_HOST]";
         $target = ($user->getRole() === 'admin') ? '/admin' : '/dashboard';
-        header("Location: {$url}{$target}");
+        $this->response->redirect($target);
     }
 
     public function register() {
         if (!$this->isPost()) {
-            return $this->render('register');
+            $this->render('register');
+            return;
         }
 
-        $username = trim($_POST['username'] ?? '');
-        $email = strtolower(trim((string)($_POST['email'] ?? '')));
-        $password = (string)($_POST['password1'] ?? '');
-        $confirmedPassword = (string)($_POST['password2'] ?? '');
-        $firstname = trim((string)($_POST['firstname'] ?? ''));
-        $lastname = trim((string)($_POST['lastname'] ?? ''));
+        $post = $this->request->post();
+        $username = trim((string)($post['username'] ?? ''));
+        $email = strtolower(trim((string)($post['email'] ?? '')));
+        $password = (string)($post['password1'] ?? '');
+        $confirmedPassword = (string)($post['password2'] ?? '');
+        $firstname = trim((string)($post['firstname'] ?? ''));
+        $lastname = trim((string)($post['lastname'] ?? ''));
 
-        if (!$this->isValidUsername($username)) {
-            return $this->render('register', ['messages' => ['Niepoprawna nazwa użytkownika.']]);
+        if (!Validator::isValidUsername($username)) {
+            $this->render('register', ['messages' => ['Niepoprawna nazwa użytkownika.']]);
+            return;
         }
 
-        if (!$this->isValidEmail($email)) {
-            return $this->render('register', ['messages' => ['Niepoprawny email.']]);
+        if (!Validator::isValidEmail($email)) {
+            $this->render('register', ['messages' => ['Niepoprawny email.']]);
+            return;
         }
 
-        if (!$this->isValidPersonName($firstname)) {
-            return $this->render('register', ['messages' => ['Niepoprawne imię.']]);
+        if (!Validator::isValidPersonName($firstname)) {
+            $this->render('register', ['messages' => ['Niepoprawne imię.']]);
+            return;
         }
-        if (!$this->isValidPersonName($lastname)) {
-            return $this->render('register', ['messages' => ['Niepoprawne nazwisko.']]);
+        if (!Validator::isValidPersonName($lastname)) {
+            $this->render('register', ['messages' => ['Niepoprawne nazwisko.']]);
+            return;
         }
 
-        // Required checks requested: username exists / email exists / weak password
         if ($this->userRepository->getUserByUsername($username)) {
-            return $this->render('register', ['messages' => ['Użytkownik o tym nicku już istnieje.']]);
+            $this->render('register', ['messages' => ['Użytkownik o tym nicku już istnieje.']]);
+            return;
         }
 
         if ($this->userRepository->getUserByEmail($email)) {
-            return $this->render('register', ['messages' => ['Użytkownik o tym mailu już istnieje.']]);
+            $this->render('register', ['messages' => ['Użytkownik o tym mailu już istnieje.']]);
+            return;
         }
 
         if ($password !== $confirmedPassword) {
-            return $this->render('register', ['messages' => ['Hasła nie są identyczne.']]);
+            $this->render('register', ['messages' => ['Hasła nie są identyczne.']]);
+            return;
         }
 
-        $pwErr = $this->passwordPolicyError($password, $username, $email);
+        $pwErr = Validator::passwordPolicyError($password, $username, $email);
         if ($pwErr) {
-            return $this->render('register', ['messages' => ['Za słabe hasło.']]);
+            $this->render('register', ['messages' => ['Za słabe hasło.']]);
+            return;
         }
 
-        // Haszujemy hasło
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         $user = new User($username, $email, $passwordHash, $firstname, $lastname);
 
         $this->userRepository->addUser($user);
 
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}/login");
-        exit;
+        $this->response->redirect('/login');
     }
 
     public function logout(): void
     {
-        // Bezpieczne wylogowanie
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
@@ -199,28 +151,7 @@ class SecurityController extends AppController {
         }
         session_destroy();
 
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}/login");
-        exit;
-    }
-
-    private function requireLogin(): string
-    {
-        $userId = $_SESSION['user_id'] ?? null;
-        if (!$userId) {
-            $url = "http://$_SERVER[HTTP_HOST]";
-            header("Location: {$url}/login");
-            exit;
-        }
-
-        return $userId;
-    }
-
-    private function redirect(string $path): void
-    {
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}{$path}");
-        exit;
+        $this->response->redirect('/login');
     }
 
     public function updateProfile(): void
@@ -234,13 +165,11 @@ class SecurityController extends AppController {
         $firstName = trim($_POST['first_name'] ?? '');
         $lastName = trim($_POST['last_name'] ?? '');
 
-        // Username is NOT changeable (only name fields)
         if ($firstName === '' || $lastName === '') {
             $this->redirect('/settings?err=profile');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         $stmt = $pdo->prepare('UPDATE users SET first_name = :fn, last_name = :ln, updated_at = NOW() WHERE id = :id');
         $stmt->execute([
@@ -267,8 +196,7 @@ class SecurityController extends AppController {
             $this->redirect('/settings?err=pw');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = :id');
         $stmt->execute([':id' => $userId]);
@@ -358,10 +286,8 @@ class SecurityController extends AppController {
             $this->redirect('/settings?err=pw');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
-        // If password change requested, verify old password first.
         if ($wantsPasswordChange) {
             $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = :id');
             $stmt->execute([':id' => $userId]);
@@ -371,7 +297,6 @@ class SecurityController extends AppController {
             }
         }
 
-        // Optional avatar upload.
         $avatarPath = null;
         $avatarFile = $_FILES['avatar'] ?? [];
         $hasAvatarFile = isset($avatarFile['tmp_name']) && ($avatarFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
@@ -387,7 +312,6 @@ class SecurityController extends AppController {
             $avatarPath = '/public/uploads/avatars/' . $fileName;
         }
 
-        // Update name (+ optional password, optional avatar) in one transaction.
         $pdo->beginTransaction();
         try {
             if ($wantsNameUpdate) {

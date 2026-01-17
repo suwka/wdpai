@@ -1,3 +1,5 @@
+/* modul ladowania danych strony kategorii */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -59,7 +61,6 @@
             const caregiversBtn = card.querySelector('.icon-btn[data-cat-action="caregivers"]');
             if (caregiversBtn) caregiversBtn.hidden = !isOwner;
 
-            // For caregivers: clicking the card should still open details, but without edit flows.
             if (!isOwner) {
               const editLikeHref = '/details' + (id ? `?cat_id=${encodeURIComponent(id)}` : '');
               if (editLink) editLink.setAttribute('href', editLikeHref);

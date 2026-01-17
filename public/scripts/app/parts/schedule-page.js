@@ -1,3 +1,5 @@
+/* Schedule page module. */
+
 (function () {
   window.AppParts = window.AppParts || {};
 

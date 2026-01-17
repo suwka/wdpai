@@ -1,14 +1,38 @@
 <?php
+
+/**
+ * Bootstrap aplikacji.
+ *
+ * Odpowiada wyłącznie za start sesji, rejestrację globalnej obsługi błędów
+ * oraz uruchomienie routingu na podstawie obiektu Request.
+ */
 session_start();
-// Wymagamy naszego (nowego) pliku z logiką wyświetlania
+
+require_once __DIR__ . '/src/ErrorHandler.php';
+require_once __DIR__ . '/src/Http/Request.php';
+
+ErrorHandler::register(function (): bool {
+	$uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+	$path = (string)(parse_url($uri, PHP_URL_PATH) ?? '');
+	$path = strtolower(trim($path, '/'));
+
+	if ($path === '' || $path === 'login' || $path === 'register') {
+		return false;
+	}
+
+	if (str_starts_with($path, 'api-')) {
+		return true;
+	}
+
+	$accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+	if (str_contains($accept, 'application/json')) {
+		return true;
+	}
+
+	$xhr = strtolower((string)($_SERVER['HTTP_X_REQUESTED_WITH'] ?? ''));
+	return $xhr === 'xmlhttprequest';
+});
 require_once 'Routing.php';
 
-// 1. Odbierz ścieżkę (URL) od użytkownika
-$path = $_SERVER['REQUEST_URI'];
-
-// 2. Oczyść ścieżkę: usuń parametry, zamień na małe litery i usuń ukośniki
-$path = parse_url($path, PHP_URL_PATH);
-$path = strtolower(trim($path, '/'));
-
-// 3. Uruchom prosty router
-Routing::run($path);
+$request = Request::fromGlobals();
+Routing::run($request);

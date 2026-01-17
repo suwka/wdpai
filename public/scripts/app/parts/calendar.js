@@ -1,3 +1,5 @@
+/* modul widzetu kalendarza */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -147,7 +149,6 @@
             });
           })
           .catch(() => {
-            // ignore
           });
       }
 

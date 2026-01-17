@@ -1,3 +1,5 @@
+/* modul sekcji kategorii ustawien */
+
 (function () {
   window.AppParts = window.AppParts || {};
 

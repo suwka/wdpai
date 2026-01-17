@@ -1,3 +1,5 @@
+/* modul strony logow */
+
 (function () {
   window.AppParts = window.AppParts || {};
 

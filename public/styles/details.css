@@ -1,3 +1,4 @@
+/* Styles: details.css */
 body {
     min-height: 100vh;
     margin: 0; 
@@ -9,7 +10,7 @@ body {
     height: 10vh;
 }
 
-/* nagłówek górnego menu, tło i ułożenie elementów*/
+
 .header {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -19,7 +20,7 @@ body {
     width: 100%;
 }
 
-/* user1, avatar, dzwonek i logout w nagłówku */
+
 .option-bar ul {
     list-style-type: none;
     display: flex;
@@ -45,20 +46,20 @@ body {
     color: inherit;
 }
 
- /*zachowanie avataru w nagłówku*/
+ 
 .small-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
 }
 
-/* tytuł dashboardu */
+
 .tittle {
     font-size: 3rem;
     margin-left: 50px;
 }
 
-/*stopka dolnego menu, tło i zachowanie*/
+
 .footer {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -70,7 +71,7 @@ body {
     width: 100%;
 }
 
-/* dolne menu */
+
 .menu-bar ul {
     list-style-type: none;
     width: 100%;
@@ -96,7 +97,7 @@ body {
     color: #551a8b;
 }
 
-/* główna zawartość dashboardu */
+
 .main-content {
     flex: 1;
     overflow-y: auto;
@@ -104,7 +105,7 @@ body {
     box-sizing: border-box;
 }
 
-/* tytul podstrony */
+
 .box_top {
     display: flex;
     justify-content: space-between;
@@ -146,7 +147,7 @@ body {
     font-size: 1rem;
 }
 
-/* GALERIA ZDJEC NIE?? */
+
 .image-box {
     display: flex;
     justify-content: center;
@@ -219,7 +220,6 @@ body {
 }
 
 
-/* tutaj zdjecie kocura, imie, rasa, wiek */
 .cat-description {
     display: flex;
     flex-direction: row;
@@ -258,11 +258,11 @@ body {
     margin-left: 2rem;
 }
 
-/* opis kocura */
+
 .cat-details-cards {
     display: flex;
     flex-direction: column;
-    /* margin: 10px 0px; */
+    
 }
 
 
@@ -304,15 +304,12 @@ body {
 }
 
 
-
-
-/* przycisk na dole strony */
 .box_bottom {
     display: flex;
     justify-content: center;
     padding: 20px;
     margin-top: 20px;
-    /* bez position: fixed */
+    
 }
 
 .view-activity-log {
@@ -326,7 +323,6 @@ body {
 }
 
 
-
 .cat-description > a {
     margin-left: auto;
     margin-right: 2rem;
@@ -337,7 +333,6 @@ body {
     text-decoration: none;
     gap: 5px;
 }
-
 
 
 .primary-content {
@@ -359,7 +354,6 @@ body {
 }
 
 
-/* zapewnienie pełnej wysokości strony */
 html {
     height: 100%;
 }
@@ -424,10 +418,6 @@ html {
     .all-images {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
-    }
-
-    .singlepicture:nth-child(n+5) {
-        display: none;
     }
 
     .box_bottom {

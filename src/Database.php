@@ -1,10 +1,16 @@
 <?php
 
+/**
+ * Database
+ *
+ * Prosta klasa do tworzenia połączenia PDO z PostgreSQL.
+ */
+
 class Database {
-    private $username;
-    private $password;
-    private $host;
-    private $database;
+    private string $username;
+    private string $password;
+    private string $host;
+    private string $database;
 
     public function __construct() {
         $this->username = 'docker';
@@ -13,7 +19,7 @@ class Database {
         $this->database = 'cats_db';
     }
 
-    public function connect() {
+    public function connect(): PDO {
         try {
             $conn = new PDO(
                 "pgsql:host=$this->host;port=5432;dbname=$this->database",
@@ -22,10 +28,12 @@ class Database {
                 ["sslmode" => "prefer"]
             );
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
             return $conn;
         }
         catch(PDOException $e) {
-            die("Connection failed: " . $e->getMessage());
+            throw new RuntimeException('Database connection failed.', 0, $e);
         }
     }
 }

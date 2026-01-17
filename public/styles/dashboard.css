@@ -1,3 +1,4 @@
+/* Styles: dashboard.css */
 body {
     min-height: 100vh;
     margin: 0; 
@@ -9,7 +10,7 @@ body {
     height: 10vh;
 }
 
-/* nagłówek górnego menu, tło i ułożenie elementów*/
+
 .header {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -19,7 +20,7 @@ body {
     width: 100%;
 }
 
-/* user1, avatar, dzwonek i logout w nagłówku */
+
 .option-bar ul {
     list-style-type: none;
     display: flex;
@@ -45,20 +46,20 @@ body {
     color: inherit;
 }
 
- /*zachowanie avataru w nagłówku*/
+ 
 .small-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
 }
 
-/* tytuł dashboardu */
+
 .tittle {
     font-size: 3rem;
     margin-left: 50px;
 }
 
-/*stopka dolnego menu, tło i zachowanie*/
+
 .footer {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -70,7 +71,7 @@ body {
     width: 100%;
 }
 
-/* dolne menu */
+
 .menu-bar ul {
     list-style-type: none;
     width: 100%;
@@ -96,7 +97,7 @@ body {
     color: #551a8b;
 }
 
-/* główna zawartość dashboardu */
+
 .main-content {
     flex: 1;
     overflow-y: auto;
@@ -107,7 +108,7 @@ body {
     gap: 20px;
 }
 
-/* białe boxy sekcji */
+
 .section-box {
     background-color: white;
     border-radius: 20px;
@@ -122,7 +123,7 @@ body {
     box-shadow: none;
 }
 
-/* tytul podstrony */
+
 .box_primary {
     display: flex;
     justify-content: space-between;
@@ -141,7 +142,7 @@ body {
     font-size: 1rem;
 }
 
-/* TUTAJ KOTY SA PRZEGLAD KUMALSKI */
+
 .box_middle {
     margin-bottom: 20px;
 }
@@ -208,7 +209,7 @@ body {
     color: #888;
 }
     
-/* 2/2 TUTAJ SOM AKTYWNOSCI NIE?? */
+
 
 .activity-card {
     display: flex;
@@ -318,7 +319,7 @@ body {
     align-items: flex-start;
     padding: 20px 30px 0 30px;
 }
-/* KALENDARZ */
+
 .calendar-container {
     width: 100%;
     max-width: 100%;
@@ -466,8 +467,6 @@ body {
 }
 
 
-
-/* zapewnienie pełnej wysokości strony */
 html {
     height: 100%;
 }
@@ -575,7 +574,7 @@ html {
         display: none;
     }
 
-    /* Kalendarz i activities dla widoku mobilnego */
+    
     .box_top {
         display: flex;
         flex-direction: column;
@@ -645,7 +644,7 @@ html {
         width: calc(100% - 2px);
     }
 
-    /* Ukryj karty powyżej 3 na widoku mobilnym */
+    
     .card-activity-info > .activity-card:nth-child(n+4) {
         display: none;
     }
@@ -667,11 +666,11 @@ html {
 }
 
 
-.items-card::-webkit-scrollbar {   /* Chrome / Edge / Safari */
+.items-card::-webkit-scrollbar {   
     display: none;
 }
 
-.activity-column::-webkit-scrollbar {   /* Chrome / Edge / Safari */
+.activity-column::-webkit-scrollbar {   
     display: none;
 }
 

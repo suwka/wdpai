@@ -1,3 +1,5 @@
+/* User context bootstrap (profile, nav, visibility). */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -29,7 +31,6 @@
               img.src = avatarFallback;
             };
 
-            // Make avatar act as a link to settings (on every view)
             img.style.cursor = 'pointer';
             if (img.getAttribute('data-avatar-settings-bound') === '1') return;
             img.setAttribute('data-avatar-settings-bound', '1');
@@ -80,7 +81,6 @@
           });
         })
         .catch(() => {
-          // ignore
         });
     })();
   };

@@ -1,3 +1,5 @@
+/* Caregivers page module. */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -16,19 +18,7 @@
     const addBtn = document.querySelector('[data-caregiver-add]');
 
     function apiPostForm(url, formData) {
-      return fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' },
-      }).then((r) => {
-        if (!r.ok) {
-          return r.json().catch(() => ({})).then((j) => {
-            const msg = j?.error ? String(j.error) : ('HTTP ' + r.status);
-            throw new Error(msg);
-          });
-        }
-        return r.json();
-      });
+      return ctx.apiPostFormData(url, formData);
     }
 
     function clearRows() {
@@ -98,8 +88,6 @@
       }
 
       form.setAttribute('data-modal-form', '');
-
-      // Fill caregivers
       const userFirst = userSel.querySelector('[data-caregivers-assign-user-first]');
       userSel.innerHTML = '';
       if (userFirst) userSel.appendChild(userFirst);
@@ -164,7 +152,6 @@
         });
     }
 
-    // Click delegation for assign/unassign
     document.addEventListener('click', (e) => {
       const unassignBtn = e.target.closest('[data-caregivers-remove]');
       if (unassignBtn) {

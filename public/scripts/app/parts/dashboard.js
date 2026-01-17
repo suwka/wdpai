@@ -1,3 +1,5 @@
+/* Dashboard page module. */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -10,7 +12,7 @@
       const frag = ctx.cloneTemplate(tplId);
       const el = frag?.firstElementChild || frag?.querySelector?.('*');
       if (!host || !el) return;
-      try { fillCb?.(el); } catch { /* ignore */ }
+      try { fillCb?.(el); } catch {}
       host.appendChild(el);
     }
 

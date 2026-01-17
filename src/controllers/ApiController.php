@@ -1,26 +1,26 @@
 <?php
 
+/**
+ * ApiController
+ *
+ * Kontroler API (JSON). Odpowiada za endpointy pobierające i modyfikujące dane
+ * z użyciem sesji (401/403) i zwracaniem spójnych odpowiedzi JSON.
+ */
+
 require_once __DIR__ . '/AppController.php';
-require_once __DIR__ . '/../Database.php';
+require_once __DIR__ . '/../utils/Validator.php';
 
 class ApiController extends AppController
 {
     private const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
-    private function requireLogin(): string
+
+    protected function requireLogin(): string
     {
         $userId = $_SESSION['user_id'] ?? null;
         if (!$userId) {
-            http_response_code(401);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['error' => 'unauthorized']);
-            exit;
+            $this->json(['error' => 'unauthorized'], 401);
         }
         return $userId;
-    }
-
-    private function isAdmin(): bool
-    {
-        return ($_SESSION['role'] ?? null) === 'admin';
     }
 
     private function requireAdmin(): void
@@ -31,63 +31,14 @@ class ApiController extends AppController
         }
     }
 
-    private function isValidEmail(string $email): bool
-    {
-        $email = trim($email);
-        if ($email === '' || strlen($email) > 254) return false;
-        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-    }
-
-    private function isValidUsername(string $username): bool
-    {
-        $username = trim($username);
-        if ($username === '' || strlen($username) < 3 || strlen($username) > 30) return false;
-        return (bool)preg_match('/^[a-zA-Z0-9._-]{3,30}$/', $username);
-    }
-
-    private function isValidPersonName(string $name): bool
-    {
-        $name = trim($name);
-        if ($name === '' || mb_strlen($name) > 50) return false;
-        return (bool)preg_match('/^[\p{L}][\p{L} \-]{0,49}$/u', $name);
-    }
-
     private function passwordPolicyError(string $password): ?string
     {
-        $password = (string)$password;
-        $len = strlen($password);
-        if ($len < 8 || $len > 64) {
-            return 'Hasło musi mieć 8–64 znaki.';
-        }
-        if (preg_match('/\s/', $password)) {
-            return 'Hasło nie może zawierać spacji.';
-        }
-        if (!preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
-            return 'Hasło jest za słabe.';
-        }
-        return null;
+        return Validator::passwordPolicyError($password);
     }
 
     private function json(array $payload, int $code = 200): void
     {
-        http_response_code($code);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    private function canAccessCat(PDO $pdo, string $userId, string $catId): bool
-    {
-        if ($this->isAdmin()) return true;
-
-        $stmt = $pdo->prepare(
-            'SELECT 1 '
-            . 'FROM cats c '
-            . 'LEFT JOIN cat_caregivers cc ON cc.cat_id = c.id AND cc.user_id = :uid '
-            . 'WHERE c.id = :cid AND (c.owner_id = :uid OR cc.user_id IS NOT NULL)'
-        );
-        $stmt->execute([':cid' => $catId, ':uid' => $userId]);
-        return (bool)$stmt->fetchColumn();
+        $this->response->json($payload, $code);
     }
 
     public function catActivities(): void
@@ -365,7 +316,6 @@ class ApiController extends AppController
             $params[':ph'] = password_hash($newPassword, PASSWORD_DEFAULT);
         }
 
-        // Cannot edit default admin account here
         $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
         $emailStmt->execute([':id' => $userId]);
         $email = (string)($emailStmt->fetchColumn() ?? '');
@@ -434,7 +384,6 @@ class ApiController extends AppController
             $this->json(['error' => 'protected_account'], 403);
         }
 
-        // Safety: do not allow deleting last admin
         $roleStmt = $pdo->prepare('SELECT role FROM users WHERE id = :id');
         $roleStmt->execute([':id' => $userId]);
         $role = (string)($roleStmt->fetchColumn() ?? '');
@@ -463,13 +412,13 @@ class ApiController extends AppController
         $role = trim((string)($_POST['role'] ?? 'user'));
         $password = (string)($_POST['password'] ?? '');
 
-        if (!$this->isValidUsername($username)) {
+        if (!Validator::isValidUsername($username)) {
             $this->json(['error' => 'invalid_username'], 400);
         }
-        if (!$this->isValidEmail($email)) {
+        if (!Validator::isValidEmail($email)) {
             $this->json(['error' => 'invalid_email'], 400);
         }
-        if (!$this->isValidPersonName($firstName) || !$this->isValidPersonName($lastName)) {
+        if (!Validator::isValidPersonName($firstName) || !Validator::isValidPersonName($lastName)) {
             $this->json(['error' => 'invalid_name'], 400);
         }
 
@@ -486,7 +435,6 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        // Prevent duplicates with friendly error
         $existsStmt = $pdo->prepare('SELECT 1 FROM users WHERE email = :e OR username = :u');
         $existsStmt->execute([':e' => $email, ':u' => $username]);
         if ((bool)$existsStmt->fetchColumn()) {
@@ -537,7 +485,6 @@ class ApiController extends AppController
             $this->json(['items' => $rows]);
         }
 
-        // Default scope: cats owned by me OR where I am assigned as caregiver
         $stmt = $pdo->prepare(
             'SELECT c.id, c.owner_id, c.name, c.breed, c.age, c.description, c.avatar_path, '
             . '(CASE WHEN c.owner_id = :uid THEN 1 ELSE 0 END) AS is_owner '
@@ -606,8 +553,6 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        // Recent = last activities that already started
-        // Planned = next planned activities
         if ($this->isAdmin()) {
             $recentStmt = $pdo->query(
                 "SELECT a.id, a.cat_id, c.name AS cat_name, a.title, a.starts_at, a.status\n" .
@@ -671,7 +616,6 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        // Only owner (or admin) can delete photos
         if (!$this->isAdmin()) {
             $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
             $stmt->execute([':id' => $catId]);
@@ -699,7 +643,6 @@ class ApiController extends AppController
 
         $order = $orderRaw;
         if (!is_array($order)) {
-            // Allow JSON string in order
             $decoded = json_decode((string)$orderRaw, true);
             $order = is_array($decoded) ? $decoded : [];
         }
@@ -707,7 +650,6 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        // Only owner (or admin) can reorder photos
         if (!$this->isAdmin()) {
             $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
             $stmt->execute([':id' => $catId]);
@@ -758,7 +700,6 @@ class ApiController extends AppController
             $this->json(['error' => 'forbidden'], 403);
         }
 
-        // Assigned caregivers for this cat
         $assignedStmt = $pdo->prepare(
             'SELECT u.id, u.username, u.first_name, u.last_name, u.avatar_path '
             . 'FROM cat_caregivers cc '
@@ -769,7 +710,6 @@ class ApiController extends AppController
         $assignedStmt->execute([':cid' => $catId]);
         $assigned = $assignedStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Available caregivers to assign: regular users excluding owner + already assigned
         $availableStmt = $pdo->prepare(
             'SELECT u.id, u.username, u.first_name, u.last_name, u.avatar_path '
             . 'FROM users u '

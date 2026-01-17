@@ -1,4 +1,9 @@
-﻿// Loader: keeps HTML stable, splits app logic into separate file(s)
+﻿/*
+ * main.js
+ *
+ * Loader modułów frontendu (bez bundlera). Ładuje pliki JS w ustalonej kolejności
+ * i uruchamia bootstrap aplikacji po załadowaniu dokumentu.
+ */
 (function () {
   const SCRIPTS = [
     '/public/scripts/app/parts/core-modal.js',

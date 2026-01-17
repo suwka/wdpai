@@ -1,3 +1,4 @@
+/* Styles: caregivers.css */
 body {
     min-height: 100vh;
     margin: 0;
@@ -180,7 +181,7 @@ body {
     padding: 12px 14px;
 }
 
-/* Table style (like /schedule) */
+
 .logs-table {
     width: 100%;
 }
@@ -217,7 +218,7 @@ body {
     object-fit: cover;
 }
 
-/* Column widths */
+
 .logs-table th:nth-child(1),
 .logs-table td:nth-child(1) { width: 6%; text-align: center; }
 .logs-table th:nth-child(2),

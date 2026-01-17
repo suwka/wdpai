@@ -1,34 +1,16 @@
 <?php
 
+/**
+ * CatsController
+ *
+ * Kontroler HTML dla operacji CRUD kotów (tworzenie/edycja/usuwanie).
+ * Waliduje dane i wykonuje operacje DB.
+ */
+
 require_once __DIR__ . '/AppController.php';
-require_once __DIR__ . '/../Database.php';
 
 class CatsController extends AppController
 {
-    private function isAdmin(): bool
-    {
-        return ($_SESSION['role'] ?? null) === 'admin';
-    }
-
-    private function requireLogin(): string
-    {
-        $userId = $_SESSION['user_id'] ?? null;
-        if (!$userId) {
-            $url = "http://$_SERVER[HTTP_HOST]";
-            header("Location: {$url}/login");
-            exit;
-        }
-
-        return $userId;
-    }
-
-    private function redirect(string $path): void
-    {
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}{$path}");
-        exit;
-    }
-
     private function detectImageExtension(string $tmpPath): ?string
     {
         if (class_exists('finfo')) {
@@ -97,8 +79,7 @@ class CatsController extends AppController
             $this->redirect('/cats?err=cat_name');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         $stmt = $pdo->prepare('INSERT INTO cats (owner_id, name, breed, age, description) VALUES (:owner, :name, :breed, :age, :desc) RETURNING id');
         $stmt->execute([
@@ -138,17 +119,15 @@ class CatsController extends AppController
             $this->redirect('/details?cat_id=' . urlencode($catId) . '&err=cat_name');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
         $stmt->execute([':id' => $catId]);
         $ownerId = $stmt->fetchColumn();
 
         if (!$ownerId || $ownerId !== $userId) {
-            http_response_code(403);
-            echo 'Forbidden';
-            exit;
+            $this->response->text('Forbidden', 403);
+            return;
         }
 
         $stmt = $pdo->prepare('UPDATE cats SET name = :name, breed = :breed, age = :age, description = :desc, updated_at = NOW() WHERE id = :id');
@@ -178,8 +157,7 @@ class CatsController extends AppController
             $this->redirect('/settings?err=no_cat');
         }
 
-        $db = new Database();
-        $pdo = $db->connect();
+        $pdo = $this->db();
 
         $stmt = $pdo->prepare('SELECT owner_id FROM cats WHERE id = :id');
         $stmt->execute([':id' => $catId]);
@@ -190,9 +168,8 @@ class CatsController extends AppController
         }
 
         if ($ownerId !== $userId && !$this->isAdmin()) {
-            http_response_code(403);
-            echo 'Forbidden';
-            exit;
+            $this->response->text('Forbidden', 403);
+            return;
         }
 
         $stmt = $pdo->prepare('DELETE FROM cats WHERE id = :id');

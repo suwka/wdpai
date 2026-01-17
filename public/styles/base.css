@@ -1,0 +1,60 @@
+/* Base styles shared across pages (kept minimal to avoid breaking existing layouts) */
+:root {
+  --pc-bg: rgb(238, 238, 238);
+  --pc-surface: #ffffff;
+  --pc-text: #222;
+  --pc-muted: #777;
+  --pc-accent: rgba(206, 70, 197, 0.75);
+  --pc-accent-solid: #d466d1;
+  --pc-danger: #d9534f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--pc-text);
+  background: var(--pc-bg);
+  font-family: 'Abhaya Libre', serif;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(206, 70, 197, 0.55);
+  outline-offset: 2px;
+}
+
+
+.hint {
+  color: var(--pc-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+
+.pc-alert {
+  border: 1px solid rgba(206, 70, 197, 0.35);
+  background: rgba(206, 70, 197, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: rgba(156, 26, 148, 0.95);
+}
+
+.pc-alert-danger {
+  border-color: rgba(217, 83, 79, 0.35);
+  background: rgba(217, 83, 79, 0.08);
+  color: #a33;
+}

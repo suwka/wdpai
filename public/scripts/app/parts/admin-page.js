@@ -1,3 +1,5 @@
+/* modul strony administratora */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -154,10 +156,9 @@
       }
 
       function post(url, dataObj) {
-        const fd = new FormData();
-        Object.entries(dataObj || {}).forEach(([k, v]) => fd.append(k, (v ?? '').toString()));
-        return fetch(url, { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
-          .then((r) => r.json().catch(() => ({})).then((j) => ({ ok: r.ok, status: r.status, json: j })));
+        return ctx.apiPostFormObject(url, dataObj)
+          .then((j) => ({ ok: true, status: 200, json: (j && typeof j === 'object') ? j : {} }))
+          .catch((e) => ({ ok: false, status: e?.status || 500, json: e?.payload && typeof e.payload === 'object' ? e.payload : { message: e?.message || 'Błąd' } }));
       }
 
       function openCreateUserModal() {
@@ -210,8 +211,8 @@
 
         post(ctx.URLS.adminUserUpdate, payload).then((res) => {
           if (!res.ok) {
-            const msg = res?.json?.message || 'Nie udało się zapisać zmian.';
-            ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.safeText(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
+            const msg = res?.json?.message || res?.json?.error || 'Nie udało się zapisać zmian.';
+            ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.escapeHtml(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
             return;
           }
           ctx.closeModal();
@@ -237,7 +238,7 @@
         post(ctx.URLS.adminUserCreate, payload).then((res) => {
           if (!res.ok) {
             const msg = res?.json?.message || res?.json?.error || 'Nie udało się utworzyć użytkownika.';
-            ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.safeText(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
+            ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.escapeHtml(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
             return;
           }
           ctx.closeModal();
@@ -272,7 +273,7 @@
             const verb = isBlocked ? 'odblokować' : 'zablokować';
             ctx.openModal({
               title: 'Potwierdź',
-              bodyHtml: `<div class="hint">Czy na pewno chcesz ${verb} użytkownika <b>${ctx.safeText(username)}</b>?</div>`,
+              bodyHtml: `<div class="hint">Czy na pewno chcesz ${ctx.escapeHtml(verb)} użytkownika <b>${ctx.escapeHtml(username)}</b>?</div>`,
               okText: 'Tak',
               cancelText: 'Nie',
               onOkCb: () => {
@@ -288,14 +289,14 @@
             }
             ctx.openModal({
               title: 'Potwierdź usunięcie',
-              bodyHtml: `<div class="hint">Usunąć użytkownika <b>${ctx.safeText(username)}</b>? Tej operacji nie da się cofnąć.</div>`,
+              bodyHtml: `<div class="hint">Usunąć użytkownika <b>${ctx.escapeHtml(username)}</b>? Tej operacji nie da się cofnąć.</div>`,
               okText: 'Usuń',
               cancelText: 'Anuluj',
               onOkCb: () => {
                 post(ctx.URLS.adminUserDelete, { user_id: userId }).then((res) => {
                   if (!res.ok) {
                     const msg = res?.json?.error || 'Nie udało się usunąć użytkownika.';
-                    ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.safeText(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
+                    ctx.openModal({ title: 'Błąd', bodyHtml: `<div class="hint">${ctx.escapeHtml(msg)}</div>`, okText: 'OK', cancelText: 'Zamknij' });
                     return;
                   }
                   load();

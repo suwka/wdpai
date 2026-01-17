@@ -1,3 +1,5 @@
+/* modul ladowania danych strony szczegolow */
+
 (function () {
   window.AppParts = window.AppParts || {};
 
@@ -41,7 +43,6 @@
           if (manageBtn) manageBtn.hidden = !isOwner;
         })
         .catch(() => {
-          // no-op
         });
 
       ctx.apiGet(ctx.URLS.apiCatPhotos + '?cat_id=' + encodeURIComponent(catId))
@@ -63,7 +64,6 @@
           });
         })
         .catch(() => {
-          // no-op
         });
 
       (function initDetailsPlannedActivities() {

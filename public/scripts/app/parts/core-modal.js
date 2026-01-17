@@ -1,5 +1,8 @@
-// Core + modal context (no bundler, plain globals)
-// Exposes: window.AppCore.createContext()
+/*
+Rdzen + kontekst modalny (bez bundlera, zwykle globalnie).
+Udostepnia: window.AppCore.createContext()
+*/
+
 
 (function () {
   const AppCore = {};
@@ -88,11 +91,136 @@
       return (value ?? '').toString();
     }
 
-    function apiGet(url) {
-      return fetch(url, { headers: { 'Accept': 'application/json' } }).then((r) => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
+    function escapeHtml(str) {
+      return safeText(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    let lastUiErrorAt = 0;
+    function shouldNotifyNow() {
+      const now = Date.now();
+      if (now - lastUiErrorAt < 2500) return false;
+      lastUiErrorAt = now;
+      return true;
+    }
+
+    function notifyError(title, message) {
+      if (!shouldNotifyNow()) return;
+      openModal({
+        title: safeText(title || 'Błąd'),
+        bodyHtml: `<div class="hint">${escapeHtml(message || 'Wystąpił błąd.')}</div>`,
+        okText: 'OK',
+        cancelText: 'Zamknij',
       });
+    }
+
+    function handleHttpError(status, message) {
+      if (status === 401) {
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          go('/login?err=unauthorized');
+          return;
+        }
+        notifyError('Brak autoryzacji', 'Zaloguj się ponownie.');
+        return;
+      }
+
+      if (status === 403) {
+        notifyError('Brak dostępu (403)', message || 'Nie masz uprawnień do wykonania tej akcji.');
+        return;
+      }
+
+      if (status >= 500) {
+        notifyError('Błąd serwera', message || `HTTP ${status}`);
+        return;
+      }
+    }
+
+    async function request(url, options = {}) {
+      const opts = { credentials: 'same-origin', ...options };
+      opts.headers = { 'Accept': 'application/json', ...(options.headers || {}) };
+
+      let resp;
+      try {
+        resp = await fetch(url, opts);
+      } catch (e) {
+        notifyError('Brak połączenia', 'Nie udało się połączyć z serwerem.');
+        throw e;
+      }
+
+      const ct = (resp.headers.get('content-type') || '').toLowerCase();
+      const isJson = ct.includes('application/json');
+      const payload = isJson
+        ? await resp.json().catch(() => null)
+        : await resp.text().catch(() => '');
+
+      if (!resp.ok) {
+        const msg = (payload && typeof payload === 'object')
+          ? (payload.message || payload.error || (`HTTP ${resp.status}`))
+          : (payload || (`HTTP ${resp.status}`));
+
+        handleHttpError(resp.status, safeText(msg));
+
+        const err = new Error(safeText(msg));
+        err.status = resp.status;
+        err.payload = payload;
+        throw err;
+      }
+
+      return payload;
+    }
+
+    function apiGet(url) {
+      return request(url, { method: 'GET' });
+    }
+
+    function apiPostUrlEncoded(url, params) {
+      const body = (params instanceof URLSearchParams) ? params.toString() : safeText(params);
+      return request(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+    }
+
+    function apiPostFormObject(url, dataObj) {
+      const fd = new FormData();
+      Object.entries(dataObj || {}).forEach(([k, v]) => fd.append(k, (v ?? '').toString()));
+      return request(url, { method: 'POST', body: fd });
+    }
+
+    function apiPostFormData(url, formData) {
+      return request(url, { method: 'POST', body: formData });
+    }
+
+    async function submitForm(formEl) {
+      const method = (formEl?.method || 'POST').toUpperCase();
+      const action = formEl?.action || '';
+      const fd = new FormData(formEl);
+
+      let resp;
+      try {
+        resp = await fetch(action, { method, body: fd, credentials: 'same-origin' });
+      } catch (e) {
+        notifyError('Brak połączenia', 'Nie udało się wysłać formularza.');
+        throw e;
+      }
+
+      if (resp.ok) {
+        if (resp.redirected && resp.url) {
+          window.location.href = resp.url;
+          return;
+        }
+        window.location.reload();
+        return;
+      }
+
+      const text = await resp.text().catch(() => '');
+      handleHttpError(resp.status, text || `HTTP ${resp.status}`);
+      throw new Error(text || `HTTP ${resp.status}`);
     }
 
     function debounce(fn, waitMs) {
@@ -224,6 +352,12 @@
       FILTER_PRESETS,
       safeText,
       apiGet,
+      apiPostUrlEncoded,
+      apiPostFormObject,
+      apiPostFormData,
+      submitForm,
+      notifyError,
+      escapeHtml,
       debounce,
       fillForm,
       cloneTemplate,

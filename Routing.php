@@ -1,20 +1,26 @@
 <?php
 
-class Routing {
+/**
+ * Routing
+ *
+ * Centralny router aplikacji. Mapuje ścieżkę URL + metodę HTTP na akcję kontrolera
+ * albo na render widoku. Trzyma logikę „glue code” (nawigacja, autoryzacja dla widoków).
+ */
 
-    // Tablica definicji naszych tras (ścieżek)
-    // Klucz = ścieżka w URL (np. /login)
-    // Wartość = nazwa pliku widoku (np. login.html)
+require_once __DIR__ . '/src/Http/Request.php';
+require_once __DIR__ . '/src/Http/Response.php';
+
+class Routing {
     public static $routes = [
-        'login' => 'login',        // Obsługuje /login
-        'register' => 'register',  // Obsługuje /register
+        'login' => 'login',
+        'register' => 'register',
         'logout' => 'logout',
-        'dashboard' => 'dashboard',// Obsługuje /dashboard
+        'dashboard' => 'dashboard',
         'admin' => 'admin',
-        'details' => 'details',     // Obsługuje /details
-        'settings' => 'settings',    //settings
-        'logs' => 'logs',            //logi
-        'schedule' => 'schedule',   //terminarz
+        'details' => 'details',
+        'settings' => 'settings',
+        'logs' => 'logs',
+        'schedule' => 'schedule',
         'cats' => 'cats',
         'caregivers' => 'caregivers',
         'profile-update' => 'profile-update',
@@ -49,249 +55,147 @@ class Routing {
         'cat-delete' => 'cat-delete',
         'activity-create' => 'activity-create',
         'activity-update' => 'activity-update',
-        '' => 'login'              // Obsługuje pustą ścieżkę (strona główna)
+        '' => 'login'
     ];
 
-    private static function redirect(string $path): void
+    private static function redirect(Response $response, string $path): void
     {
-        $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}{$path}");
-        exit;
+        $response->redirect($path);
     }
 
-    private static function isLoggedIn(): bool
+    private static function isLoggedIn(Request $request): bool
     {
-        return !empty($_SESSION['user_id']);
+        $session = $request->session();
+        return !empty($session['user_id']);
     }
 
-    private static function isAdmin(): bool
+    private static function isAdmin(Request $request): bool
     {
-        return ($_SESSION['role'] ?? null) === 'admin';
+        $session = $request->session();
+        return ($session['role'] ?? null) === 'admin';
+    }
+
+    private static function dispatch(string $controllerClass, string $method): void
+    {
+        require_once __DIR__ . '/src/controllers/' . $controllerClass . '.php';
+        $controller = new $controllerClass();
+        $controller->$method();
     }
 
 
-    public static function run(string $path) {
+    public static function run(Request $request): void {
+        $response = new Response();
+
+        $path = $request->path();
         if (!array_key_exists($path, self::$routes)) {
-            http_response_code(404);
-            echo "nie znaleziono strony (404)";
+            $response->text('nie znaleziono strony (404)', 404);
             return;
         }
 
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $method = $request->method();
 
-        // POST-only endpoints: never try to render them as HTML.
         if ($method === 'GET' && ($path === 'profile-update' || $path === 'profile-password-update' || $path === 'account-update')) {
-            http_response_code(405);
-            echo 'Method not allowed';
+            $response->text('Method not allowed', 405);
             return;
         }
 
-        // Auth guard for HTML pages.
+        $apiGetActions = [
+            'api-me' => ['ApiController', 'me'],
+            'api-profile' => ['ApiController', 'profile'],
+            'api-users' => ['ApiController', 'users'],
+            'api-admin-stats' => ['ApiController', 'adminStats'],
+            'api-cats' => ['ApiController', 'cats'],
+            'api-cat' => ['ApiController', 'cat'],
+            'api-cat-photos' => ['ApiController', 'catPhotos'],
+            'api-dashboard-activities' => ['ApiController', 'dashboardActivities'],
+            'api-cat-activities' => ['ApiController', 'catActivities'],
+            'api-activities' => ['ApiController', 'activities'],
+            'api-activities-calendar' => ['ApiController', 'activitiesCalendar'],
+            'api-activities-day' => ['ApiController', 'activitiesDay'],
+            'api-caregivers' => ['ApiController', 'caregivers'],
+        ];
+
+        $getActions = [
+            'logout' => ['SecurityController', 'logout'],
+        ];
+
+        $postActions = [
+            'login' => ['SecurityController', 'login'],
+            'register' => ['SecurityController', 'register'],
+
+            'profile-update' => ['SecurityController', 'updateProfile'],
+            'profile-password-update' => ['SecurityController', 'updatePassword'],
+            'account-update' => ['SecurityController', 'updateAccount'],
+
+            'upload-user-avatar' => ['UploadController', 'userAvatar'],
+            'upload-cat-avatar' => ['UploadController', 'catAvatar'],
+            'upload-cat-photo' => ['UploadController', 'catPhoto'],
+
+            'cat-create' => ['CatsController', 'create'],
+            'cat-update' => ['CatsController', 'update'],
+            'cat-delete' => ['CatsController', 'delete'],
+
+            'activity-create' => ['ActivitiesController', 'create'],
+            'activity-update' => ['ActivitiesController', 'update'],
+
+            'cat-photo-delete' => ['ApiController', 'deleteCatPhoto'],
+            'cat-photos-reorder' => ['ApiController', 'reorderCatPhotos'],
+
+            'admin-user-update' => ['ApiController', 'adminUserUpdate'],
+            'admin-user-create' => ['ApiController', 'adminUserCreate'],
+            'admin-user-block' => ['ApiController', 'adminUserBlock'],
+            'admin-user-delete' => ['ApiController', 'adminUserDelete'],
+
+            'caregiver-assign' => ['ApiController', 'assignCaregiver'],
+            'caregiver-unassign' => ['ApiController', 'unassignCaregiver'],
+        ];
+
         if ($method === 'GET') {
             $publicPages = ['', 'login', 'register'];
             $adminPages = ['admin'];
-            $isHtmlPage = !in_array($path, [
-                'api-me', 'api-profile', 'api-users', 'api-admin-stats', 'api-cats', 'api-cat', 'api-cat-photos', 'api-dashboard-activities', 'api-cat-activities',
-                'api-activities', 'api-activities-calendar', 'api-activities-day', 'api-caregivers'
-            ], true);
+            $isHtmlPage = !isset($apiGetActions[$path]);
 
             if ($isHtmlPage && !in_array($path, $publicPages, true) && $path !== 'logout') {
-                if (!self::isLoggedIn()) {
-                    self::redirect('/login');
+                if (!self::isLoggedIn($request)) {
+                    self::redirect($response, '/login');
                 }
 
-                // Admin allowed HTML pages: /admin and /settings (plus logout)
                 $adminAllowed = array_merge($adminPages, ['settings']);
-                if (self::isAdmin() && !in_array($path, $adminAllowed, true)) {
-                    self::redirect('/admin');
+                if (self::isAdmin($request) && !in_array($path, $adminAllowed, true)) {
+                    self::redirect($response, '/admin');
                 }
-                if (in_array($path, $adminPages, true) && !self::isAdmin()) {
-                    self::redirect('/dashboard?err=forbidden');
+                if (in_array($path, $adminPages, true) && !self::isAdmin($request)) {
+                    self::redirect($response, '/dashboard?err=forbidden');
                 }
             }
         }
 
-        // Controller-based handling for JSON GET endpoints.
         if ($method === 'GET') {
-            if ($path === 'logout') {
-                require_once __DIR__ . '/src/controllers/SecurityController.php';
-                $controller = new SecurityController();
-                $controller->logout();
+            if (isset($getActions[$path])) {
+                [$controllerClass, $action] = $getActions[$path];
+                self::dispatch($controllerClass, $action);
                 return;
             }
 
-            if ($path === 'api-me' || $path === 'api-profile' || $path === 'api-users' || $path === 'api-admin-stats' || $path === 'api-cats' || $path === 'api-cat' || $path === 'api-cat-photos' || $path === 'api-dashboard-activities' || $path === 'api-cat-activities' || $path === 'api-activities' || $path === 'api-activities-calendar' || $path === 'api-activities-day' || $path === 'api-caregivers') {
-                require_once __DIR__ . '/src/controllers/ApiController.php';
-                $controller = new ApiController();
-                if ($path === 'api-me') {
-                    $controller->me();
-                    return;
-                }
-                if ($path === 'api-profile') {
-                    $controller->profile();
-                    return;
-                }
-                if ($path === 'api-users') {
-                    $controller->users();
-                    return;
-                }
-                if ($path === 'api-admin-stats') {
-                    $controller->adminStats();
-                    return;
-                }
-                if ($path === 'api-cats') {
-                    $controller->cats();
-                    return;
-                }
-                if ($path === 'api-cat') {
-                    $controller->cat();
-                    return;
-                }
-                if ($path === 'api-dashboard-activities') {
-                    $controller->dashboardActivities();
-                    return;
-                }
-                if ($path === 'api-cat-activities') {
-                    $controller->catActivities();
-                    return;
-                }
-                if ($path === 'api-activities') {
-                    $controller->activities();
-                    return;
-                }
-                if ($path === 'api-activities-calendar') {
-                    $controller->activitiesCalendar();
-                    return;
-                }
-                if ($path === 'api-activities-day') {
-                    $controller->activitiesDay();
-                    return;
-                }
-                if ($path === 'api-caregivers') {
-                    $controller->caregivers();
-                    return;
-                }
-                $controller->catPhotos();
+            if (isset($apiGetActions[$path])) {
+                [$controllerClass, $action] = $apiGetActions[$path];
+                self::dispatch($controllerClass, $action);
                 return;
             }
 
         }
 
-        // Controller-based handling for POST endpoints.
         if ($method === 'POST') {
-            if ($path === 'login' || $path === 'register') {
-                require_once __DIR__ . '/src/controllers/SecurityController.php';
-                $controller = new SecurityController();
-                if ($path === 'login') {
-                    $controller->login();
-                    return;
-                }
-                $controller->register();
+            if (isset($postActions[$path])) {
+                [$controllerClass, $action] = $postActions[$path];
+                self::dispatch($controllerClass, $action);
                 return;
             }
 
-            if ($path === 'profile-update' || $path === 'profile-password-update' || $path === 'account-update') {
-                require_once __DIR__ . '/src/controllers/SecurityController.php';
-                $controller = new SecurityController();
-                if ($path === 'account-update') {
-                    $controller->updateAccount();
-                    return;
-                }
-                if ($path === 'profile-update') {
-                    $controller->updateProfile();
-                    return;
-                }
-                $controller->updatePassword();
-                return;
-            }
-
-            if ($path === 'upload-user-avatar' || $path === 'upload-cat-avatar' || $path === 'upload-cat-photo') {
-                require_once __DIR__ . '/src/controllers/UploadController.php';
-                $controller = new UploadController();
-                if ($path === 'upload-user-avatar') {
-                    $controller->userAvatar();
-                    return;
-                }
-                if ($path === 'upload-cat-avatar') {
-                    $controller->catAvatar();
-                    return;
-                }
-                $controller->catPhoto();
-                return;
-            }
-
-            if ($path === 'cat-create' || $path === 'cat-update' || $path === 'cat-delete') {
-                require_once __DIR__ . '/src/controllers/CatsController.php';
-                $controller = new CatsController();
-                if ($path === 'cat-create') {
-                    $controller->create();
-                    return;
-                }
-                if ($path === 'cat-update') {
-                    $controller->update();
-                    return;
-                }
-                $controller->delete();
-                return;
-            }
-
-            if ($path === 'activity-create') {
-                require_once __DIR__ . '/src/controllers/ActivitiesController.php';
-                $controller = new ActivitiesController();
-                $controller->create();
-                return;
-            }
-
-            if ($path === 'activity-update') {
-                require_once __DIR__ . '/src/controllers/ActivitiesController.php';
-                $controller = new ActivitiesController();
-                $controller->update();
-                return;
-            }
-
-            if ($path === 'cat-photo-delete' || $path === 'cat-photos-reorder') {
-                require_once __DIR__ . '/src/controllers/ApiController.php';
-                $controller = new ApiController();
-                if ($path === 'cat-photo-delete') {
-                    $controller->deleteCatPhoto();
-                    return;
-                }
-                $controller->reorderCatPhotos();
-                return;
-            }
-
-            if ($path === 'admin-user-update' || $path === 'admin-user-create' || $path === 'admin-user-block' || $path === 'admin-user-delete') {
-                require_once __DIR__ . '/src/controllers/ApiController.php';
-                $controller = new ApiController();
-                if ($path === 'admin-user-update') {
-                    $controller->adminUserUpdate();
-                    return;
-                }
-                if ($path === 'admin-user-create') {
-                    $controller->adminUserCreate();
-                    return;
-                }
-                if ($path === 'admin-user-block') {
-                    $controller->adminUserBlock();
-                    return;
-                }
-                $controller->adminUserDelete();
-                return;
-            }
-
-            if ($path === 'caregiver-assign' || $path === 'caregiver-unassign') {
-                require_once __DIR__ . '/src/controllers/ApiController.php';
-                $controller = new ApiController();
-                if ($path === 'caregiver-assign') {
-                    $controller->assignCaregiver();
-                    return;
-                }
-                $controller->unassignCaregiver();
-                return;
-            }
+            $response->text('Method not allowed', 405);
+            return;
         }
 
-        // Default: render static view (HTML).
         $templateName = self::$routes[$path];
         $templatePath = 'public/views/'. $templateName .'.html';
         include $templatePath;

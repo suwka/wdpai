@@ -1,3 +1,4 @@
+/* Styles: settings.css */
 body {
     min-height: 100vh;
     margin: 0; 
@@ -9,7 +10,7 @@ body {
     height: 10vh;
 }
 
-/* nagłówek górnego menu, tło i ułożenie elementów*/
+
 .header {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -19,7 +20,7 @@ body {
     width: 100%;
 }
 
-/* user1, avatar, dzwonek i logout w nagłówku */
+
 .option-bar ul {
     list-style-type: none;
     display: flex;
@@ -45,20 +46,20 @@ body {
     color: inherit;
 }
 
- /*zachowanie avataru w nagłówku*/
+ 
 .small-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
 }
 
-/* tytuł dashboardu */
+
 .tittle {
     font-size: 3rem;
     margin-left: 50px;
 }
 
-/*stopka dolnego menu, tło i zachowanie*/
+
 .footer {
     height: 100px;
     background-color: rgba(240, 199, 237);
@@ -70,7 +71,7 @@ body {
     width: 100%;
 }
 
-/* dolne menu */
+
 .menu-bar ul {
     list-style-type: none;
     width: 100%;
@@ -117,7 +118,7 @@ body {
     color: #999;
 }
 
-/* główna zawartość dashboardu */
+
 .main-content {
     flex: 1;
     overflow-y: auto;
@@ -128,7 +129,7 @@ body {
     gap: 20px;
 }
 
-/* białe boxy sekcji */
+
 .section-box {
     background-color: white;
     border-radius: 20px;
@@ -136,7 +137,7 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* tytul podstrony */
+
 .box_top {
     display: flex;
     justify-content: space-between;
@@ -242,7 +243,6 @@ body {
     text-decoration: none;
 }
 
-/* USTAWIENIA */
 
 .settings-options {
     display: grid;
@@ -289,8 +289,6 @@ input[type="checkbox"] {
 }
 
 
-
-/* zapewnienie pełnej wysokości strony */
 html {
     height: 100%;
 }
@@ -377,7 +375,7 @@ html {
     
 }
 
-/* Profile (moved from /profile to /settings) */
+
 .profile-grid {
     display: flex;
     flex-direction: column;

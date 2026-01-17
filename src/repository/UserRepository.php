@@ -1,21 +1,23 @@
 <?php
 
-require_once __DIR__ . '/Repository.php';
+/**
+ * UserRepository
+ *
+ * Repozytorium użytkowników. Odpowiada za pobieranie i zapis danych użytkownika
+ * w bazie oraz mapowanie wiersza DB na obiekt domenowy User.
+ */
+
+require_once __DIR__ . '/../Database.php';
 require_once __DIR__.'/../models/User.php';
 
-if (!class_exists('Repository')) {
-    require_once __DIR__ . '/../Database.php';
+class UserRepository {
 
-    class Repository {
-        protected $database;
+    private Database $database;
 
-        public function __construct() {
-            $this->database = new Database();
-        }
+    public function __construct(?Database $database = null)
+    {
+        $this->database = $database ?? new Database();
     }
-}
-
-class UserRepository extends Repository {
 
     public function getUserByEmail(string $email): ?User {
         $stmt = $this->database->connect()->prepare('SELECT * FROM users WHERE email = :email');

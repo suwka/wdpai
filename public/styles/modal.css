@@ -1,5 +1,4 @@
 /* Shared modal + small form styles (kept in existing app vibe) */
-
 .pc-modal-overlay[hidden] {
     display: none;
 }
@@ -188,7 +187,7 @@
     max-width: 70%;
 }
 
-/* Activity list inside day modal */
+
 .pc-activity-day-list {
     display: flex;
     flex-direction: column;

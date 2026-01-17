@@ -1,5 +1,4 @@
 /* Minimal additions on top of schedule.css */
-
 .admin-stats {
     display: flex;
     gap: 16px;
@@ -51,12 +50,12 @@
     word-break: break-all;
 }
 
-/* Make the admin table readable with many columns */
+
 .logs-table table[data-admin-users-table] {
     table-layout: auto;
 }
 
-/* schedule.css ma globalne th/td:nth-child(...) – resetujemy dla tabeli admina */
+
 .logs-table table[data-admin-users-table] th,
 .logs-table table[data-admin-users-table] td {
     width: auto;
@@ -74,4 +73,24 @@
 
 .logs-table table[data-admin-users-table] th {
     white-space: nowrap;
+}
+
+
+@media (max-width: 700px) {
+    .logs-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .logs-table table[data-admin-users-table] {
+        min-width: 980px;
+    }
+
+    
+    .logs-table table[data-admin-users-table] th,
+    .logs-table table[data-admin-users-table] td {
+        display: table-cell !important;
+        font-size: 14px;
+        height: auto;
+    }
 }

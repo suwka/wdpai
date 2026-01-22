@@ -188,3 +188,20 @@ DROP TRIGGER IF EXISTS set_updated_at_activities ON activities;
 CREATE TRIGGER set_updated_at_activities
 BEFORE UPDATE ON activities
 FOR EACH ROW EXECUTE FUNCTION trg_set_updated_at();
+
+
+CREATE OR REPLACE FUNCTION format_imion_nazwisk()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.first_name := INITCAP(NEW.first_name);
+    NEW.last_name := INITCAP(NEW.last_name);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_popraw_dane_users ON users;
+
+CREATE TRIGGER trg_popraw_dane_users
+BEFORE INSERT OR UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION format_imion_nazwisk();

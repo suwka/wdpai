@@ -26,10 +26,11 @@
                             </div>
                         <?php endif; ?>
 
-                        <input name="email" type="email" class="input" placeholder="Email" required autocomplete="email">
-                        <input name="password" type="password" class="input" placeholder="Password" required autocomplete="current-password">
+                        <input name="email" type="email" class="input" placeholder="Email" required maxlength="254" autocomplete="email">
+                        <input name="password" type="password" class="input" placeholder="Password" required maxlength="128" autocomplete="current-password">
                         <button type="submit" class="signin">sign in</button>
                         <a href="#" class="forgot-password">forgot password?</a>
+                        <div class="forgot-hint">Skontaktuj się z administratorem strony.</div>
                     </form>
                 </div>
     </div>

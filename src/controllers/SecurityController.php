@@ -32,7 +32,14 @@ class SecurityController extends AppController {
         $email = strtolower(trim((string)($post['email'] ?? '')));
         $password = (string)($post['password'] ?? '');
 
-        $genericLoginError = ['messages' => ['Błędny email lub hasło.']];
+        $genericLoginError = ['messages' => ['Nieprawidłowe dane logowania.']];
+
+        // Proste i skuteczne: odrzucamy znaki kontrolne i znaczniki w polu email
+        // (SQL injection i tak jest blokowany przez prepared statements, ale tu chodzi też o wklejanie <script> itd.)
+        if ($email === '' || strlen($email) > 254 || preg_match('/[\x00-\x1F\x7F]/', $email) || str_contains($email, '<') || str_contains($email, '>') || !Validator::isValidEmail($email)) {
+            $this->render('login', $genericLoginError);
+            return;
+        }
 
         if ($email === '' || trim($password) === '') {
             $this->render('login', $genericLoginError);
@@ -105,12 +112,12 @@ class SecurityController extends AppController {
         }
 
         if ($this->userRepository->getUserByUsername($username)) {
-            $this->render('register', ['messages' => ['Użytkownik o tym nicku już istnieje.']]);
+            $this->render('register', ['messages' => ['Taki użytkownik już istnieje.']]);
             return;
         }
 
         if ($this->userRepository->getUserByEmail($email)) {
-            $this->render('register', ['messages' => ['Użytkownik o tym mailu już istnieje.']]);
+            $this->render('register', ['messages' => ['Taki użytkownik już istnieje.']]);
             return;
         }
 

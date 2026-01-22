@@ -13,8 +13,21 @@
         <div class="error-title">Dostęp zabroniony</div>
         <div class="error-message">Nie masz uprawnień do dostępu do tego zasobu.</div>
         <div class="action-buttons">
-            <a href="/" class="btn btn-primary">Powrót do aplikacji</a>
+                        <a href="/dashboard" class="btn btn-primary" data-error-back>Powrót do aplikacji</a>
         </div>
     </div>
+
+        <script>
+            (function () {
+                var a = document.querySelector('[data-error-back]');
+                if (!a) return;
+                a.addEventListener('click', function (e) {
+                    if (window.history && window.history.length > 1) {
+                        e.preventDefault();
+                        window.history.back();
+                    }
+                });
+            })();
+        </script>
 </body>
 </html>

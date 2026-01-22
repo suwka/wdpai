@@ -67,6 +67,15 @@ body, input, button {
     color: rgba(206, 70, 197, 0.75);
 }
 
+.forgot-hint {
+    margin-top: -0.35em;
+    text-align: center;
+    font-size: 0.75em;
+    color: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+}
+
 .input{
     padding: 10px;
     font-size: 1em;
@@ -92,6 +101,7 @@ body, input, button {
 .mobile-break {
     display: none;
 }
+
 
 @media (max-width: 510px) {
     .mobile-break {

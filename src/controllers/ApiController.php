@@ -373,26 +373,53 @@ class ApiController extends AppController
         $db = new Database();
         $pdo = $db->connect();
 
-        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
-        $emailStmt->execute([':id' => $userId]);
-        $email = (string)($emailStmt->fetchColumn() ?? '');
-        if (strtolower($email) === self::DEFAULT_ADMIN_EMAIL) {
-            $this->json(['error' => 'protected_account'], 403);
-        }
+        try {
+            $pdo->beginTransaction();
 
-        $roleStmt = $pdo->prepare('SELECT role FROM users WHERE id = :id');
-        $roleStmt->execute([':id' => $userId]);
-        $role = (string)($roleStmt->fetchColumn() ?? '');
-        if ($role === 'admin') {
-            $cntStmt = $pdo->query("SELECT COUNT(*)::int FROM users WHERE role = 'admin'");
-            $adminCount = (int)$cntStmt->fetchColumn();
-            if ($adminCount <= 1) {
-                $this->json(['error' => 'cannot_delete_last_admin'], 400);
+            $uStmt = $pdo->prepare('SELECT email, role FROM users WHERE id = :id');
+            $uStmt->execute([':id' => $userId]);
+            $uRow = $uStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$uRow) {
+                $pdo->rollBack();
+                $this->json(['error' => 'not_found'], 404);
             }
-        }
 
-        $stmt = $pdo->prepare('DELETE FROM users WHERE id = :id');
-        $stmt->execute([':id' => $userId]);
+            $email = strtolower((string)($uRow['email'] ?? ''));
+            if ($email === self::DEFAULT_ADMIN_EMAIL) {
+                $pdo->rollBack();
+                $this->json(['error' => 'protected_account'], 403);
+            }
+
+            $role = (string)($uRow['role'] ?? '');
+            if ($role === 'admin') {
+                $cntStmt = $pdo->query("SELECT COUNT(*)::int FROM users WHERE role = 'admin'");
+                $adminCount = (int)$cntStmt->fetchColumn();
+                if ($adminCount <= 1) {
+                    $pdo->rollBack();
+                    $this->json(['error' => 'cannot_delete_last_admin'], 400);
+                }
+            }
+
+            // 1) Usuń koty należące do użytkownika.
+            // Dzięki FK ON DELETE CASCADE usunie to też: activities/logs/cat_photos/cat_caregivers dla tych kotów.
+            $delCats = $pdo->prepare('DELETE FROM cats WHERE owner_id = :id');
+            $delCats->execute([':id' => $userId]);
+
+            // 2) Usuń przypisania opiekuna do cudzych kotów (jeśli był caregiverem innych).
+            $delCaregiverLinks = $pdo->prepare('DELETE FROM cat_caregivers WHERE user_id = :id');
+            $delCaregiverLinks->execute([':id' => $userId]);
+
+            // 3) Usuń użytkownika.
+            $delUser = $pdo->prepare('DELETE FROM users WHERE id = :id');
+            $delUser->execute([':id' => $userId]);
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $this->json(['error' => 'delete_failed', 'message' => 'Nie udało się usunąć użytkownika.'], 500);
+        }
 
         $this->json(['ok' => true]);
     }

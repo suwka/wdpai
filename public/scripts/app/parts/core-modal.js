@@ -178,6 +178,11 @@ Udostepnia: window.AppCore.createContext()
     };
 
     function handleHttpError(status, message) {
+      const p = (window.location.pathname || '').toString().toLowerCase();
+      if (p === '/login' || p === '/login/' || p === '/register' || p === '/register/') {
+        return;
+      }
+
       if (status === 401) {
         if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
           go('/login?err=unauthorized');

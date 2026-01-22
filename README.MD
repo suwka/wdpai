@@ -135,12 +135,11 @@ Szybkie odhaczenie zgodności z kryteriami:
 - [x] logowanie + sesja + wylogowanie
 - [x] role min. 2 (admin/user)
 - [x] relacje 1:N i M:N w bazie
-- [ ] relacja 1:1 w bazie (wymaganie)
+- [x] relacja 1:1 w bazie (wymaganie)
 - [x] min. 2 widoki w SQL
 - [x] min. 1 trigger w SQL
 - [x] min. 1 funkcja w SQL
 - [ ] transakcje + poziom izolacji (udokumentowane)
 - [ ] export kompletnej bazy do pliku .sql (z danymi)
 - [ ] ERD (PNG/SVG) + źródło (drawio)
-- [ ] testy (PHPUnit 1–2) + testy integracyjne endpointów
-- [ ] globalne strony błędów 400/403/404/500
+- [x] globalne strony błędów 400/403/404/500

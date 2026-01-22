@@ -11,6 +11,7 @@
     '/public/scripts/app/parts/gallery-upload.js',
     '/public/scripts/app/parts/calendar.js',
     '/public/scripts/app/parts/dashboard.js',
+    '/public/scripts/app/parts/settings-app.js',
     '/public/scripts/app/parts/settings-cats.js',
     '/public/scripts/app/parts/cats-page-data.js',
     '/public/scripts/app/parts/caregivers-page.js',

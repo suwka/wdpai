@@ -59,6 +59,18 @@ class UserRepository {
         ]);
     }
 
+    private function parsePgBool(mixed $value): bool
+    {
+        if ($value === true || $value === 1) return true;
+        if ($value === false || $value === 0 || $value === null) return false;
+
+        $s = strtolower(trim((string)$value));
+        if ($s === 't' || $s === 'true' || $s === '1' || $s === 'yes' || $s === 'y' || $s === 'on') return true;
+        if ($s === 'f' || $s === 'false' || $s === '0' || $s === 'no' || $s === 'n' || $s === 'off' || $s === '') return false;
+
+        return (bool)$value;
+    }
+
     private function mapRowToUser(array $row): User
     {
         return new User(
@@ -68,7 +80,7 @@ class UserRepository {
             $row['first_name'],
             $row['last_name'],
             $row['role'] ?? 'user',
-            (bool)($row['is_blocked'] ?? false),
+            $this->parsePgBool($row['is_blocked'] ?? false),
             isset($row['last_login_at']) ? (string)$row['last_login_at'] : null,
             $row['id'] ?? null,
             $row['avatar_path'] ?? null

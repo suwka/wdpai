@@ -118,6 +118,65 @@ Udostepnia: window.AppCore.createContext()
       });
     }
 
+    const SETTINGS_KEY = 'pc_app_settings_v1';
+    const DEFAULT_SETTINGS = {
+      confirmDelete: true,
+      showCatMeta: true,
+    };
+
+    function applySettingsToDom(state) {
+      try {
+        const show = (state?.showCatMeta !== false);
+        document.documentElement.setAttribute('data-pc-show-cat-meta', show ? '1' : '0');
+      } catch {
+      }
+    }
+
+    function loadSettings() {
+      try {
+        const raw = window.localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return { ...DEFAULT_SETTINGS };
+        const parsed = JSON.parse(raw);
+        return { ...DEFAULT_SETTINGS, ...(parsed && typeof parsed === 'object' ? parsed : {}) };
+      } catch {
+        return { ...DEFAULT_SETTINGS };
+      }
+    }
+
+    function saveSettings(next) {
+      try {
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      } catch {
+      }
+
+      applySettingsToDom(next);
+
+      try {
+        window.dispatchEvent(new Event('pc:settingsChanged'));
+      } catch {
+      }
+    }
+
+    let settingsState = loadSettings();
+    applySettingsToDom(settingsState);
+
+    const settings = {
+      get(key) {
+        return settingsState?.[key];
+      },
+      set(key, value) {
+        settingsState = { ...(settingsState || {}), [key]: value };
+        saveSettings(settingsState);
+      },
+      all() {
+        return { ...(settingsState || {}) };
+      },
+      reset() {
+        settingsState = { ...DEFAULT_SETTINGS };
+        saveSettings(settingsState);
+      },
+    };
+
     function handleHttpError(status, message) {
       if (status === 401) {
         if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
@@ -351,6 +410,7 @@ Udostepnia: window.AppCore.createContext()
       URLS,
       FILTER_PRESETS,
       safeText,
+      settings,
       apiGet,
       apiPostUrlEncoded,
       apiPostFormObject,

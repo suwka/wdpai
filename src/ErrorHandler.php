@@ -61,9 +61,21 @@ final class ErrorHandler
         if ($canSendHeaders) {
             header('Content-Type: text/html; charset=utf-8');
         }
-        echo '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>500</title></head>'
-           . '<body style="font-family:system-ui,Segoe UI,Arial,sans-serif;background:#eee;margin:0;padding:40px;">'
-           . '<h1 style="margin:0 0 8px;">500</h1><p style="margin:0;">Wystąpił błąd serwera.</p>'
-           . '</body></html>';
+        
+        // Render error page
+        self::renderErrorPage(500);
+    }
+
+    private static function renderErrorPage(int $code): void
+    {
+        $templatePath = __DIR__ . '/../public/views/error-' . $code . '.html';
+        if (file_exists($templatePath)) {
+            include $templatePath;
+        } else {
+            echo '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $code . '</title></head>'
+               . '<body style="font-family:system-ui,Segoe UI,Arial,sans-serif;background:#eee;margin:0;padding:40px;">'
+               . '<h1 style="margin:0 0 8px;">' . $code . '</h1><p style="margin:0;">Błąd serwera.</p>'
+               . '</body></html>';
+        }
     }
 }

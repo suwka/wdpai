@@ -1,0 +1,100 @@
+:root {
+  --pc-bg: rgb(238, 238, 238);
+  --pc-surface: #ffffff;
+  --pc-text: #222;
+  --pc-muted: #777;
+  --pc-accent: #d466d1;
+  --pc-accent-solid: #d466d1;
+  --pc-accent-soft: rgba(212, 102, 209, 0.7);
+  --pc-accent-soft-bg: rgba(212, 102, 209, 0.15);
+  --pc-accent-soft-border: rgba(212, 102, 209, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Abhaya Libre', serif;
+  background-color: var(--pc-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-weight: 500;
+}
+
+.error-container {
+  background: var(--pc-surface);
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.error-code {
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--pc-accent-soft);
+  margin-bottom: 15px;
+  line-height: 1;
+}
+
+.error-title {
+  font-size: 28px;
+  color: var(--pc-text);
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.error-message {
+  font-size: 16px;
+  color: var(--pc-muted);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Abhaya Libre', serif;
+}
+
+.btn-primary {
+  background: var(--pc-accent-solid);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #c856c5;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--pc-accent-soft-bg);
+  color: var(--pc-accent-solid);
+  border: 1px solid var(--pc-accent-soft-border);
+}
+
+.btn-secondary:hover {
+  background: rgba(212, 102, 209, 0.25);
+}

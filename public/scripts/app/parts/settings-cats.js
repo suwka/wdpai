@@ -13,6 +13,15 @@
         host.innerHTML = '';
       }
 
+      function applyShowMetaSetting() {
+        const show = (ctx?.settings?.get?.('showCatMeta') !== false);
+        const metaEls = host.querySelectorAll('[data-settings-cat-meta]');
+        metaEls.forEach((el) => {
+          const hasText = ((el.textContent || '').trim() !== '');
+          el.hidden = (!show) || (!hasText);
+        });
+      }
+
       function appendCat(c) {
         const frag = ctx.cloneTemplate('tpl-settings-cat-row');
         if (!frag) return;
@@ -58,6 +67,7 @@
         }
 
         host.appendChild(frag);
+        applyShowMetaSetting();
       }
 
       ctx.apiGet(ctx.URLS.apiCats + '?owned=1')
@@ -65,10 +75,13 @@
           const items = Array.isArray(data?.items) ? data.items : [];
           clearHost();
           for (const c of items) appendCat(c);
+          applyShowMetaSetting();
         })
         .catch(() => {
           clearHost();
         });
+
+      window.addEventListener('pc:settingsChanged', applyShowMetaSetting);
     })();
   };
 })();

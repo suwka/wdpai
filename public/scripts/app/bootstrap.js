@@ -19,6 +19,7 @@
     try { parts.calendar?.(ctx); } catch (e) { console.warn('calendar failed', e); }
     try { parts.dashboard?.(ctx); } catch (e) { console.warn('dashboard failed', e); }
     try { parts.settingsCats?.(ctx); } catch (e) { console.warn('settingsCats failed', e); }
+    try { parts.settingsApp?.(ctx); } catch (e) { console.warn('settingsApp failed', e); }
     try { parts.catsPageData?.(ctx); } catch (e) { console.warn('catsPageData failed', e); }
     try { parts.caregiversPage?.(ctx); } catch (e) { console.warn('caregiversPage failed', e); }
     try { parts.detailsPageData?.(ctx); } catch (e) { console.warn('detailsPageData failed', e); }

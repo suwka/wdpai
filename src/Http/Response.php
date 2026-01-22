@@ -46,4 +46,18 @@ final class Response
         include $templatePath;
         echo ob_get_clean();
     }
-}
+
+    public function error(int $code = 500): void
+    {
+        http_response_code($code);
+        header('Content-Type: text/html; charset=utf-8');
+
+        $templatePath = 'public/views/error-' . $code . '.html';
+        if (!file_exists($templatePath)) {
+            $this->text('Error: ' . $code, $code);
+            return;
+        }
+
+        include $templatePath;
+        exit;
+    }}

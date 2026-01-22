@@ -88,14 +88,14 @@ class Routing {
 
         $path = $request->path();
         if (!array_key_exists($path, self::$routes)) {
-            $response->text('nie znaleziono strony (404)', 404);
+            $response->error(404);
             return;
         }
 
         $method = $request->method();
 
         if ($method === 'GET' && ($path === 'profile-update' || $path === 'profile-password-update' || $path === 'account-update')) {
-            $response->text('Method not allowed', 405);
+            $response->error(400);
             return;
         }
 
@@ -187,12 +187,20 @@ class Routing {
 
         if ($method === 'POST') {
             if (isset($postActions[$path])) {
+                $publicPostActions = ['login', 'register'];
+
+                // Sprawdzenie autoryzacji dla POST akcji (oprócz publicznych)
+                if (!in_array($path, $publicPostActions, true) && !self::isLoggedIn($request)) {
+                    $response->error(403);
+                    return;
+                }
+
                 [$controllerClass, $action] = $postActions[$path];
                 self::dispatch($controllerClass, $action);
                 return;
             }
 
-            $response->text('Method not allowed', 405);
+            $response->error(400);
             return;
         }
 

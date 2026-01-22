@@ -281,7 +281,6 @@ class ApiController extends AppController
     {
         $this->requireAdmin();
 
-        $adminId = (string)($_SESSION['user_id'] ?? '');
         $userId = trim((string)($_POST['user_id'] ?? ''));
         $firstName = trim((string)($_POST['first_name'] ?? ''));
         $lastName = trim((string)($_POST['last_name'] ?? ''));
@@ -290,15 +289,19 @@ class ApiController extends AppController
         if ($userId === '') {
             $this->json(['error' => 'missing_user_id'], 400);
         }
-        if ($userId === $adminId) {
-            $this->json(['error' => 'cannot_edit_self'], 400);
-        }
         if ($firstName === '' || $lastName === '') {
             $this->json(['error' => 'invalid_name'], 400);
         }
 
         $db = new Database();
         $pdo = $db->connect();
+
+        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
+        $emailStmt->execute([':id' => $userId]);
+        $email = (string)($emailStmt->fetchColumn() ?? '');
+        if ($email === '') {
+            $this->json(['error' => 'not_found'], 404);
+        }
 
         $pwdSql = '';
         $params = [
@@ -314,13 +317,6 @@ class ApiController extends AppController
             }
             $pwdSql = ', password_hash = :ph';
             $params[':ph'] = password_hash($newPassword, PASSWORD_DEFAULT);
-        }
-
-        $emailStmt = $pdo->prepare('SELECT email FROM users WHERE id = :id');
-        $emailStmt->execute([':id' => $userId]);
-        $email = (string)($emailStmt->fetchColumn() ?? '');
-        if (strtolower($email) === self::DEFAULT_ADMIN_EMAIL) {
-            $this->json(['error' => 'protected_account'], 403);
         }
 
         $stmt = $pdo->prepare('UPDATE users SET first_name = :fn, last_name = :ln' . $pwdSql . ', updated_at = NOW() WHERE id = :id');

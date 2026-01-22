@@ -152,6 +152,13 @@
       if (!form) return;
 
       e.preventDefault();
+
+      const shouldConfirm = (ctx?.settings?.get?.('confirmDelete') !== false);
+      if (!shouldConfirm) {
+        form.submit();
+        return;
+      }
+
       const rawName = (form.getAttribute('data-cat-name') || '').trim();
       const name = rawName || 'this cat';
 

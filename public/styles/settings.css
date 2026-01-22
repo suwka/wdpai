@@ -245,7 +245,7 @@ body {
 
 .settings-options {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: 1fr;
 }
 
 
@@ -269,12 +269,20 @@ body {
 input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    accent-color: grey;
+    accent-color: rgba(206, 70, 197, 0.75);
     cursor: pointer;
     border-radius: 2px;
     border: 2px solid #555;
     background-color: white;
     vertical-align: middle;
+}
+
+.settings-options select {
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.18);
+    font-family: 'Abhaya Libre', serif;
+    font-size: 16px;
 }
 
 .box_under_bottom {

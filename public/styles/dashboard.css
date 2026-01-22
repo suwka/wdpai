@@ -178,6 +178,10 @@ body {
     margin: 15px;
 }
 
+html[data-pc-show-cat-meta="0"] [data-dashboard-meta] {
+    display: none !important;
+}
+
 .card-info {
     display: flex;
     flex-direction: column;

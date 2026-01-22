@@ -1,4 +1,4 @@
-/* Caregivers page module. */
+/* modul strony opiekunow */
 
 (function () {
   window.AppParts = window.AppParts || {};

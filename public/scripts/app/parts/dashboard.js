@@ -1,4 +1,4 @@
-/* Dashboard page module. */
+/* modul strony panelu glownego */
 
 (function () {
   window.AppParts = window.AppParts || {};

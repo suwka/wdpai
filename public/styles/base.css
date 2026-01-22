@@ -1,4 +1,3 @@
-/* Base styles shared across pages (kept minimal to avoid breaking existing layouts) */
 :root {
   --pc-bg: rgb(238, 238, 238);
   --pc-surface: #ffffff;

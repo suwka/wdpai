@@ -1,4 +1,4 @@
-/* Gallery upload helper module. */
+/* modul pomocniczy do przesylania galerii */
 
 (function () {
   window.AppParts = window.AppParts || {};

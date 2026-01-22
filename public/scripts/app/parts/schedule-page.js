@@ -1,4 +1,4 @@
-/* Schedule page module. */
+/* modul strony harmonogramu */
 
 (function () {
   window.AppParts = window.AppParts || {};

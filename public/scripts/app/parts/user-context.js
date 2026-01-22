@@ -1,4 +1,4 @@
-/* User context bootstrap (profile, nav, visibility). */
+/* kontekst uzytkownika bootstrap profilu nawigacji i widocznosci */
 
 (function () {
   window.AppParts = window.AppParts || {};

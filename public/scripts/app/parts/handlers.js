@@ -1,4 +1,4 @@
-/* Global UI event handlers module. */
+/* modul globalnych obslugi zdarzen UI */
 
 (function () {
   window.AppParts = window.AppParts || {};

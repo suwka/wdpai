@@ -400,16 +400,39 @@ class ApiController extends AppController
                 }
             }
 
-            // 1) Usuń koty należące do użytkownika.
-            // Dzięki FK ON DELETE CASCADE usunie to też: activities/logs/cat_photos/cat_caregivers dla tych kotów.
+            // 1) Usuń dane powiązane z kotami należącymi do użytkownika.
+            // Robimy to jawnie (zamiast polegać wyłącznie na FK ON DELETE CASCADE),
+            // bo w środowiskach z istniejącą bazą/volumenem constrainty mogły zostać
+            // utworzone bez CASCADE i wtedy DELETE z cats kończy się błędem.
+            $delOwnedCaregiverLinks = $pdo->prepare(
+                'DELETE FROM cat_caregivers WHERE cat_id IN (SELECT id FROM cats WHERE owner_id = :id)'
+            );
+            $delOwnedCaregiverLinks->execute([':id' => $userId]);
+
+            $delOwnedActivities = $pdo->prepare(
+                'DELETE FROM activities WHERE cat_id IN (SELECT id FROM cats WHERE owner_id = :id)'
+            );
+            $delOwnedActivities->execute([':id' => $userId]);
+
+            $delOwnedLogs = $pdo->prepare(
+                'DELETE FROM logs WHERE cat_id IN (SELECT id FROM cats WHERE owner_id = :id)'
+            );
+            $delOwnedLogs->execute([':id' => $userId]);
+
+            $delOwnedPhotos = $pdo->prepare(
+                'DELETE FROM cat_photos WHERE cat_id IN (SELECT id FROM cats WHERE owner_id = :id)'
+            );
+            $delOwnedPhotos->execute([':id' => $userId]);
+
+            // 2) Usuń koty należące do użytkownika.
             $delCats = $pdo->prepare('DELETE FROM cats WHERE owner_id = :id');
             $delCats->execute([':id' => $userId]);
 
-            // 2) Usuń przypisania opiekuna do cudzych kotów (jeśli był caregiverem innych).
+            // 3) Usuń przypisania opiekuna do cudzych kotów (jeśli był caregiverem innych).
             $delCaregiverLinks = $pdo->prepare('DELETE FROM cat_caregivers WHERE user_id = :id');
             $delCaregiverLinks->execute([':id' => $userId]);
 
-            // 3) Usuń użytkownika.
+            // 4) Usuń użytkownika.
             $delUser = $pdo->prepare('DELETE FROM users WHERE id = :id');
             $delUser->execute([':id' => $userId]);
 

@@ -1,0 +1,46 @@
+<mxfile host="app.diagrams.net" modified="2026-01-29T00:00:00.000Z" agent="GitHub Copilot" version="24.7.8" type="device">
+  <diagram id="architecture" name="Architecture">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="PurrfectCare Manager — architektura (Docker)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="30" width="1050" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="client" value="Przeglądarka\nHTML/CSS/JS (Fetch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="60" y="120" width="280" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="nginx" value="Nginx (web)\n/ → PHP-FPM\n/public → static" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="420" y="120" width="320" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="php" value="PHP-FPM (php)\nMVC + API JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="800" y="120" width="310" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db" value="PostgreSQL (db)\nDB: cats_db\nvolume: pg-data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="800" y="300" width="310" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pgadmin" value="pgAdmin\nhttp://localhost:5050" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="420" y="300" width="320" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge1" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="client" target="nginx">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge2" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="nginx" target="php">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge3" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="php" target="db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge4" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="pgadmin" target="db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

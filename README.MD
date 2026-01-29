@@ -50,7 +50,35 @@ pgAdmin:
 - email: `admin@example.com`
 - hasło: `admin`
 
-Reset bazy: usuń wolumen `pg-data` i uruchom ponownie kontenery.
+## Reset bazy (usuń wolumen pg-data)
+
+Najprościej:
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+Jeśli chcesz usunąć tylko wolumen ręcznie:
+
+```bash
+docker compose down
+docker volume rm wdpai_pg-data
+docker compose up -d --build
+```
+
+Uwaga: nazwa wolumenu zwykle ma prefix projektu (`wdpai_pg-data`). Sprawdź w `docker volume ls`.
+
+## Architektura
+
+- źródło: `docs/architecture.drawio`
+- podgląd: `docs/architecture.png`
+
+![Architecture](docs/architecture.png)
+
+## Konfiguracja (.env)
+
+Przykładowe wartości: `.env.example` (DB/porty/pgAdmin).
 
 ## Konta demo
 

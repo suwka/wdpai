@@ -151,7 +151,7 @@ Zaimplementowane obiekty SQL (w init.sql):
 - funkcja: `fn_assign_caregiver(p_cat_id UUID, p_user_id UUID)`
 - trigger: `trg_set_updated_at()` + triggery `set_updated_at_*`
 
-## ERD (diagram)
+## ERD
 
 ![ERD](ERD.png)
 
@@ -178,7 +178,7 @@ Tabele i relacje (krótko):
 - Transakcje (SQL): migracje z `BEGIN/COMMIT` w `docker/db/migrations/*.sql`.
 - Poziom izolacji: nie jest ustawiany ręcznie, więc działa domyślny PostgreSQL: `READ COMMITTED`.
 
-## Wzorce (prosto)
+## Wzorce
 
 - **MVC**: kontroler (`src/controllers/*`) wybiera widok (`public/views/*`) i pracuje na modelu/DB.
 - **Repository**: `src/repository/UserRepository.php` ukrywa SQL dla użytkowników.

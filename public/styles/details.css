@@ -319,6 +319,9 @@ body {
     height: 40px;
     background-color: rgba(206, 70, 197, 0.75);
     border-radius: 20px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 

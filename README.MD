@@ -76,6 +76,12 @@ Uwaga: nazwa wolumenu zwykle ma prefix projektu (`wdpai_pg-data`). Sprawdź w `d
 - Kontrolery w `src/controllers/` korzystają z `src/Database.php` (PDO) i warstw pomocniczych (`Validator`, `ErrorHandler`).
 - Frontend to `public/views` + `public/scripts` (moduły JS z jednym wrapperem `fetch`).
 
+Diagram architektury:
+
+![Architektura](docs/architecture.png)
+
+Źródło (draw.io): `docs/architecture.drawio`
+
 ## Konfiguracja środowiska (.env.example)
 
 - `POSTGRES_DB/USER/PASSWORD` – dane startowe Postgresa (kontener `db`).

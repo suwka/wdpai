@@ -1,0 +1,93 @@
+wdpai/
+├─ .env.example — przykład zmiennych środowiskowych (głównie Docker/DB).
+├─ docker-compose.yaml — definicja usług: nginx + php-fpm + postgres (i ewentualnie narzędzia pomocnicze).
+├─ ERD.png — diagram ERD bazy (tabele i relacje).
+├─ index.php — „front controller”: start sesji, routing i wejście do aplikacji.
+├─ login_admin_headers.txt — pomocniczy plik z nagłówkami do testowania żądań (np. w curl/Postman).
+├─ README.MD — krótka dokumentacja projektu (uruchomienie, konta demo, baza, transakcje).
+├─ Routing.php — prosty router/mapowanie ścieżek na kontrolery/akcje.
+├─ .git/ — metadane repozytorium Git (historia, konfiguracja).
+│
+├─ docker/
+│  ├─ db/
+│  │  ├─ Dockerfile — obraz bazy (PostgreSQL) z inicjalizacją.
+│  │  ├─ init.sql — schema + dane startowe + widoki/funkcje/wyzwalacze.
+│  │  └─ migrations/
+│  │     ├─ 2026-01-13_admin_panel.sql — migracja dodająca elementy panelu admina.
+│  │     └─ 2026-01-29_fix_fk_cascades.sql — migracja naprawiająca FK/cascady.
+│  ├─ nginx/
+│  │  ├─ Dockerfile — obraz nginx jako reverse proxy.
+│  │  └─ nginx.conf — konfiguracja serwera (static + PHP przez fastcgi).
+│  └─ php/
+│     └─ Dockerfile — obraz php-fpm dla backendu.
+│
+├─ docs/
+│  ├─ architecture.drawio — źródło diagramu architektury (edytowalne w draw.io).
+│  └─ architecture.png — podgląd diagramu architektury.
+│
+├─ public/
+│  ├─ img/ — statyczne grafiki używane w UI.
+│  │  ├─ avatar.jpg — przykładowy avatar.
+│  │  ├─ backgroundcat.PNG — tło/elementy wizualne.
+│  │  └─ cat1.jpg — przykładowa grafika kota.
+│  ├─ scripts/
+│  │  ├─ main.js — entrypoint frontendu; ładuje moduły i podpina eventy.
+│  │  └─ app/
+│  │     ├─ bootstrap.js — inicjalizacja aplikacji po stronie przeglądarki.
+│  │     └─ parts/ — moduły ekranów i wspólne komponenty JS.
+│  │        ├─ admin-page.js — logika panelu administratora (users/stats).
+│  │        ├─ calendar.js — widok kalendarza/filtry aktywności po datach.
+│  │        ├─ caregivers-page.js — przypisywanie/opiekunowie kota.
+│  │        ├─ cats-page-data.js — pobieranie i render listy kotów.
+│  │        ├─ core-modal.js — wspólne „API klienta”: fetch wrapper + modale + helpery.
+│  │        ├─ dashboard.js — logika dashboardu (ostatnie i nadchodzące).
+│  │        ├─ details-gallery-controls.js — sterowanie galerią (nawigacja, akcje UI).
+│  │        ├─ details-page-data.js — pobieranie danych do szczegółów kota.
+│  │        ├─ gallery-upload.js — upload zdjęć i obsługa kolejności.
+│  │        ├─ handlers.js — rejestracja event handlerów dla elementów UI.
+│  │        ├─ login-page.js — logika logowania (formularz, błędy, redirect).
+│  │        ├─ logs-page.js — logi/zdarzenia (pobieranie i render).
+│  │        ├─ schedule-page.js — harmonogram/aktywności (lista + akcje).
+│  │        ├─ settings-app.js — ustawienia aplikacji po stronie UI.
+│  │        ├─ settings-cats.js — ustawienia dotyczące kotów (UI/akcje).
+│  │        └─ user-context.js — stan użytkownika (me/profile) i pomocnicze flagi.
+│  ├─ styles/ — CSS per widok + style bazowe.
+│  │  ├─ base.css — style globalne.
+│  │  ├─ modal.css — styl modali.
+│  │  ├─ error.css — strony błędów.
+│  │  ├─ login.css, register.css — formularze logowania/rejestracji.
+│  │  ├─ dashboard.css, cats.css, details.css — widoki aplikacji.
+│  │  ├─ schedule.css, logs.css, caregivers.css — widoki funkcjonalne.
+│  │  ├─ settings.css — ustawienia.
+│  │  └─ admin.css — panel admina.
+│  ├─ uploads/ — pliki wrzucane przez użytkowników (runtime; nie trzymać w repo w produkcji).
+│  │  ├─ avatars/ — avatary użytkowników.
+│  │  └─ cats/ — zdjęcia kotów (miniatury/oryginały, foldery per kot).
+│  └─ views/ — statyczne strony HTML (szablony/ekrany).
+│     ├─ login.html, register.html — auth.
+│     ├─ dashboard.html — ekran startowy.
+│     ├─ cats.html, details.html — lista i szczegóły kota.
+│     ├─ schedule.html, logs.html, caregivers.html — funkcje dodatkowe.
+│     ├─ settings.html — ustawienia.
+│     ├─ admin.html — panel administratora.
+│     └─ error-400.html, error-403.html, error-404.html, error-500.html — strony błędów.
+│
+└─ src/
+   ├─ Database.php — połączenie PDO z PostgreSQL (konfiguracja + connect()).
+   ├─ ErrorHandler.php — wspólna obsługa wyjątków i błędów (HTML/JSON).
+   ├─ Http/
+   │  ├─ Request.php — obudowa danych requestu (GET/POST/SESSION itp.).
+   │  └─ Response.php — helpery odpowiedzi (np. JSON + status code).
+   ├─ controllers/ — logika endpointów (HTML i API JSON).
+   │  ├─ AppController.php — wspólna baza: sesja, autoryzacja, helpery.
+   │  ├─ ApiController.php — endpointy JSON (fetch), 401/403 + transakcje w krytycznych operacjach.
+   │  ├─ SecurityController.php — logowanie/rejestracja/wylogowanie + zmiana danych konta.
+   │  ├─ CatsController.php — operacje na kotach (widoki + modyfikacje).
+   │  ├─ ActivitiesController.php — operacje na aktywnościach/harmonogramie.
+   │  └─ UploadController.php — upload plików (avatary/zdjęcia kotów).
+   ├─ models/
+   │  └─ User.php — model użytkownika (encja i mapowanie pól).
+   ├─ repository/
+   │  └─ UserRepository.php — warstwa dostępu do danych użytkowników (PDO + prepared statements).
+   └─ utils/
+      └─ Validator.php — walidacja wejścia (email, username, imię/nazwisko, polityka hasła).

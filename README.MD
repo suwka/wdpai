@@ -69,25 +69,28 @@ docker compose up -d --build
 
 Uwaga: nazwa wolumenu zwykle ma prefix projektu (`wdpai_pg-data`). Sprawdź w `docker volume ls`.
 
-## Architektura
+## Architektura (krótko)
 
-- źródło: `docs/architecture.drawio`
-- podgląd: `docs/architecture.png`
+- `index.php` startuje sesję i uruchamia routing.
+- `Routing.php` mapuje URL → kontroler (HTML lub API JSON).
+- Kontrolery w `src/controllers/` korzystają z `src/Database.php` (PDO) i warstw pomocniczych (`Validator`, `ErrorHandler`).
+- Frontend to `public/views` + `public/scripts` (moduły JS z jednym wrapperem `fetch`).
 
-![Architecture](docs/architecture.png)
+## Konfiguracja środowiska (.env.example)
 
-## Konfiguracja (.env)
+- `POSTGRES_DB/USER/PASSWORD` – dane startowe Postgresa (kontener `db`).
+- `APP_PORT/DB_PORT/PGADMIN_PORT` – porty wystawione na hosta.
+- `PGADMIN_DEFAULT_EMAIL/PASSWORD` – login do pgAdmin.
 
-Przykładowe wartości: `.env.example` (DB/porty/pgAdmin).
+Uwaga: aplikacja (PDO) ma teraz host/user/pass „na sztywno” w `src/Database.php` (host `db`, baza `cats_db`, user `docker`).
 
 ## Konta demo
 
-W init bazy (`docker/db/init.sql`) są dodane przykładowe konta:
+W init bazy (`docker/db/init.sql`) są dodane 3 konta (hasła są zapisane jako hash bcrypt):
 
-- admin: `admin@example.com`
-- user: `user1@example.com`
-
-Hasła są zapisane jako hash w SQL, więc do demo najprościej: zarejestrować nowe konto lub ustawić hasło ręcznie w bazie.
+- `admin` / `admin@example.com` / `Admin123!` – rola `admin`
+- `user1` / `user1@example.com` / `User123!` – rola `user`
+- `testowy` / `testowy@example.com` / `Testowy123!` – rola `user`
 
 ## Struktura projektu (tree)
 
@@ -148,26 +151,71 @@ Zaimplementowane obiekty SQL (w init.sql):
 - funkcja: `fn_assign_caregiver(p_cat_id UUID, p_user_id UUID)`
 - trigger: `trg_set_updated_at()` + triggery `set_updated_at_*`
 
-## Screenshoty
+## ERD (diagram)
 
-logowanie, dashboard, koty/szczegóły, terminarz, admin
+![ERD](ERD.png)
 
-## Checklist
+Tabele i relacje (krótko):
 
-Szybkie odhaczenie zgodności z kryteriami:
+- `users` – użytkownicy (role: `admin/user`, blokada, avatar).
+- `cats` – koty; relacja 1:N `users(id)` → `cats(owner_id)` (właściciel).
+- `cat_photos` – zdjęcia; relacja 1:N `cats(id)` → `cat_photos(cat_id)` (kasuje się kaskadowo).
+- `activities` – aktywności; relacja 1:N `cats(id)` → `activities(cat_id)` + opcjonalnie `done_by/created_by` → `users(id)`.
+- `logs` – logi; relacja 1:N `cats(id)` → `logs(cat_id)` + opcjonalnie `created_by` → `users(id)`.
+- `cat_caregivers` – tabela łącząca M:N `cats` ↔ `users` (PK: `(cat_id, user_id)`).
+- `support_tickets` – zgłoszenia; opcjonalnie `user_id` → `users(id)`.
 
-- [x] Docker + docker-compose
-- [x] PostgreSQL
-- [x] PHP (OOP) + MVC
-- [x] HTML + CSS + JS (FETCH)
-- [x] logowanie + sesja + wylogowanie
-- [x] role min. 2 (admin/user)
-- [x] relacje 1:N i M:N w bazie
-- [x] relacja 1:1 w bazie (wymaganie)
-- [x] min. 2 widoki w SQL
-- [x] min. 1 trigger w SQL
-- [x] min. 1 funkcja w SQL
-- [ ] transakcje + poziom izolacji (udokumentowane)
-- [ ] export kompletnej bazy do pliku .sql (z danymi)
-- [ ] ERD (PNG/SVG) + źródło (drawio)
-- [x] globalne strony błędów 400/403/404/500
+## Funkcje / widoki / triggery (SQL)
+
+- Widoki: `vw_activity_details` (JOIN aktywności+kot+użytkownicy) i `vw_cat_overview` (kot + owner + liczniki).
+- Funkcja: `fn_assign_caregiver(cat_id, user_id)` dodaje opiekuna do kota (bez duplikatów).
+- Trigger: `trg_set_updated_at()` automatycznie ustawia `updated_at` przy UPDATE.
+- Trigger: `format_imion_nazwisk()` poprawia zapis imienia/nazwiska (`INITCAP`) przy INSERT/UPDATE.
+
+## Transakcje i poziom izolacji
+
+- Transakcje (PDO): usuwanie użytkownika + danych powiązanych (`adminUserDelete`) i reorder zdjęć (`reorderCatPhotos`) w `src/controllers/ApiController.php`; aktualizacja konta (`updateAccount`) w `src/controllers/SecurityController.php`.
+- Transakcje (SQL): migracje z `BEGIN/COMMIT` w `docker/db/migrations/*.sql`.
+- Poziom izolacji: nie jest ustawiany ręcznie, więc działa domyślny PostgreSQL: `READ COMMITTED`.
+
+## Wzorce (prosto)
+
+- **MVC**: kontroler (`src/controllers/*`) wybiera widok (`public/views/*`) i pracuje na modelu/DB.
+- **Repository**: `src/repository/UserRepository.php` ukrywa SQL dla użytkowników.
+- **Front Controller**: `index.php` jest jednym wejściem do aplikacji.
+- **DRY/Utility**: `src/utils/Validator.php` trzyma wspólną walidację.
+
+## Screenshots
+
+Rejestracja użytkownika (formularz + walidacja po stronie serwera).
+![Rejestracja](screenshots/register.png)
+
+Dashboard po zalogowaniu (podsumowanie i szybkie akcje).
+![Dashboard](screenshots/dashboard.png)
+
+Lista kotów z podstawowymi danymi i dostępami (właściciel/opiekun).
+![Koty](screenshots/cats.png)
+
+Szczegóły kota (opis, informacje, sekcje szczegółowe).
+![Szczegóły](screenshots/details.png)
+
+Modal edycji kota (zmiana danych bez przeładowania strony).
+![Edycja kota](screenshots/modal-editcat.png)
+
+Harmonogram/aktywności (planowanie i przegląd zadań).
+![Harmonogram](screenshots/schedule.png)
+
+Zarządzanie opiekunami kota (przypisywanie i usuwanie relacji).
+![Opiekunowie](screenshots/caregivers.png)
+
+Ustawienia użytkownika/aplikacji (profil, hasło, preferencje).
+![Ustawienia](screenshots/settings.png)
+
+Strona błędu 404 (obsługa nieistniejących ścieżek).
+![404](screenshots/404.png)
+
+Modal edycji użytkownika w panelu admina (rola, blokada, hasło).
+![Edycja użytkownika](screenshots/modal-edituser.png)
+
+Panel administratora (statystyki i zarządzanie użytkownikami).
+![Admin](screenshots/admin-mainpage.png)
